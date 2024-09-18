@@ -8,9 +8,15 @@ universe u
 variable {α : Type u}
 variable {d : α -> α -> Prop}
 
+variable [Group G]
+
 #check α → Prop
 #check Set α
 #check Set (Set α)
+
+theorem group_implies_ac (h: ∀ s: Set α, (∃ G, ∃ f: (s -> Group G), Function.Bijective f)): True := by
+  G.mul 0 1
+  sorry
 
 
 def Set.image' {α : Type _} {β : Type _} (s : Set α) (f : (a : α) → a ∈ s → β) : Set β :=
@@ -51,15 +57,19 @@ def hartog_number (s: Set α) : Set Ordinal.{u} :=
   -- (fun c => Ordinal.type c) '' as_ord by
   --  sorry
 
-
-
-
-def no_injection (s: Set α) : Cardinal.lift.{u + 1} (Cardinal.mk s) ≤ Cardinal.mk (hartog_number s):= by
+theorem le_hartog (s: Set α) : Cardinal.lift.{u + 1} (Cardinal.mk s) < Cardinal.mk (hartog_number s) :=
+  --simp only [(· ≤ ·)]
+  rw [← not_le]
   intro h
-  simp only [(· ≤ ·)] at h
-  contrapose! h
-  rintro ⟨⟨f, hf⟩⟩
-  suffices (hartog_number s) ∈ (hartog_number s) from sorry
+  rw [Cardinal.out_embedding] at h
+  let f: _ := Classical.choice h
+
+
+
+  --simp only [(· ≤ ·)] at h
+  --rw [← Cardinal.lift_lt] at h
+
+
 
 
 -- def hartog_cardinality (s: Set α) : ¬(hartog_number s < Cardinal.mk s) := by
