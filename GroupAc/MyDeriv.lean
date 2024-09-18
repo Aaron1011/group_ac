@@ -41,6 +41,33 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedFDeriv 
       apply en_closed k
 
     have en_covers: (Set.Icc a b) = Set.iUnion fun j => ((e_n j) ∩ Set.Icc a b) := by
-      sorry
+      ext p
+      obtain ⟨n, hn⟩ := hf p
+      have p_in_en: p ∈ (e_n n) := by
+        simp only [e_n]
+        simp
+        exact hn
+
+
+      --have p_implies_in_en: fun h_new => (p ∈ (e_n n) (e_n n) ∩ Set.Icc a b) := by
+      --  simp only [e_n]
+      --  apply And.intro p_in_en h_new
+
+      constructor
+      -- first case
+      intro p_in_interval
+      have p_in_intersect: p ∈ (e_n n) ∩ Set.Icc a b := by
+        apply Set.mem_inter
+        exact p_in_en
+        exact p_in_interval
+
+      simp only [Set.mem_iUnion]
+      exact ⟨n, p_in_intersect⟩
+      -- second case
+
+      simp
+
+
+
     --apply is_closed_iff_forall_subset_is_closed.mp (en_closed k)
     --apply Set.Icc_subset_Icc
