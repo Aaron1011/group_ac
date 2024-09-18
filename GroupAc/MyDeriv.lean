@@ -67,7 +67,10 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedFDeriv 
 
       simp
 
+    have en_cov_univ_set: (Set.iUnion fun j => (Set.Icc a b) ∩ (e_n j)) = Set.univ := by
+      sorry
 
+    obtain ⟨interior_index, int_nonempty⟩ := nonempty_interior_of_iUnion_of_closed en_intersect_closed en_cov_univ_set
 
     --apply is_closed_iff_forall_subset_is_closed.mp (en_closed k)
     --apply Set.Icc_subset_Icc
