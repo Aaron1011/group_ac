@@ -40,6 +40,8 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (hf: ∀ (x : ℝ), (x ∈ Se
     rw [temp_f_zero]
     simp [Polynomial.eval_zero]
 
+  sorry
+
 
 
 -- https://mathoverflow.net/questions/34059/if-f-is-infinitely-differentiable-then-f-coincides-with-a-polynomial
@@ -131,6 +133,8 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedFDeriv 
       apply Set.subset_inter
       exact cd_subset_omega
       exact cd_subset_ab
+
+    sorry
 
 
   let X := poly_omegaᶜ
