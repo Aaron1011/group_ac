@@ -43,7 +43,7 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (hf: ∀ (x : ℝ), (x ∈ Se
 
 
 -- https://mathoverflow.net/questions/34059/if-f-is-infinitely-differentiable-then-f-coincides-with-a-polynomial
-theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedFDeriv ℝ n f) x = 0): RestrictsToPoly f 0 1 := by
+theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedFDeriv ℝ n f) x = 0) (hCInfinity: ContDiffOn ℝ ⊤ f {x: ℝ | True}): RestrictsToPoly f 0 1 := by
   -- let real_powset := 𝒫 { z: ℝ | True }
   let poly_omega := Set.sUnion { i | ∃ (a b : ℝ ), i = Set.Ioo a b ∧ RestrictsToPoly f a b }
   have poly_open: IsOpen poly_omega := by
@@ -133,75 +133,167 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedFDeriv 
       exact cd_subset_ab
 
 
-    let X := poly_omegaᶜ
-    have X_closed: IsClosed X := IsOpen.isClosed_compl poly_open
-    have X_empty: X = ∅ := by
-      have x_accum: ∀ x, x ∈ X → AccPt x (Filter.principal X) := by
-        by_contra!
-        obtain ⟨x, ⟨x_in, x_not_acc⟩⟩ := this
-        rw [accPt_iff_nhds] at x_not_acc
-        simp at x_not_acc
-        obtain ⟨u, hu⟩ := x_not_acc
-        rw [nhds_def] at hu
+  let X := poly_omegaᶜ
+  have X_closed: IsClosed X := IsOpen.isClosed_compl poly_open
+  have X_empty: X = ∅ := by
+    have x_accum: ∀ x, x ∈ X → AccPt x (Filter.principal X) := by
+      by_contra!
+      obtain ⟨x, ⟨x_in, x_not_acc⟩⟩ := this
+      rw [accPt_iff_nhds] at x_not_acc
+      simp at x_not_acc
+      obtain ⟨u, hu⟩ := x_not_acc
+      rw [nhds_def] at hu
 
-        have g : ℝ := by sorry
-        have g_lt_x: g < x := by sorry
-        have h : ℝ := by sorry
-        have x_lt_h: x < h := by sorry
+      have g : ℝ := by sorry
+      have g_lt_x: g < x := by sorry
+      have h : ℝ := by sorry
+      have x_lt_h: x < h := by sorry
 
-        -- TODO - get this intervals from the fact that x is an isolated point
-        have _: (Set.Ioo g x) ⊆ poly_omega := by sorry
-        have _: (Set.Ioo x h) ⊆ poly_omega := by sorry
+      -- TODO - get this intervals from the fact that x is an isolated point
+      have _: (Set.Ioo g x) ⊆ poly_omega := by sorry
+      have _: (Set.Ioo x h) ⊆ poly_omega := by sorry
 
-        have is_first_poly: RestrictsToPoly f g x := by sorry
-        have is_second_poly: RestrictsToPoly f x h := by sorry
+      have is_first_poly: RestrictsToPoly f g x := by sorry
+      have is_second_poly: RestrictsToPoly f x h := by sorry
 
-        obtain ⟨first_poly, h_first_poly⟩ := is_first_poly
-        obtain ⟨second_poly, h_second_poly⟩ := is_second_poly
+      obtain ⟨first_poly, h_first_poly⟩ := is_first_poly
+      obtain ⟨second_poly, h_second_poly⟩ := is_second_poly
 
-        let n := max first_poly.natDegree second_poly.natDegree
-        have zero_on_new: ∀ (y: ℝ), y ∈ (Set.Ioo g x ∪ Set.Ioo x h) → (iteratedDerivWithin n f (Set.Ioo g x ∪ Set.Ioo x h)) y = 0 := by
-          have degree_zero: ((⇑Polynomial.derivative)^[n] first_poly).natDegree ≤ first_poly.natDegree - n := by
-            apply Polynomial.natDegree_iterate_derivative first_poly n
-          simp at degree_zero
-          have first_le_n : first_poly.natDegree ≤ n := by exact Nat.le_max_left first_poly.natDegree second_poly.natDegree
-          have real_degree_zero: ((⇑Polynomial.derivative)^[n] first_poly).natDegree ≤ 0 := by sorry
+      let n := max first_poly.natDegree second_poly.natDegree
+      have zero_on_new: ∀ (y: ℝ), y ∈ (Set.Ioo g x ∪ Set.Ioo x h) → (iteratedDerivWithin n f (Set.Ioo g x ∪ Set.Ioo x h)) y = 0 := by
+        have degree_zero: ((⇑Polynomial.derivative)^[n] first_poly).natDegree ≤ first_poly.natDegree - n := by
+          apply Polynomial.natDegree_iterate_derivative first_poly n
+        simp at degree_zero
+        have first_le_n : first_poly.natDegree ≤ n := by exact Nat.le_max_left first_poly.natDegree second_poly.natDegree
+        have real_degree_zero: ((⇑Polynomial.derivative)^[n] first_poly).natDegree ≤ 0 := by sorry
 
-          have first_zero: ((⇑Polynomial.derivative)^[n] first_poly) = 0 := by sorry
-          have second_zero: ((⇑Polynomial.derivative)^[n] second_poly) = 0 := by sorry
+        have first_zero: ((⇑Polynomial.derivative)^[n] first_poly) = 0 := by sorry
+        have second_zero: ((⇑Polynomial.derivative)^[n] second_poly) = 0 := by sorry
 
-          have f_deriv_zero: ∀ (y: ℝ), y ∈ (Set.Ioo g x ∪ Set.Ioo x h) → (iteratedDerivWithin n f (Set.Ioo g x ∪ Set.Ioo x h)) y = 0 := by
-            sorry
-
-          -- Use continuity here
-          have f_deriv_at_x: (iteratedDerivWithin n f (Set.Ioo g h)) x = 0 := sorry
-          -- f^(n) is zero on (g, x) and (x, h), and x, so it's zero on (g, h)
-          have f_zero_full: ∀ (y: ℝ), y ∈ (Set.Ioo g h) → (iteratedDerivWithin n f (Set.Ioo g h)) y = 0 := sorry
+        have f_deriv_zero: ∀ (y: ℝ), y ∈ (Set.Ioo g x ∪ Set.Ioo x h) → (iteratedDerivWithin n f (Set.Ioo g x ∪ Set.Ioo x h)) y = 0 := by
           sorry
 
-        have f_poly_full: RestrictsToPoly f g h := by sorry
-        have gh_in_omega: Set.Ioo g h ⊆ poly_omega := by
-          simp [poly_omega]
-          rw [Set.subset_def]
-          intro y hy
-          simp only [Set.mem_sUnion]
-          use Set.Ioo g h
-          simp
-          constructor
-          exact ⟨g, h, rfl, f_poly_full⟩
-          exact hy
+        -- Use continuity here
+        have f_deriv_at_x: (iteratedDerivWithin n f (Set.Ioo g h)) x = 0 := sorry
+        -- f^(n) is zero on (g, x) and (x, h), and x, so it's zero on (g, h)
+        have f_zero_full: ∀ (y: ℝ), y ∈ (Set.Ioo g h) → (iteratedDerivWithin n f (Set.Ioo g h)) y = 0 := sorry
+        sorry
 
-        have x_in_gh: x ∈ Set.Ioo g h := by
-          simp
-          exact ⟨g_lt_x, x_lt_h⟩
+      have f_poly_full: RestrictsToPoly f g h := by sorry
+      have gh_in_omega: Set.Ioo g h ⊆ poly_omega := by
+        simp [poly_omega]
+        rw [Set.subset_def]
+        intro y hy
+        simp only [Set.mem_sUnion]
+        use Set.Ioo g h
+        simp
+        constructor
+        exact ⟨g, h, rfl, f_poly_full⟩
+        exact hy
 
-        have x_in_omega: x ∈ poly_omega := by
-          apply gh_in_omega
-          exact x_in_gh
-        contradiction
-      by_contra!
+      have x_in_gh: x ∈ Set.Ioo g h := by
+        simp
+        exact ⟨g_lt_x, x_lt_h⟩
+
+      have x_in_omega: x ∈ poly_omega := by
+        apply gh_in_omega
+        exact x_in_gh
+      contradiction
+
+    have x_intersect_closed: ∀ k: ℕ , IsClosed (X ∩ (e_n k)) := by
+      intro k
+      apply IsClosed.inter
+      exact X_closed
+      apply en_closed k
+
+    have x_union_en: X = Set.iUnion fun j => X ∩ (e_n j) := by
+      ext p
+      obtain ⟨n, hn⟩ := hf p
+      have p_in_en: p ∈ (e_n n) := by
+        simp only [e_n]
+        simp
+        exact hn
+
+      constructor
+      intro p_in_x
+      have p_in_intersect: p ∈ X ∩ (e_n n):= by
+        apply Set.mem_inter
+        exact p_in_x
+        exact p_in_en
+
+      simp only [Set.mem_iUnion]
+      exact ⟨n, p_in_intersect⟩
+      -- second case
+      intro p_in_union
+      simp only [Set.mem_iUnion] at p_in_union
+      obtain ⟨_, p_in_intersect⟩ := p_in_union
+      exact p_in_intersect.1
+
+    have en_cov_univ_set_x: (Set.iUnion fun j => X ∩ (e_n j)) = Set.univ := by
       sorry
 
+    by_contra!
+
+    rw [eq_comm] at x_union_en
+    obtain ⟨n_x_int, x_int_nonempty⟩ := nonempty_interior_of_iUnion_of_closed x_intersect_closed en_cov_univ_set_x
+    let x_int := (interior (X ∩ e_n n_x_int))
+    have x_int_open: IsOpen x_int := by apply isOpen_interior
+    obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset x_int_open x_int_nonempty
+    have x_zero_on_cd: ∀ (x: ℝ), x ∈ Set.Ioo c d → (iteratedDerivWithin n_x_int f (Set.Ioo c d)) x = 0 :=
+      by sorry
+
+    have unique_diff: ∀ (x: ℝ), x ∈ Set.Ioo c d → UniqueDiffWithinAt ℝ (Set.Ioo c d) x := by
+      apply uniqueDiffWithinAt_Ioo
+
+    have n_succ_deriv_zero: ∀ (x: ℝ), x ∈ Set.Ioo c d → (iteratedDerivWithin (n_x_int + 1) f (Set.Ioo c d)) x = 0 := by
+      intro x hx
+      have unique_diff_at : UniqueDiffWithinAt ℝ (Set.Ioo c d) x := by
+        apply unique_diff x hx
+      rw [iteratedDerivWithin_succ unique_diff_at]
+
+      have deriv_within: HasDerivWithinAt (iteratedDerivWithin n_x_int f (Set.Ioo c d)) 0 (Set.Ioo c d) x := by
+        --rw [hasDerivWithinAt_iff_tendsto_slope]
+        sorry
+      exact HasDerivWithinAt.derivWithin deriv_within (unique_diff x hx)
+
+    have forall_deriv_zero: ∀ (m: ℕ), m ≥ n_x_int →  ∀ (x: ℝ), x ∈ X ∩ Set.Ioo c d → (iteratedDerivWithin m f (Set.Ioo c d)) x = 0 := by
+      intro m hm
+      induction m with
+      | zero => sorry
+      | succ a ha => sorry
+
+    have deriv_zero_on_cd_omega: ∀ (x : ℝ), x ∈ Set.Ioo c d → (iteratedDerivWithin n_x_int f (Set.Ioo c d)) x = 0 := by
+      sorry
+
+    have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d n_x_int deriv_zero_on_cd_omega
+    have cd_subset_omega: Set.Ioo c d ⊆ poly_omega := by
+      simp [poly_omega]
+      rw [Set.subset_def]
+      intro x hx
+      simp only [Set.mem_sUnion]
+      use Set.Ioo c d
+      simp
+      constructor
+      exact ⟨c, d, rfl, poly_on_cd⟩
+      exact hx
+    have int_subset_x_int: x_int ⊆ X ∩ e_n n_x_int := interior_subset
+    have int_subset_x: x_int ⊆ X := by sorry
+    have cd_subset_x: Set.Ioo c d ⊆ X := by sorry
+    simp [X] at cd_subset_x
+
+    -- TODO - obtain this from our subsets above
+    have q: ℝ := sorry
+    have _: q ∈ X := by sorry
+    have _: q ∉ X := by sorry
+
+    contradiction
+
+  have poly_comp_empty: poly_omegaᶜ = ∅ := by
+    apply X_empty
+  have poly_full: poly_omega = (Set.univ) := by
+    exact Set.compl_empty_iff.mp X_empty
+
+  sorry
 
     --apply is_closed_iff_forall_subset_is_closed.mp (en_closed k)
     --apply Set.Icc_subset_Icc
