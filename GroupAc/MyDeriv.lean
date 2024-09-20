@@ -45,7 +45,7 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (hf: ∀ (x : ℝ), (x ∈ Se
 
 
 -- https://mathoverflow.net/questions/34059/if-f-is-infinitely-differentiable-then-f-coincides-with-a-polynomial
-theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedFDeriv ℝ n f) x = 0) (hCInfinity: ContDiffOn ℝ ⊤ f {x: ℝ | True}): RestrictsToPoly f 0 1 := by
+theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n f) x = 0) (hCInfinity: ContDiff ℝ ⊤ f): RestrictsToPoly f 0 1 := by
   -- let real_powset := 𝒫 { z: ℝ | True }
   let poly_omega := Set.sUnion { i | ∃ (a b : ℝ ), i = Set.Ioo a b ∧ RestrictsToPoly f a b }
   have poly_open: IsOpen poly_omega := by
@@ -63,11 +63,21 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedFDeriv 
   have poly_full: poly_intervals = ℝ := by
     sorry
 
-  let e_n := fun k => { x: ℝ | (iteratedFDeriv ℝ k f) x = 0 }
+  have unique_diff: ∀ (x c d: ℝ), x ∈ Set.Ioo c d → UniqueDiffWithinAt ℝ (Set.Ioo c d) x := by
+    exact fun x c d a ↦ uniqueDiffWithinAt_Ioo a
+
+  let e_n := fun k => { x: ℝ | (iteratedDeriv k f) x = 0 }
   have en_closed: ∀ k: ℕ, IsClosed (e_n k) := by
     intro k
     simp only [e_n]
-    sorry
+    --have closed_zero: IsClosed { @Set.Icc _ _ 0 0 } := sorry
+    simp [← Set.mem_singleton_iff]
+    rw [← Set.preimage]
+    apply IsClosed.preimage
+    apply ContDiff.continuous_iteratedDeriv k hCInfinity _
+    exact OrderTop.le_top _
+    exact isClosed_singleton
+
 
   have nonempty_closed_interval: ∀ a b : ℝ, ((Set.Icc a b) ∩ poly_omega).Nonempty := by
     intro a b
@@ -245,9 +255,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedFDeriv 
     obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset x_int_open x_int_nonempty
     have x_zero_on_cd: ∀ (x: ℝ), x ∈ Set.Ioo c d → (iteratedDerivWithin n_x_int f (Set.Ioo c d)) x = 0 :=
       by sorry
-
-    have unique_diff: ∀ (x: ℝ), x ∈ Set.Ioo c d → UniqueDiffWithinAt ℝ (Set.Ioo c d) x := by
-      apply uniqueDiffWithinAt_Ioo
 
     have n_succ_deriv_zero: ∀ (x: ℝ), x ∈ Set.Ioo c d → (iteratedDerivWithin (n_x_int + 1) f (Set.Ioo c d)) x = 0 := by
       intro x hx
