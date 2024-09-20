@@ -195,6 +195,12 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         simp [Set.mem_Ioo] at x_in_gh
         exact x_in_gh.2
 
+      have _: ∀ y: ℝ, y ∈ (Set.Ioo g x) → y ∈ poly_omega := by
+        sorry
+
+      have _: ∀ y: ℝ, y ∈ (Set.Ioo x h) → y ∈ poly_omega := by
+        sorry
+
       -- TODO - get this intervals from the fact that x is an isolated point
       have _: (Set.Ioo g x) ⊆ poly_omega := by sorry
       have _: (Set.Ioo x h) ⊆ poly_omega := by sorry
