@@ -185,12 +185,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       rw [accPt_iff_nhds] at x_not_acc
       simp at x_not_acc
       obtain ⟨u, hu⟩ := x_not_acc
-      rw [nhds_def] at hu
-
-      have u_open: IsOpen u := by sorry
-      have u_nonempty: u.Nonempty := by sorry
-      obtain ⟨g, h, g_lt_h, gh_int⟩ := IsOpen.exists_Ioo_subset u_open u_nonempty
-      have x_in_gh: x ∈ Set.Ioo g h := by sorry
+      obtain ⟨g, h, x_in_gh, gh_in_u⟩ := mem_nhds_iff_exists_Ioo_subset.mp hu.1
 
       have g_lt_x: g < x := by
         simp [Set.mem_Ioo] at x_in_gh
