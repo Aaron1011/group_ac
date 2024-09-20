@@ -187,10 +187,18 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       obtain ⟨u, hu⟩ := x_not_acc
       rw [nhds_def] at hu
 
-      have g : ℝ := by sorry
-      have g_lt_x: g < x := by sorry
-      have h : ℝ := by sorry
-      have x_lt_h: x < h := by sorry
+      have u_open: IsOpen u := by sorry
+      have u_nonempty: u.Nonempty := by sorry
+      obtain ⟨g, h, g_lt_h, gh_int⟩ := IsOpen.exists_Ioo_subset u_open u_nonempty
+      have x_in_gh: x ∈ Set.Ioo g h := by sorry
+
+      have g_lt_x: g < x := by
+        simp [Set.mem_Ioo] at x_in_gh
+        exact x_in_gh.1
+
+      have x_lt_h: x < h := by
+        simp [Set.mem_Ioo] at x_in_gh
+        exact x_in_gh.2
 
       -- TODO - get this intervals from the fact that x is an isolated point
       have _: (Set.Ioo g x) ⊆ poly_omega := by sorry
