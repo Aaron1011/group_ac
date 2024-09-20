@@ -79,9 +79,9 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     exact isClosed_singleton
 
 
-  have nonempty_closed_interval: ∀ a b : ℝ, ((Set.Icc a b) ∩ poly_omega).Nonempty := by
-    intro a b
-    have en_intersect_closed: ∀ k: ℕ , IsClosed ((Set.Icc a b) ∩ (e_n k)) := by
+  have nonempty_closed_interval: ∀ a b : ℝ, a < b → ((Set.Icc a b) ∩ poly_omega).Nonempty := by
+    intro a b a_lt_b
+    have en_intersect_closed: ∀ k: ℕ , @IsClosed (Set.Icc a b) _ ((Set.Icc a b) ∩ (e_n k)) := by
       intro k
       apply IsClosed.inter
       apply isClosed_Icc
@@ -114,10 +114,16 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
       simp
 
-    have en_cov_univ_set: (Set.iUnion fun j => (Set.Icc a b) ∩ (e_n j)) = Set.univ := by
-      sorry
+    have nonempty: (Set.Icc a b).Nonempty := by
+      rw [Set.nonempty_Icc]
+      linarith
 
-    obtain ⟨interior_index, int_nonempty⟩ := nonempty_interior_of_iUnion_of_closed en_intersect_closed en_cov_univ_set
+    have real_nonempty: Nonempty (Set.Icc a b) := by
+      rw [Set.nonempty_iff_ne_empty']
+      exact Set.nonempty_iff_ne_empty.mp nonempty
+
+
+    obtain ⟨interior_index, int_nonempty⟩ := @nonempty_interior_of_iUnion_of_closed (Set.Icc a b) _ _ _ _ _ _ en_intersect_closed en_covers
     have int_open: IsOpen (interior (Set.Icc a b ∩ e_n interior_index)) := by apply isOpen_interior
     obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset int_open int_nonempty
     have zero_on_cd: ∀ (x: ℝ), x ∈ (Set.Ioo c d) → (iteratedDerivWithin interior_index f (Set.Ioo c d)) x = 0 := by sorry
