@@ -57,9 +57,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     apply isOpen_Ioo
 
   obtain ⟨poly_intervals, hIntervals⟩ := TopologicalSpace.IsTopologicalBasis.open_eq_sUnion Real.isTopologicalBasis_Ioo_rat poly_open
-  have _: poly_intervals.Countable := by
-    sorry
-
   have poly_full: poly_intervals = ℝ := by
     sorry
 
