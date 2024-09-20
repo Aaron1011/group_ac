@@ -79,9 +79,10 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     exact isClosed_singleton
 
 
+  --have nonempty_closed_interval: ∀ a b : ℝ, a < b → ((Set.Icc a b) ∩ poly_omega).Nonempty := by
   have nonempty_closed_interval: ∀ a b : ℝ, a < b → ((Set.Icc a b) ∩ poly_omega).Nonempty := by
     intro a b a_lt_b
-    have en_intersect_closed: ∀ k: ℕ , @IsClosed (Set.Icc a b) _ ((Set.Icc a b) ∩ (e_n k)) := by
+    have en_intersect_closed: ∀ k: ℕ , IsClosed ((Set.Icc a b ) ∩ (e_n k)) := by
       intro k
       apply IsClosed.inter
       apply isClosed_Icc
@@ -123,7 +124,9 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       exact Set.nonempty_iff_ne_empty.mp nonempty
 
 
-    obtain ⟨interior_index, int_nonempty⟩ := @nonempty_interior_of_iUnion_of_closed (Set.Icc a b) _ _ _ _ _ _ en_intersect_closed en_covers
+    --obtain ⟨interior_index, int_nonempty⟩ := @nonempty_interior_of_iUnion_of_closed (Set.Icc a b) _ _ _ _ _ _ en_intersect_closed en_covers
+    -- TODO - we need to apply this to an entire topolgical space. We need [a, b] with the subspace topology
+    obtain ⟨interior_index, int_nonempty⟩ := nonempty_interior_of_iUnion_of_closed en_intersect_closed sorry -- en_covers
     have int_open: IsOpen (interior (Set.Icc a b ∩ e_n interior_index)) := by apply isOpen_interior
     obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset int_open int_nonempty
     have zero_on_cd: ∀ (x: ℝ), x ∈ (Set.Ioo c d) → (iteratedDerivWithin interior_index f (Set.Ioo c d)) x = 0 := by sorry
@@ -145,12 +148,35 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       have io_lt: Set.Ioo a b ⊆ Set.Icc a b := Set.Ioo_subset_Icc_self
       apply subset_trans cd_subset io_lt
 
-    have cd_subet_omega_ab: Set.Ioo c d ⊆ poly_omega ∩ Set.Icc a b := by
+    have cd_subet_omega_ab: Set.Ioo c d ⊆ (Set.Icc a b) ∩ poly_omega := by
       apply Set.subset_inter
-      exact cd_subset_omega
       exact cd_subset_ab
+      exact cd_subset_omega
 
-    sorry
+    -- rw [Set.nonempty_def]
+
+    --simp at cd_subet_omega_ab
+    --have cd_subset_just_omega: Set.Ioo c d ⊆ poly_omega := by
+    --  exact cd_subet_omega_ab.1
+
+
+    --have ioo_c_d_nonempty: (Set.Ioo c d).Nonempty := by
+    --  rw [Set.nonempty_Ioo]
+    --  linarith
+
+    rw [Set.nonempty_def]
+    have cd_nonempty: (Set.Ioo c d).Nonempty := by
+      simp
+      exact c_lt_d
+
+    rw [Set.nonempty_def] at cd_nonempty
+    obtain ⟨elem_cd, h_elem_cd⟩ := cd_nonempty
+
+    have elem_target: elem_cd ∈ (Set.Icc a b) ∩ poly_omega := by
+      rw [Set.subset_def] at cd_subet_omega_ab
+      apply cd_subet_omega_ab elem_cd h_elem_cd
+
+    exact ⟨elem_cd, elem_target⟩
 
 
   let X := poly_omegaᶜ
