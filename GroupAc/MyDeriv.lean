@@ -332,10 +332,17 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     have cd_subset_x: Set.Ioo c d ⊆ X := by sorry
     simp [X] at cd_subset_x
 
-    -- TODO - obtain this from our subsets above
-    have q: ℝ := sorry
-    have _: q ∈ X := by sorry
-    have _: q ∉ X := by sorry
+    have cd_nonempty: (Set.Ioo c d).Nonempty := by
+      simp
+      exact c_lt_d
+
+    obtain ⟨q, hq⟩ := Set.nonempty_def.mp cd_nonempty
+    have _: q ∈ X := by
+      apply cd_subset_x
+      exact hq
+    have _: q ∈ poly_omega := by
+      apply cd_subset_omega
+      exact hq
 
     contradiction
 
