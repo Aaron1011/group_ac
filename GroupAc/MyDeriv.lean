@@ -2,7 +2,7 @@ import Mathlib
 import Mathlib.Data.Set.Defs
 import Mathlib.Data.Set.Basic
 
-variable {f}
+variable {f: ℝ → ℝ}
 
 def RestrictsToPoly (f: ℝ → ℝ) (a b: ℝ) :=
   ∃ (p: Polynomial ℝ), ∀ (y: ℝ), y ∈ Set.Icc a b → f y = p.eval y
@@ -42,7 +42,7 @@ lemma poly_n_induct (n k: ℕ) (p: Polynomial ℝ) (hp1: ((Polynomial.derivative
 
   -- sorry
 
-lemma zero_first_deriv_implies_poly (a b : ℝ) (n: ℕ) (hd: DifferentiableOn ℝ f (Set.Icc a b)) (hf: ∀ (x : ℝ), (x ∈ Set.Icc a b) → (derivWithin f (Set.Icc a b) x) = 0): RestrictsToPoly f a b := by
+lemma zero_first_deriv_implies_poly (a b : ℝ) (hd: DifferentiableOn ℝ f (Set.Icc a b)) (hf: ∀ (x : ℝ), (x ∈ Set.Icc a b) → (derivWithin f (Set.Icc a b) x) = 0): RestrictsToPoly f a b := by
   have smaller:  ∀ (x : ℝ), (x ∈ Set.Ico a b) → (derivWithin f (Set.Icc a b) x) = 0 := by
     refine fun x a ↦ ?_
     apply hf x
@@ -57,6 +57,42 @@ lemma zero_first_deriv_implies_poly (a b : ℝ) (n: ℕ) (hd: DifferentiableOn �
   unfold RestrictsToPoly
   exact ⟨const_poly, f_eq_const_poly⟩
 
+
+lemma zero_deriv_implies_poly (a b : ℝ) (a_lt_b: a < b) (n: ℕ) (hd: ContDiffOn ℝ ⊤ f (Set.Icc a b)) (hf: ∀ (x : ℝ), (x ∈ Set.Icc a b) → (iteratedDerivWithin n f (Set.Icc a b)) x = 0): RestrictsToPoly f a b := by
+  have unique_diff: UniqueDiffOn ℝ (Set.Icc a b) := by exact uniqueDiffOn_Icc a_lt_b
+  have unique_diff_at : ∀ (x: ℝ), x ∈ (Set.Icc a b) → UniqueDiffWithinAt ℝ (Set.Icc a b) x := unique_diff
+  induction n generalizing f with
+  | zero =>
+    simp only [iteratedDerivWithin_zero] at hf
+    unfold RestrictsToPoly
+    use 0
+    intro y hy
+    simp
+    apply hf
+    exact hy
+  | succ k hk =>
+    have k_restrict_poly: (∀ x ∈ Set.Icc a b, iteratedDerivWithin k f (Set.Icc a b) x = 0) → RestrictsToPoly f a b := hk hd
+    have deriv_succ: ∀ (x: ℝ), x ∈ Set.Icc a b → (iteratedDerivWithin k (derivWithin f (Set.Icc a b)) (Set.Icc a b)) x = 0 := by
+      intro x hx
+      rw [← iteratedDerivWithin_succ']
+      apply hf
+      exact hx
+      exact unique_diff
+      exact hx
+
+    have contdiff_derivative: ContDiffOn ℝ ⊤ (derivWithin f (Set.Icc a b)) (Set.Icc a b) := by
+      rw [contDiffOn_top_iff_derivWithin] at hd
+      exact hd.2
+      exact unique_diff
+    have deriv_f_poly: RestrictsToPoly (derivWithin f (Set.Icc a b)) a b := by
+      apply hk
+      apply contdiff_derivative
+      exact deriv_succ
+
+    obtain ⟨p, hp⟩ := deriv_f_poly
+
+
+    sorry
 
 -- https://mathoverflow.net/questions/34059/if-f-is-infinitely-differentiable-then-f-coincides-with-a-polynomial
 theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n f) x = 0) (hCInfinity: ContDiff ℝ ⊤ f): RestrictsToPoly f 0 1 := by
