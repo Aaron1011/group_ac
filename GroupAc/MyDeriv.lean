@@ -25,23 +25,37 @@ lemma poly_n_induct (n k: ℕ) (p: Polynomial ℝ) (hp1: ((Polynomial.derivative
       --apply lt_of_le_of_lt' partial_lt (ha 1)
     sorry
 
-lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (hf: ∀ (x : ℝ), (x ∈ Set.Ioo a b) → (iteratedDerivWithin n f (Set.Ioo a b)) x = 0): RestrictsToPoly f a b := by
-  let temp_f: Set.Ioo a b → ℝ := λ z => (iteratedDerivWithin n f (Set.Ioo a b)) z
-  have temp_f_zero: temp_f = λ x => 0 := by
-    simp only [temp_f]
-    apply funext
-    intro x
+-- lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (hf: ∀ (x : ℝ), (x ∈ Set.Icc a b) → (iteratedDerivWithin n f (Set.Icc a b)) x = 0): RestrictsToPoly f a b := by
+  -- let temp_f: Set.Icc a b → ℝ := λ z => (iteratedDerivWithin n f (Set.Icc a b)) z
+  -- have temp_f_zero: temp_f = λ x => 0 := by
+  --   apply funext
+  --   intro x
+  --   apply hf x
+  --   simp
+
+
+  -- have temp_f_zero_poly: temp_f = λ x: Set.Icc a b => Polynomial.eval ↑x 0 := by
+  --   apply funext
+  --   intro x
+  --   rw [temp_f_zero]
+  --   simp [Polynomial.eval_zero]
+
+  -- sorry
+
+lemma zero_first_deriv_implies_poly (a b : ℝ) (n: ℕ) (hd: DifferentiableOn ℝ f (Set.Icc a b)) (hf: ∀ (x : ℝ), (x ∈ Set.Icc a b) → (derivWithin f (Set.Icc a b) x) = 0): RestrictsToPoly f a b := by
+  have smaller:  ∀ (x : ℝ), (x ∈ Set.Ico a b) → (derivWithin f (Set.Icc a b) x) = 0 := by
+    refine fun x a ↦ ?_
     apply hf x
-    simp
+    exact Set.mem_Icc_of_Ico a
+  have f_eq_constant: ∀ (x: ℝ), x ∈ Set.Icc a b → f x = f a := by apply constant_of_derivWithin_zero hd smaller
+  let const_poly: Polynomial ℝ := Polynomial.C (f a)
+  have f_eq_const_poly: ∀ (x: ℝ), x ∈ Set.Icc a b → f x = const_poly.eval x := by
+    intro x hx
+    rw [f_eq_constant x hx]
+    rw [Polynomial.eval_C]
 
-  have temp_f_zero_poly: temp_f = λ x: Set.Ioo a b => Polynomial.eval ↑x 0 := by
-    apply funext
-    intro x
-    rw [temp_f_zero]
-    simp [Polynomial.eval_zero]
-
-  sorry
-
+  unfold RestrictsToPoly
+  exact ⟨const_poly, f_eq_const_poly⟩
 
 
 -- https://mathoverflow.net/questions/34059/if-f-is-infinitely-differentiable-then-f-coincides-with-a-polynomial
@@ -119,6 +133,8 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     have real_nonempty: Nonempty (Set.Icc a b) := by
       rw [Set.nonempty_iff_ne_empty']
       exact Set.nonempty_iff_ne_empty.mp nonempty
+
+
 
 
     --obtain ⟨interior_index, int_nonempty⟩ := @nonempty_interior_of_iUnion_of_closed (Set.Icc a b) _ _ _ _ _ _ en_intersect_closed en_covers
