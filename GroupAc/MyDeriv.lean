@@ -89,10 +89,28 @@ lemma zero_deriv_implies_poly (a b : ℝ) (a_lt_b: a < b) (n: ℕ) (hd: ContDiff
       apply contdiff_derivative
       exact deriv_succ
 
+    have f_differentiable: DifferentiableOn ℝ f (Set.Icc a b) := by
+      rw [contDiffOn_top_iff_derivWithin] at hd
+      exact hd.1
+      exact unique_diff
+
     obtain ⟨p, hp⟩ := deriv_f_poly
+    let poly_integral: Polynomial ℝ := sorry
+    have deriv_integral : Polynomial.derivative poly_integral = p := by sorry
+    have deriv_integral_eq_f_deriv: ∀ (x: ℝ), x ∈ Set.Icc a b → derivWithin (fun (y : ℝ) => Polynomial.eval y p) (Set.Icc a b) x = (derivWithin f (Set.Icc a b)) x := by
+      sorry
 
+    have eq_at_a: f a = Polynomial.eval a poly_integral := by
+      sorry
+    have f_eq_deriv_integral: ∀(x: ℝ), x ∈ Set.Icc a b → f x = Polynomial.eval x poly_integral := by
+      intro x
+      apply eq_of_derivWithin_eq f_differentiable
+      sorry
+      sorry
+      apply eq_at_a
 
-    sorry
+    unfold RestrictsToPoly
+    exact ⟨poly_integral, f_eq_deriv_integral⟩
 
 -- https://mathoverflow.net/questions/34059/if-f-is-infinitely-differentiable-then-f-coincides-with-a-polynomial
 theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n f) x = 0) (hCInfinity: ContDiff ℝ ⊤ f): RestrictsToPoly f 0 1 := by
