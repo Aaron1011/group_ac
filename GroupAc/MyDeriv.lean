@@ -31,13 +31,18 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff
       exact unique_diff
       exact hx
 
-    have contdiff_derivative: ContDiffOn ℝ ⊤ (derivWithin f (Set.Icc a b)) (Set.Icc a b) := by
+    --have contdiff_derivative: ContDiff ℝ ⊤ (iteratedDerivWithin k f (Set.Icc a b)) := by
+    --  apply ContDiff.of_succ
+
+
+
+    have contdiffon_derivative: ContDiffOn ℝ ⊤ (derivWithin f (Set.Icc a b)) (Set.Icc a b) := by
       rw [contDiffOn_top_iff_derivWithin] at hd
       exact hd.2
       exact unique_diff
     have deriv_f_poly: RestrictsToPoly (derivWithin f (Set.Icc a b)) a b := by
       apply hk
-      apply contdiff_derivative
+      apply contdiffon_derivative
       exact deriv_succ
 
     have f_differentiable: DifferentiableOn ℝ f (Set.Icc a b) := by
@@ -118,6 +123,8 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
   obtain ⟨poly_intervals, hIntervals⟩ := TopologicalSpace.IsTopologicalBasis.open_eq_sUnion Real.isTopologicalBasis_Ioo_rat poly_open
   have unique_diff: ∀ (x c d: ℝ), x ∈ Set.Ioo c d → UniqueDiffWithinAt ℝ (Set.Ioo c d) x := by
     exact fun x c d a ↦ uniqueDiffWithinAt_Ioo a
+
+
 
   let e_n := fun k => { x: ℝ | (iteratedDeriv k f) x = 0 }
   have en_closed: ∀ k: ℕ, IsClosed (e_n k) := by
@@ -420,6 +427,18 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       have deriv_x_zero: (iteratedDerivWithin n_x_int f (Set.Ioo c d)) x = 0 := by
         apply x_zero_on_cd x hx
 
+      have cont_diff_within_at: ContDiffWithinAt ℝ ⊤ (iteratedDerivWithin n_x_int f (Set.Ioo c d)) (Set.Ioo c d) c := by
+        --apply ContDiff.contDiffWithinAt hCInfinity
+        sorry
+
+      have continuous_within_at_c: ContinuousWithinAt (iteratedDerivWithin n_x_int f (Set.Ioo c d)) (Set.Ioo c d) c := by
+        apply ContDiffWithinAt.continuousWithinAt cont_diff_within_at
+
+      have deriv_tendsto_at_a: Filter.Tendsto (iteratedDerivWithin n_x_int f (Set.Ioo c d)) (nhdsWithin c (Set.Ioo c d)) (nhds ((iteratedDerivWithin n_x_int f (Set.Ioo c d)) c)) := by
+        apply ContinuousWithinAt.tendsto _
+        apply continuous_within_at_c
+
+
       have deriv_zero_at_c: (iteratedDerivWithin n_x_int f (Set.Ioo c d)) c = 0 := by
         sorry
 
@@ -430,27 +449,20 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
       have deriv_k_const: iteratedDerivWithin n_x_int f (Set.Ioo c d) = λ y => 0 := by
         ext y
-        by_cases h_mem_interval: y ∈ closure (Set.Ioo c d)
-        . sorry
-        . by_cases n_x_int_zero: n_x_int = 0
-          . rw [n_x_int_zero]
-            simp
+        sorry
+        -- by_cases h_mem_interval: y ∈ closure (Set.Ioo c d)
+        -- . sorry
+        -- . by_cases n_x_int_zero: n_x_int = 0
+        --   . rw [n_x_int_zero]
+        --     simp
 
 
-          . sorry
+        --   . sorry
 
-          have deriv_zero: derivi derivWithin_zero_of_nmem_closure h_mem_interval
+        --   have deriv_zero: derivi derivWithin_zero_of_nmem_closure h_mem_interval
         --   . simp
         --     sorry
         --   . rw [Set.eq_endpoints_or_mem_Ioo_of_mem_Icc] at y_mem_endpoints
-
-
-
-
-
-
-
-
 
       have deriv_within: HasDerivWithinAt (iteratedDerivWithin n_x_int f (Set.Ioo c d)) 0 (Set.Ioo c d) x := by
         --rw [hasDerivWithinAt_iff_tendsto_slope]
@@ -458,11 +470,12 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       apply HasDerivWithinAt.derivWithin deriv_within
       sorry
 
-    have forall_deriv_zero: ∀ (m: ℕ), m ≥ n_x_int →  ∀ (x: ℝ), x ∈ X ∩ Set.Ioo c d → (iteratedDerivWithin m f (Set.Ioo c d)) x = 0 := by
-      intro m hm
-      induction m with
-      | zero => sorry
-      | succ a ha => sorry
+    -- have forall_deriv_zero: ∀ (m: ℕ), m ≥ n_x_int →  ∀ (x: ℝ), x ∈ X ∩ Set.Ioo c d → (iteratedDerivWithin m f (Set.Ioo c d)) x = 0 := by
+    --   intro m hm
+    --   induction m with
+    --   | zero => sorry
+    --   | succ a ha => sorry
+
 
     have cont_diff_on: ContDiffOn ℝ ⊤ f (Set.Icc c d) := ContDiff.contDiffOn hCInfinity
     have deriv_zero_on_cd_omega: ∀ (x : ℝ), x ∈ Set.Icc c d → (iteratedDerivWithin n_x_int f (Set.Icc c d)) x = 0 := by
@@ -482,8 +495,11 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       exact ⟨c, d, rfl, poly_on_cd⟩
       exact hx
     have int_subset_x_int: x_int ⊆ X ∩ e_n n_x_int := interior_subset
-    have int_subset_x: x_int ⊆ X := by sorry
-    have cd_subset_x: Set.Ioo c d ⊆ X := by sorry
+    have int_subset_x: x_int ⊆ X := by
+      simp [Set.subset_inter_iff] at int_subset_x_int
+      exact int_subset_x_int.1
+    have cd_subset_x: Set.Ioo c d ⊆ X := by
+      apply subset_trans cd_int int_subset_x
     simp [X] at cd_subset_x
 
     have cd_nonempty: (Set.Ioo c d).Nonempty := by
