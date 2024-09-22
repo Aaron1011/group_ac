@@ -239,7 +239,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
     have cd_subset_ab: Set.Ioo c d ⊆ Set.Icc a b := by
       simp at cd_int
-      have cd_subset: (Set.Ioo c d) ⊆ Set.Ioo a b := by exact cd_int.1
+      have cd_subset: (Set.Ioo c d) ⊆ Set.Ioo a b := sorry --by exact cd_int.1
       have io_lt: Set.Ioo a b ⊆ Set.Icc a b := Set.Ioo_subset_Icc_self
       apply subset_trans cd_subset io_lt
 
@@ -420,14 +420,29 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       have deriv_x_zero: (iteratedDerivWithin n_x_int f (Set.Ioo c d)) x = 0 := by
         apply x_zero_on_cd x hx
 
+      have deriv_zero_at_c: (iteratedDerivWithin n_x_int f (Set.Ioo c d)) c = 0 := by
+        sorry
+
+
+      have deriv_zero_at_d: (iteratedDerivWithin n_x_int f (Set.Ioo c d)) c = 0 := by
+        sorry
+
+
       have deriv_k_const: iteratedDerivWithin n_x_int f (Set.Ioo c d) = λ y => 0 := by
         ext y
-        by_cases h_mem_interval: y ∈ (Set.Ioo c d)
-        . exact x_zero_on_cd y h_mem_interval
-        . by_cases y_mem_endpoints: y ∈ {c, d}
-          . simp
-            sorry
-          . rw [Set.eq_endpoints_or_mem_Ioo_of_mem_Icc] at y_mem_endpoints
+        by_cases h_mem_interval: y ∈ closure (Set.Ioo c d)
+        . sorry
+        . by_cases n_x_int_zero: n_x_int = 0
+          . rw [n_x_int_zero]
+            simp
+
+
+          . sorry
+
+          have deriv_zero: derivi derivWithin_zero_of_nmem_closure h_mem_interval
+        --   . simp
+        --     sorry
+        --   . rw [Set.eq_endpoints_or_mem_Ioo_of_mem_Icc] at y_mem_endpoints
 
 
 
