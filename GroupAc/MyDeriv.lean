@@ -286,16 +286,18 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     --  linarith
 
     rw [Set.nonempty_def]
-    have cd_nonempty: (Set.Ioo c d).Nonempty := by
+    have cd_nonempty: (Set.Icc c d).Nonempty := by
       simp
-      exact c_lt_d
+      apply le_of_lt c_lt_d
 
     rw [Set.nonempty_def] at cd_nonempty
     obtain ⟨elem_cd, h_elem_cd⟩ := cd_nonempty
 
     have elem_target: elem_cd ∈ (Set.Icc a b) ∩ poly_omega := by
       rw [Set.subset_def] at cd_subet_omega_ab
-      apply cd_subet_omega_ab elem_cd h_elem_cd
+      apply cd_subet_omega_ab elem_cd _
+      exact h_elem_cd
+
 
     exact ⟨elem_cd, elem_target⟩
 
