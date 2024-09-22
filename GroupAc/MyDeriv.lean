@@ -253,27 +253,26 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
 
     have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d interior_index c_lt_d cont_diff_on zero_on_cd
-    have cd_subset_omega: Set.Ioo c d ⊆ poly_omega := by
+    have cd_subset_omega: Set.Icc c d ⊆ poly_omega := by
       simp [poly_omega]
       rw [Set.subset_def]
       intro x hx
       simp only [Set.mem_sUnion]
-      use Set.Ioo c d
+      use Set.Ioo c_open d_open
       simp
       constructor
-      exact ⟨c, d, rfl, poly_on_cd⟩
-      exact hx
+      exact ⟨c, d, _, poly_on_cd⟩
 
-    have cd_subset_ab: Set.Ioo c d ⊆ Set.Icc a b := by
-      simp at cd_int
-      have cd_subset: (Set.Ioo c d) ⊆ Set.Ioo a b :=
-      have io_lt: Set.Ioo a b ⊆ Set.Icc a b := Set.Ioo_subset_Icc_self
-      apply subset_trans cd_int _
 
-    have cd_subet_omega_ab: Set.Ioo c d ⊆ (Set.Icc a b) ∩ poly_omega := by
+    --have cd_subset_ab: Set.Icc c d ⊆ Set.Icc a b := by
+    --  simp at cd_int
+    --  apply subset_trans cd_int.1 int_subset_a_b
+
+
+    have cd_subet_omega_ab: Set.Icc c d ⊆ (Set.Icc a b) ∩ poly_omega := by
       apply Set.subset_inter
-      exact cd_subset_ab
-      exact cd_subset_omega
+      apply subset_trans cd_int int_subset_a_b
+      apply cd_subset_omega
 
     -- rw [Set.nonempty_def]
 
