@@ -251,6 +251,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         simp only [derives_eq]
         exact iter_x
 
+      sorry
 
     have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d interior_index c_lt_d cont_diff_on zero_on_cd
     have cd_subset_omega: Set.Icc c d ⊆ poly_omega := by
@@ -258,10 +259,16 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       rw [Set.subset_def]
       intro x hx
       simp only [Set.mem_sUnion]
-      use Set.Ioo c_open d_open
+      use Set.Icc c d
       simp
       constructor
-      exact ⟨c, d, _, poly_on_cd⟩
+      dsimp [RestrictsToPoly]
+      obtain ⟨p, hp⟩ := poly_on_cd
+      sorry
+      sorry
+
+
+
 
 
     --have cd_subset_ab: Set.Icc c d ⊆ Set.Icc a b := by
@@ -514,7 +521,9 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       simp
       constructor
       exact ⟨c, d, rfl, poly_on_cd⟩
-      exact hx
+      . exact hx
+
+
     have int_subset_x_int: x_int ⊆ X ∩ e_n n_x_int := interior_subset
     have int_subset_x: x_int ⊆ X := by
       simp [Set.subset_inter_iff] at int_subset_x_int
