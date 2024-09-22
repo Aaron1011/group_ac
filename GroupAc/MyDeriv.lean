@@ -424,12 +424,16 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         ext y
         by_cases h_mem_interval: y ∈ (Set.Ioo c d)
         . exact x_zero_on_cd y h_mem_interval
-        .
+        . by_cases y_mem_endpoints: y ∈ {c, d}
+          . simp
+            sorry
+          . rw [Set.eq_endpoints_or_mem_Ioo_of_mem_Icc] at y_mem_endpoints
 
 
 
 
-      rw [deriv_x_zero]
+
+
 
 
 
