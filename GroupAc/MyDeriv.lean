@@ -202,8 +202,24 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       simp
       apply c_lt_d_open
 
+    have int_subset_a_b: interior (Set.Icc a b ∩ e_n interior_index) ⊆ Set.Icc a b := by
+      rw [Set.subset_def]
+      intro y hy
+      simp only [mem_interior] at hy
+      simp only [Set.subset_def] at hy
+      obtain ⟨t, ht, h_other_t, y_in_t⟩ := hy
+      specialize ht y y_in_t
+      exact ht.1
+
+
     have cd_int: Set.Icc c d ⊆ interior (Set.Icc a b ∩ e_n interior_index) := by
       apply subset_trans cd_subset_c_open cd_int_open
+
+    -- have int_subset_ab: interior (Set.Icc a b ∩ e_n interior_index) ⊆ Set.Icc a b := by
+    --   rw [Set.subset_def]
+    --   intro y hy
+
+
 
     have cont_diff_on: ContDiffOn ℝ ⊤ f (Set.Icc c d) := ContDiff.contDiffOn hCInfinity
     have zero_on_cd: ∀ (x: ℝ), x ∈ (Set.Icc c d) → (iteratedDerivWithin interior_index f (Set.Icc c d)) x = 0 := by
@@ -250,9 +266,9 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
     have cd_subset_ab: Set.Ioo c d ⊆ Set.Icc a b := by
       simp at cd_int
-      have cd_subset: (Set.Ioo c d) ⊆ Set.Ioo a b := sorry --by exact cd_int.1
+      have cd_subset: (Set.Ioo c d) ⊆ Set.Ioo a b :=
       have io_lt: Set.Ioo a b ⊆ Set.Icc a b := Set.Ioo_subset_Icc_self
-      apply subset_trans cd_subset io_lt
+      apply subset_trans cd_int _
 
     have cd_subet_omega_ab: Set.Ioo c d ⊆ (Set.Icc a b) ∩ poly_omega := by
       apply Set.subset_inter
