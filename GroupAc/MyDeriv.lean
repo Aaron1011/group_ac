@@ -150,7 +150,6 @@ lemma zero_deriv_implies_poly (a b : ℝ) (a_lt_b: a < b) (n: ℕ) (hd: ContDiff
       exact hy
       apply eq_at_a
 
-    unfold RestrictsToPoly
     exact ⟨poly_integral, f_eq_deriv_integral⟩
 
 -- https://mathoverflow.net/questions/34059/if-f-is-infinitely-differentiable-then-f-coincides-with-a-polynomial
