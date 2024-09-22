@@ -95,14 +95,115 @@ lemma zero_deriv_implies_poly (a b : ℝ) (a_lt_b: a < b) (n: ℕ) (hd: ContDiff
       exact unique_diff
 
     obtain ⟨p, hp⟩ := deriv_f_poly
-    let poly_integral: Polynomial ℝ := sorry
-    have deriv_integral : Polynomial.derivative poly_integral = p := by sorry
+    -- The integral of our polynomial, with the constant term set to 0
+    let initial_poly_integral: Polynomial ℝ := p.sum fun n a => Polynomial.C (a / (n + 1)) * Polynomial.X ^ (n + 1)
+    -- Evaluate it at some arbitrary point (let's pick 'a)
+    let initial_poly_at_a: ℝ := Polynomial.eval a initial_poly_integral
+    -- Make the polynomial match f at 'a'
+    let poly_constant := (f a) - initial_poly_at_a
+    -- Now, construct our polynomial integral, satisfying the condition p(a) = f(a)
+    let poly_integral := (Polynomial.C poly_constant) + initial_poly_integral
+    have deriv_integral : Polynomial.derivative poly_integral = p := by
+      simp [poly_integral]
+      simp [initial_poly_integral]
+      unfold Polynomial.derivative
+      field_simp
+      ext n
+      --rw [(Polynomial.commute_X (Polynomial.C r : Polynomial ℝ)).add_pow, ← Polynomial.lcoeff_apply, map_sum]
+      --simp [Polynomial.sum_def]
+      rw [Polynomial.sum]
+      simp only [← Polynomial.C_eq_natCast, ← Polynomial.C_mul]
+      simp only [Polynomial.C_mul_X_pow_eq_monomial]
+      rw [Polynomial.sum]
+      simp only [← Polynomial.lcoeff_apply, map_sum]
+
+      simp only [Polynomial.lcoeff_apply]
+      simp only [Polynomial.coeff_monomial]
+
+
+      nth_rewrite 1 [Finset.sum_eq_single (n + 1)]
+      . field_simp
+        intro p_eq
+        exact id (Eq.symm p_eq)
+      intro b hb b_neq
+      rw [if_neg]
+      -- Get b != n - 1 working
+      sorry
+      . intro n_plus_not_in
+
+
+
+
+
+
+
+
+
+
+      -- . intro b hb b_neq
+      --   simp
+      --   intro b_minus_eq
+      --   rw [Finset.sum_eq_single (b - 1)]
+      --   . field_simp
+      --     left
+      --     intro b_eq
+
+        -- cases b
+        -- . intro ha hb
+        --   rw [Nat.cast_zero, mul_zero]
+        --   simp
+        -- . intro ha hb
+        --   simp
+        --   intro hq hr
+
+
+        --   sorry
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      -- rw [← Polynomial.lcoeff_apply, Polynomial.sum_def]
+      -- rw [map_sum]
+      -- simp only [← Polynomial.lcoeff_apply]
+      -- rw [Polynomial.sum_def]
+      -- simp only [map_sum]
+      -- simp only [Polynomial.X_pow_eq_monomial]
+      -- simp only [Polynomial.C_mul_monomial]
+      -- simp only [Polynomial.lcoeff_apply]
+      -- simp only [Polynomial.coeff_monomial]
+
+
+
+
+
+      --simp only [Finset.sum_ite_eq]
+
+      --
+
+      --simp only [Polynomial.lcoeff_apply]
+
+      --rw [Polynomial.coeff]
+      --apply Polynomial.coeff_X_add_C_pow
+
+
+
+
     have deriv_integral_eq_f_deriv: ∀ (x: ℝ), x ∈ Set.Icc a b → derivWithin (fun (y : ℝ) => Polynomial.eval y p) (Set.Icc a b) x = (derivWithin f (Set.Icc a b)) x := by
       sorry
 
-    have eq_at_a: f a = Polynomial.eval a poly_integral := by
+    have eq_at_a: f a = Polynomial.sum a poly_integral := by
       sorry
-    have f_eq_deriv_integral: ∀(x: ℝ), x ∈ Set.Icc a b → f x = Polynomial.eval x poly_integral := by
+    have f_eq_deriv_integ ral: ∀(x: ℝ), x ∈ Set.Icc a b → f x = Polynomial.eval x poly_integral := by
       intro x
       apply eq_of_derivWithin_eq f_differentiable
       sorry
@@ -420,6 +521,8 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     apply X_empty
   have poly_full: poly_omega = (Set.univ) := by
     exact Set.compl_empty_iff.mp X_empty
+
+
 
   sorry
 
