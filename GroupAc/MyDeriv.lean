@@ -106,97 +106,25 @@ lemma zero_deriv_implies_poly (a b : ℝ) (a_lt_b: a < b) (n: ℕ) (hd: ContDiff
     have deriv_integral : Polynomial.derivative poly_integral = p := by
       simp [poly_integral]
       simp [initial_poly_integral]
-      unfold Polynomial.derivative
-      field_simp
       ext n
-      --rw [(Polynomial.commute_X (Polynomial.C r : Polynomial ℝ)).add_pow, ← Polynomial.lcoeff_apply, map_sum]
-      --simp [Polynomial.sum_def]
+      rw [Polynomial.coeff_derivative]
       rw [Polynomial.sum]
-      simp only [← Polynomial.C_eq_natCast, ← Polynomial.C_mul]
       simp only [Polynomial.C_mul_X_pow_eq_monomial]
-      rw [Polynomial.sum]
       simp only [← Polynomial.lcoeff_apply, map_sum]
-
       simp only [Polynomial.lcoeff_apply]
       simp only [Polynomial.coeff_monomial]
-
-
-      nth_rewrite 1 [Finset.sum_eq_single (n + 1)]
+      rw [Finset.sum_eq_single (n)]
       . field_simp
-        intro p_eq
-        exact id (Eq.symm p_eq)
-      intro b hb b_neq
-      rw [if_neg]
-      -- Get b != n - 1 working
-      sorry
-      . intro n_plus_not_in
-
-
-
-
-
-
-
-
-
-
-      -- . intro b hb b_neq
-      --   simp
-      --   intro b_minus_eq
-      --   rw [Finset.sum_eq_single (b - 1)]
-      --   . field_simp
-      --     left
-      --     intro b_eq
-
-        -- cases b
-        -- . intro ha hb
-        --   rw [Nat.cast_zero, mul_zero]
-        --   simp
-        -- . intro ha hb
-        --   simp
-        --   intro hq hr
-
-
-        --   sorry
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      -- rw [← Polynomial.lcoeff_apply, Polynomial.sum_def]
-      -- rw [map_sum]
-      -- simp only [← Polynomial.lcoeff_apply]
-      -- rw [Polynomial.sum_def]
-      -- simp only [map_sum]
-      -- simp only [Polynomial.X_pow_eq_monomial]
-      -- simp only [Polynomial.C_mul_monomial]
-      -- simp only [Polynomial.lcoeff_apply]
-      -- simp only [Polynomial.coeff_monomial]
-
-
-
-
-
-      --simp only [Finset.sum_ite_eq]
-
-      --
-
-      --simp only [Polynomial.lcoeff_apply]
-
-      --rw [Polynomial.coeff]
-      --apply Polynomial.coeff_X_add_C_pow
-
-
-
+      . intro b b_sup b_not_n
+        rw [if_neg]
+        simp
+        simp at b_not_n
+        exact b_not_n
+      . intro n_not_supp
+        rw [Polynomial.mem_support_iff] at n_not_supp
+        simp at n_not_supp
+        rw [n_not_supp]
+        simp
 
     have deriv_integral_eq_f_deriv: ∀ (x: ℝ), x ∈ Set.Icc a b → derivWithin (fun (y : ℝ) => Polynomial.eval y p) (Set.Icc a b) x = (derivWithin f (Set.Icc a b)) x := by
       sorry
