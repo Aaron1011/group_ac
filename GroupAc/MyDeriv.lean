@@ -7,58 +7,7 @@ variable {f: ℝ → ℝ}
 def RestrictsToPoly (f: ℝ → ℝ) (a b: ℝ) :=
   ∃ (p: Polynomial ℝ), ∀ (y: ℝ), y ∈ Set.Icc a b → f y = p.eval y
 
-lemma poly_n_induct (n k: ℕ) (p: Polynomial ℝ) (hp1: ((Polynomial.derivative)^[n] p).degree < k) : (p.degree < n + k) := by
-  induction n generalizing k with
-  | zero =>
-    simp at hp1
-    simp
-    exact hp1
-  | succ a ha =>
-    rw [Function.iterate_succ'] at hp1
-    simp at hp1
-
-    have partial_lt: (Polynomial.derivative ((Polynomial.derivative)^[a] p)).degree ≤ ((⇑Polynomial.derivative)^[a] p).degree := by
-      apply Polynomial.degree_derivative_le
-
-    have h2: (Polynomial.derivative ((⇑Polynomial.derivative)^[a] p)).degree < k := by
-      sorry
-      --apply lt_of_le_of_lt' partial_lt (ha 1)
-    sorry
-
--- lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (hf: ∀ (x : ℝ), (x ∈ Set.Icc a b) → (iteratedDerivWithin n f (Set.Icc a b)) x = 0): RestrictsToPoly f a b := by
-  -- let temp_f: Set.Icc a b → ℝ := λ z => (iteratedDerivWithin n f (Set.Icc a b)) z
-  -- have temp_f_zero: temp_f = λ x => 0 := by
-  --   apply funext
-  --   intro x
-  --   apply hf x
-  --   simp
-
-
-  -- have temp_f_zero_poly: temp_f = λ x: Set.Icc a b => Polynomial.eval ↑x 0 := by
-  --   apply funext
-  --   intro x
-  --   rw [temp_f_zero]
-  --   simp [Polynomial.eval_zero]
-
-  -- sorry
-
-lemma zero_first_deriv_implies_poly (a b : ℝ) (hd: DifferentiableOn ℝ f (Set.Icc a b)) (hf: ∀ (x : ℝ), (x ∈ Set.Icc a b) → (derivWithin f (Set.Icc a b) x) = 0): RestrictsToPoly f a b := by
-  have smaller:  ∀ (x : ℝ), (x ∈ Set.Ico a b) → (derivWithin f (Set.Icc a b) x) = 0 := by
-    refine fun x a ↦ ?_
-    apply hf x
-    exact Set.mem_Icc_of_Ico a
-  have f_eq_constant: ∀ (x: ℝ), x ∈ Set.Icc a b → f x = f a := by apply constant_of_derivWithin_zero hd smaller
-  let const_poly: Polynomial ℝ := Polynomial.C (f a)
-  have f_eq_const_poly: ∀ (x: ℝ), x ∈ Set.Icc a b → f x = const_poly.eval x := by
-    intro x hx
-    rw [f_eq_constant x hx]
-    rw [Polynomial.eval_C]
-
-  unfold RestrictsToPoly
-  exact ⟨const_poly, f_eq_const_poly⟩
-
-
-lemma zero_deriv_implies_poly (a b : ℝ) (a_lt_b: a < b) (n: ℕ) (hd: ContDiffOn ℝ ⊤ f (Set.Icc a b)) (hf: ∀ (x : ℝ), (x ∈ Set.Icc a b) → (iteratedDerivWithin n f (Set.Icc a b)) x = 0): RestrictsToPoly f a b := by
+lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiffOn ℝ ⊤ f (Set.Icc a b)) (hf: ∀ (x : ℝ), (x ∈ Set.Icc a b) → (iteratedDerivWithin n f (Set.Icc a b)) x = 0): RestrictsToPoly f a b := by
   have unique_diff: UniqueDiffOn ℝ (Set.Icc a b) := by exact uniqueDiffOn_Icc a_lt_b
   have unique_diff_at : ∀ (x: ℝ), x ∈ (Set.Icc a b) → UniqueDiffWithinAt ℝ (Set.Icc a b) x := unique_diff
   induction n generalizing f with
@@ -115,7 +64,7 @@ lemma zero_deriv_implies_poly (a b : ℝ) (a_lt_b: a < b) (n: ℕ) (hd: ContDiff
       simp only [Polynomial.coeff_monomial]
       rw [Finset.sum_eq_single (n)]
       . field_simp
-      . intro b b_sup b_not_n
+      . intro b _ b_not_n
         rw [if_neg]
         simp
         simp at b_not_n
@@ -229,15 +178,14 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       exact Set.nonempty_iff_ne_empty.mp nonempty
 
 
-
-
     --obtain ⟨interior_index, int_nonempty⟩ := @nonempty_interior_of_iUnion_of_closed (Set.Icc a b) _ _ _ _ _ _ en_intersect_closed en_covers
     -- TODO - we need to apply this to an entire topolgical space. We need [a, b] with the subspace topology
     obtain ⟨interior_index, int_nonempty⟩ := nonempty_interior_of_iUnion_of_closed en_intersect_closed sorry -- en_covers
     have int_open: IsOpen (interior (Set.Icc a b ∩ e_n interior_index)) := by apply isOpen_interior
     obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset int_open int_nonempty
-    have zero_on_cd: ∀ (x: ℝ), x ∈ (Set.Ioo c d) → (iteratedDerivWithin interior_index f (Set.Ioo c d)) x = 0 := by sorry
-    have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d interior_index zero_on_cd
+    have cont_diff_on: ContDiffOn ℝ ⊤ f (Set.Icc c d) := ContDiff.contDiffOn hCInfinity
+    have zero_on_cd: ∀ (x: ℝ), x ∈ (Set.Icc c d) → (iteratedDerivWithin interior_index f (Set.Icc c d)) x = 0 := by sorry
+    have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d interior_index c_lt_d cont_diff_on zero_on_cd
     have cd_subset_omega: Set.Ioo c d ⊆ poly_omega := by
       simp [poly_omega]
       rw [Set.subset_def]
@@ -423,10 +371,11 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       | zero => sorry
       | succ a ha => sorry
 
-    have deriv_zero_on_cd_omega: ∀ (x : ℝ), x ∈ Set.Ioo c d → (iteratedDerivWithin n_x_int f (Set.Ioo c d)) x = 0 := by
+    have cont_diff_on: ContDiffOn ℝ ⊤ f (Set.Icc c d) := ContDiff.contDiffOn hCInfinity
+    have deriv_zero_on_cd_omega: ∀ (x : ℝ), x ∈ Set.Icc c d → (iteratedDerivWithin n_x_int f (Set.Icc c d)) x = 0 := by
       sorry
 
-    have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d n_x_int deriv_zero_on_cd_omega
+    have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d n_x_int c_lt_d cont_diff_on deriv_zero_on_cd_omega
     have cd_subset_omega: Set.Ioo c d ⊆ poly_omega := by
       simp [poly_omega]
       rw [Set.subset_def]
