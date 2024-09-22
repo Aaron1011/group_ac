@@ -189,17 +189,21 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     obtain ⟨interior_index, int_nonempty⟩ := nonempty_interior_of_iUnion_of_closed en_intersect_closed sorry -- en_covers
     have int_open: IsOpen (interior (Set.Icc a b ∩ e_n interior_index)) := by apply isOpen_interior
     obtain ⟨c_open, d_open, c_lt_d_open, cd_int_open⟩ := IsOpen.exists_Ioo_subset int_open int_nonempty
-    let c := c_open + ((d_open - c_open) / 2)
-    let d := d_open - ((d_open - c_open) / 2)
+    let c := c_open + ((d_open - c_open) / 4)
+    let d := d_open - ((d_open - c_open) / 4)
     have c_lt_d: c < d := by
-      sorry
-
-    have cd_int: Set.Icc c d ⊆ interior (Set.Icc a b ∩ e_n interior_index) := by
-      sorry
+      simp [c, d]
+      linarith
 
     have cd_subset_c_open: Set.Icc c d ⊆ Set.Ioo c_open d_open := by
-      sorry
+      simp [c, d]
+      apply Set.Icc_subset_Ioo
+      linarith
+      simp
+      apply c_lt_d_open
 
+    have cd_int: Set.Icc c d ⊆ interior (Set.Icc a b ∩ e_n interior_index) := by
+      apply subset_trans cd_subset_c_open cd_int_open
 
     have cont_diff_on: ContDiffOn ℝ ⊤ f (Set.Icc c d) := ContDiff.contDiffOn hCInfinity
     have zero_on_cd: ∀ (x: ℝ), x ∈ (Set.Icc c d) → (iteratedDerivWithin interior_index f (Set.Icc c d)) x = 0 := by
@@ -520,7 +524,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     apply X_empty
   have poly_full: poly_omega = (Set.univ) := by
     exact Set.compl_empty_iff.mp X_empty
-
 
 
   sorry
