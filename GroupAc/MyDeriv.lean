@@ -7,6 +7,8 @@ variable {f: ℝ → ℝ}
 def RestrictsToPoly (f: ℝ → ℝ) (a b: ℝ) :=
   ∃ (p: Polynomial ℝ), ∀ (y: ℝ), y ∈ Set.Icc a b → f y = p.eval y
 
+-- f = λ y => p.eval y
+
 lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiffOn ℝ ⊤ f (Set.Icc a b)) (hf: ∀ (x : ℝ), (x ∈ Set.Icc a b) → (iteratedDerivWithin n f (Set.Icc a b)) x = 0): RestrictsToPoly f a b := by
   have unique_diff: UniqueDiffOn ℝ (Set.Icc a b) := by exact uniqueDiffOn_Icc a_lt_b
   have unique_diff_at : ∀ (x: ℝ), x ∈ (Set.Icc a b) → UniqueDiffWithinAt ℝ (Set.Icc a b) x := unique_diff
@@ -114,9 +116,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     apply isOpen_Ioo
 
   obtain ⟨poly_intervals, hIntervals⟩ := TopologicalSpace.IsTopologicalBasis.open_eq_sUnion Real.isTopologicalBasis_Ioo_rat poly_open
-  have poly_full: poly_intervals = ℝ := by
-    sorry
-
   have unique_diff: ∀ (x c d: ℝ), x ∈ Set.Ioo c d → UniqueDiffWithinAt ℝ (Set.Ioo c d) x := by
     exact fun x c d a ↦ uniqueDiffWithinAt_Ioo a
 
@@ -184,8 +183,35 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     have int_open: IsOpen (interior (Set.Icc a b ∩ e_n interior_index)) := by apply isOpen_interior
     obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset int_open int_nonempty
     have cont_diff_on: ContDiffOn ℝ ⊤ f (Set.Icc c d) := ContDiff.contDiffOn hCInfinity
-    have zero_on_cd: ∀ (x: ℝ), x ∈ (Set.Icc c d) → (iteratedDerivWithin interior_index f (Set.Icc c d)) x = 0 := by sorry
-    have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d interior_index c_lt_d cont_diff_on zero_on_cd
+    have zero_on_cd: ∀ (x: ℝ), x ∈ (Set.Ioo c d) → (iteratedDerivWithin interior_index f (Set.Ioo c d)) x = 0 := by
+      intro x hx
+      simp at cd_int
+      dsimp [e_n] at cd_int
+      simp only [Set.subset_def] at cd_int
+      simp only [mem_interior] at cd_int
+      simp only [Set.subset_def] at cd_int
+      simp only [Set.mem_setOf_eq] at cd_int
+      obtain ⟨t, ht⟩ := cd_int
+      specialize ht x hx
+      simp only [Set.mem_def] at ht
+      obtain ⟨other_t, h_other_t⟩ := ht
+      have iter_x: (∀ (x : ℝ), other_t x → iteratedDeriv interior_index f x = 0) := h_other_t.1
+      specialize iter_x x h_other_t.2.2
+      rw [iteratedDerivWithin]
+      rw [iteratedDeriv] at iter_x
+      have derives_eq: Set.EqOn (iteratedFDerivWithin ℝ interior_index f (Set.Ioo c d)) (iteratedFDeriv ℝ interior_index f) (Set.Ioo c d) :=
+        by apply iteratedFDerivWithin_of_isOpen interior_index (isOpen_Ioo)
+      rw [Set.EqOn] at derives_eq
+      simp
+      have deriv_within_eq_zero: iteratedFDerivWithin ℝ interior_index f (Set.Ioo c d) x (fun x ↦ 1) = 0 := by
+        specialize derives_eq hx
+        simp [derives_eq]
+        apply iter_x
+
+      exact deriv_within_eq_zero
+
+
+    have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d interior_index c_lt_d cont_diff_on sorry --zero_on_cd
     have cd_subset_omega: Set.Ioo c d ⊆ poly_omega := by
       simp [poly_omega]
       rw [Set.subset_def]
