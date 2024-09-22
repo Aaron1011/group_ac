@@ -417,6 +417,21 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         apply unique_diff x
         assumption
       rw [iteratedDerivWithin_succ unique_diff_at]
+      have deriv_x_zero: (iteratedDerivWithin n_x_int f (Set.Ioo c d)) x = 0 := by
+        apply x_zero_on_cd x hx
+
+      have deriv_k_const: iteratedDerivWithin n_x_int f (Set.Ioo c d) = λ y => 0 := by
+        ext y
+        by_cases h_mem_interval: y ∈ (Set.Ioo c d)
+        . exact x_zero_on_cd y h_mem_interval
+        .
+
+
+
+
+      rw [deriv_x_zero]
+
+
 
       have deriv_within: HasDerivWithinAt (iteratedDerivWithin n_x_int f (Set.Ioo c d)) 0 (Set.Ioo c d) x := by
         --rw [hasDerivWithinAt_iff_tendsto_slope]
