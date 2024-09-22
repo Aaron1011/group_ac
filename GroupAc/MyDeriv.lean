@@ -225,7 +225,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         exact iter_x
 
 
-    have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d interior_index c_lt_d cont_diff_on sorry --zero_on_cd
+    have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d interior_index c_lt_d cont_diff_on zero_on_cd
     have cd_subset_omega: Set.Ioo c d ⊆ poly_omega := by
       simp [poly_omega]
       rw [Set.subset_def]
@@ -389,8 +389,27 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     let x_int := (interior (X ∩ e_n n_x_int))
     have x_int_open: IsOpen x_int := by apply isOpen_interior
     obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset x_int_open x_int_nonempty
-    have x_zero_on_cd: ∀ (x: ℝ), x ∈ Set.Ioo c d → (iteratedDerivWithin n_x_int f (Set.Ioo c d)) x = 0 :=
-      by sorry
+    have x_zero_on_cd: ∀ (x: ℝ), x ∈ Set.Ioo c d → (iteratedDerivWithin n_x_int f (Set.Ioo c d)) x = 0 := by
+      dsimp [x_int] at cd_int
+      dsimp [interior, e_n] at cd_int
+      rw [Set.subset_def] at cd_int
+      intro x hx
+      specialize cd_int x hx
+      simp only [Set.mem_sUnion] at cd_int
+      obtain ⟨t, ht, hxt⟩ := cd_int
+      rw [Set.mem_setOf_eq] at ht
+      have t_subset: t ⊆ X ∩ {x | iteratedDeriv n_x_int f x = 0} := ht.2
+      apply Set.mem_of_subset_of_mem t_subset at hxt
+      apply Set.mem_of_mem_inter_right at hxt
+      rw [Set.mem_setOf_eq] at hxt
+      have eq_on: Set.EqOn (iteratedFDerivWithin ℝ n_x_int f (Set.Ioo c d)) (iteratedFDeriv ℝ n_x_int f) (Set.Ioo c d) :=
+        by apply iteratedFDerivWithin_of_isOpen n_x_int isOpen_Ioo
+      dsimp [Set.EqOn] at eq_on
+      specialize eq_on hx
+      dsimp [iteratedDeriv] at hxt
+      dsimp [iteratedDerivWithin]
+      rw [eq_on]
+      apply hxt
 
     have n_succ_deriv_zero: ∀ (x: ℝ), x ∈ Set.Ioo c d → (iteratedDerivWithin (n_x_int + 1) f (Set.Ioo c d)) x = 0 := by
       intro x hx
@@ -413,9 +432,11 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
     have cont_diff_on: ContDiffOn ℝ ⊤ f (Set.Icc c d) := ContDiff.contDiffOn hCInfinity
     have deriv_zero_on_cd_omega: ∀ (x : ℝ), x ∈ Set.Icc c d → (iteratedDerivWithin n_x_int f (Set.Icc c d)) x = 0 := by
+      intro x hx
+
       sorry
 
-    have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d n_x_int c_lt_d cont_diff_on sorry -- deriv_zero_on_cd_omega
+    have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d n_x_int c_lt_d cont_diff_on deriv_zero_on_cd_omega
     have cd_subset_omega: Set.Ioo c d ⊆ poly_omega := by
       simp [poly_omega]
       rw [Set.subset_def]
