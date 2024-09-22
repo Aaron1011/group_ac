@@ -126,16 +126,28 @@ lemma zero_deriv_implies_poly (a b : ℝ) (a_lt_b: a < b) (n: ℕ) (hd: ContDiff
         rw [n_not_supp]
         simp
 
-    have deriv_integral_eq_f_deriv: ∀ (x: ℝ), x ∈ Set.Icc a b → derivWithin (fun (y : ℝ) => Polynomial.eval y p) (Set.Icc a b) x = (derivWithin f (Set.Icc a b)) x := by
-      sorry
 
-    have eq_at_a: f a = Polynomial.sum a poly_integral := by
-      sorry
-    have f_eq_deriv_integ ral: ∀(x: ℝ), x ∈ Set.Icc a b → f x = Polynomial.eval x poly_integral := by
+    have deriv_integral_eq_poly_deeriv: ∀ (x: ℝ), x ∈ Set.Icc a b → derivWithin (fun (y : ℝ) => Polynomial.eval y poly_integral) (Set.Icc a b) x = Polynomial.eval x (Polynomial.derivative poly_integral) := by
+      intro x hx
+      apply Polynomial.derivWithin poly_integral
+      exact unique_diff_at x hx
+
+    have eq_at_a: f a = Polynomial.eval a poly_integral := by
+      simp [poly_integral, initial_poly_integral, poly_constant]
+
+    have f_eq_deriv_integral: ∀(x: ℝ), x ∈ Set.Icc a b → f x = Polynomial.eval x poly_integral := by
       intro x
       apply eq_of_derivWithin_eq f_differentiable
-      sorry
-      sorry
+      apply Polynomial.differentiableOn
+      rw [Set.EqOn]
+      intro y hy
+      rw [deriv_integral_eq_poly_deeriv]
+      rw [deriv_integral]
+      apply hp
+      apply Set.mem_Icc_of_Ico
+      exact hy
+      apply Set.mem_Icc_of_Ico
+      exact hy
       apply eq_at_a
 
     unfold RestrictsToPoly
