@@ -203,12 +203,9 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         by apply iteratedFDerivWithin_of_isOpen interior_index (isOpen_Ioo)
       rw [Set.EqOn] at derives_eq
       simp
-      have deriv_within_eq_zero: iteratedFDerivWithin ℝ interior_index f (Set.Ioo c d) x (fun x ↦ 1) = 0 := by
-        specialize derives_eq hx
-        simp [derives_eq]
-        apply iter_x
-
-      exact deriv_within_eq_zero
+      specialize derives_eq hx
+      simp [derives_eq]
+      apply iter_x
 
 
     have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d interior_index c_lt_d cont_diff_on sorry --zero_on_cd
