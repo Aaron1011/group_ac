@@ -7,6 +7,33 @@ variable {f: ℝ → ℝ}
 def RestrictsToPoly (f: ℝ → ℝ) (a b: ℝ) :=
   ∃ (p: Polynomial ℝ), ∀ (y: ℝ), y ∈ Set.Icc a b → f y = p.eval y
 
+-- variable {f' g : ℝ → ℝ }
+
+-- open Metric Set Asymptotics ContinuousLinearMap Filter
+-- open scoped Topology NNReal
+
+-- theorem eq_of_has_deriv_right_eq_open (derivf : ∀ x ∈ Set.Ioo a b, HasDerivWithinAt f (f' x) (Set.Ici x) x)
+--     (derivg : ∀ x ∈ Set.Ioo a b, HasDerivWithinAt g (f' x) (Set.Ici x) x) (fcont : ContinuousOn f (Set.Ioo a b))
+--     (gcont : ContinuousOn g (Set.Ioo a b)) (hi : ∃ p ∈ (Set.Ioo) a b, f p = g p) : ∀ y ∈ Set.Ioo a b, f y = g y := by
+--   simp only [← @sub_eq_zero _ _ (f _)] at hi ⊢
+--   obtain ⟨p, hp⟩ := hi
+--   exact hp.2 ▸ constant_of_has_deriv_right_zero (fcont.sub gcont) fun y hy => by
+--     simpa only [sub_self] using (derivf y hy).sub (derivg y hy)
+
+-- theorem eq_of_derivWithin_eq_open (a b: ℝ) (fdiff : DifferentiableOn ℝ f (Set.Ioo a b))
+--     (gdiff : DifferentiableOn ℝ g (Set.Ioo a b))
+--     (hderiv : Set.EqOn (derivWithin f (Set.Ioo a b)) (derivWithin g (Set.Ioo a b)) (Set.Ioo a b)) (hi : ∃ p ∈ Set.Icc a b, f p = g p) :
+--     ∀ y ∈ Set.Ioo a b, f y = g y := by
+--   have A : ∀ y ∈ Set.Ioo a b, HasDerivWithinAt f (derivWithin f (Set.Ioo a b) y) (Set.Ici y) y := fun y hy =>
+--     (fdiff y hy).hasDerivWithinAt.mono_of_mem (Ioo_mem_nhdsWithin_Ici hy)
+--   have B : ∀ y ∈ Set.Ioo a b, HasDerivWithinAt g (derivWithin g (Set.Ioo a b) y) (Set.Ici y) y := fun y hy =>
+--     (gdiff y hy).hasDerivWithinAt.mono_of_mem (Ioo_mem_nhdsWithin_Ici hy)
+--   exact
+--     eq_of_has_deriv_right_eq A (fun y hy => (hderiv hy).symm ▸ B y hy) fdiff.continuousOn
+--       gdiff.continuousOn hi
+
+-- end
+
 -- f = λ y => p.eval y
 
 lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiffOn ℝ ⊤ f (Set.Icc a b)) (hf: ∀ (x : ℝ), (x ∈ Set.Icc a b) → (iteratedDerivWithin n f (Set.Icc a b)) x = 0): RestrictsToPoly f a b := by
@@ -251,6 +278,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         simp only [derives_eq]
         exact iter_x
 
+
       sorry
 
     have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d interior_index c_lt_d cont_diff_on zero_on_cd
@@ -259,13 +287,20 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       rw [Set.subset_def]
       intro x hx
       simp only [Set.mem_sUnion]
-      use Set.Icc c d
-      simp
+      use Set.Ioo c_open d_open
+      simp only [Set.mem_setOf_eq]
       constructor
       dsimp [RestrictsToPoly]
       obtain ⟨p, hp⟩ := poly_on_cd
-      sorry
-      sorry
+      use c_open
+      use d_open
+      simp only [and_imp, true_and]
+      use p
+      simp at cd_int_open
+      dsimp [e_n] at cd_int_open
+
+
+
 
 
 
