@@ -352,7 +352,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
 
     have cont_diff_on: ContDiffOn ℝ ⊤ f (Set.Icc c d) := ContDiff.contDiffOn hCInfinity
-    have zero_on_cd: ∀ (x: ℝ), x ∈ (Set.Ioo c d) → (iteratedDerivWithin interior_index f (Set.Ioo c d)) x = 0 := by
+    have zero_on_cd: ∀ (x: ℝ), x ∈ (Set.Ioo c d) → (iteratedDeriv interior_index f) x = 0 := by
       intro x hx
       simp at cd_int
       dsimp [e_n] at cd_int
@@ -366,22 +366,20 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       obtain ⟨other_t, h_other_t⟩ := ht
       have iter_x: (∀ (x : ℝ), other_t x → iteratedDeriv interior_index f x = 0) := h_other_t.1
       specialize iter_x x h_other_t.2.2
-      rw [iteratedDerivWithin]
+      rw [iteratedDeriv]
       rw [iteratedDeriv] at iter_x
       have derives_eq: Set.EqOn (iteratedFDerivWithin ℝ interior_index f (Set.Ioo c d)) (iteratedFDeriv ℝ interior_index f) (Set.Ioo c d) :=
         by apply iteratedFDerivWithin_of_isOpen interior_index (isOpen_Ioo)
       rw [Set.EqOn] at derives_eq
       simp
 
-      have zero_on_open: (iteratedFDerivWithin ℝ interior_index f (Set.Ioo c d)) x (fun x ↦ 1) = 0 := by
+      have zero_on_open: (iteratedFDeriv ℝ interior_index f) x (fun x ↦ 1) = 0 := by
         simp only [derives_eq]
         specialize derives_eq hx
-        rw [derives_eq]
         exact iter_x
-
       apply zero_on_open
 
-    have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d interior_index c_lt_d sorry sorry -- cont_diff_on zero_on_cd
+    have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d interior_index c_lt_d hCInfinity zero_on_cd
     have cd_subset_omega: Set.Ioo c d ⊆ poly_omega := by
       simp [poly_omega]
       rw [Set.subset_def]
