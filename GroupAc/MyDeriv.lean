@@ -323,19 +323,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     -- TODO - we need to apply this to an entire topolgical space. We need [a, b] with the subspace topology
     obtain ⟨interior_index, int_nonempty⟩ := nonempty_interior_of_iUnion_of_closed en_intersect_closed sorry -- en_covers
     have int_open: IsOpen (interior (Set.Icc a b ∩ e_n interior_index)) := by apply isOpen_interior
-    obtain ⟨c_open, d_open, c_lt_d_open, cd_int_open⟩ := IsOpen.exists_Ioo_subset int_open int_nonempty
-    let c := c_open + ((d_open - c_open) / 4)
-    let d := d_open - ((d_open - c_open) / 4)
-    have c_lt_d: c < d := by
-      simp [c, d]
-      linarith
-
-    have cd_subset_c_open: Set.Icc c d ⊆ Set.Ioo c_open d_open := by
-      simp [c, d]
-      apply Set.Icc_subset_Ioo
-      linarith
-      simp
-      apply c_lt_d_open
+    obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset int_open int_nonempty
 
     have int_subset_a_b: interior (Set.Icc a b ∩ e_n interior_index) ⊆ Set.Icc a b := by
       rw [Set.subset_def]
@@ -347,8 +335,8 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       exact ht.1
 
 
-    have cd_int: Set.Icc c d ⊆ interior (Set.Icc a b ∩ e_n interior_index) := by
-      apply subset_trans cd_subset_c_open cd_int_open
+    --have cd_int: Set.Icc c d ⊆ interior (Set.Icc a b ∩ e_n interior_index) := by
+    --  apply subset_trans cd_subset_c_open cd_int_open
 
     -- have int_subset_ab: interior (Set.Icc a b ∩ e_n interior_index) ⊆ Set.Icc a b := by
     --   rw [Set.subset_def]
@@ -357,7 +345,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
 
     have cont_diff_on: ContDiffOn ℝ ⊤ f (Set.Icc c d) := ContDiff.contDiffOn hCInfinity
-    have zero_on_cd: ∀ (x: ℝ), x ∈ (Set.Icc c d) → (iteratedDerivWithin interior_index f (Set.Icc c d)) x = 0 := by
+    have zero_on_cd: ∀ (x: ℝ), x ∈ (Set.Ioo c d) → (iteratedDerivWithin interior_index f (Set.Ioo c d)) x = 0 := by
       intro x hx
       simp at cd_int
       dsimp [e_n] at cd_int
@@ -373,35 +361,32 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       specialize iter_x x h_other_t.2.2
       rw [iteratedDerivWithin]
       rw [iteratedDeriv] at iter_x
-      have derives_eq: Set.EqOn (iteratedFDerivWithin ℝ interior_index f (Set.Ioo c_open d_open)) (iteratedFDeriv ℝ interior_index f) (Set.Ioo c_open d_open) :=
+      have derives_eq: Set.EqOn (iteratedFDerivWithin ℝ interior_index f (Set.Ioo c d)) (iteratedFDeriv ℝ interior_index f) (Set.Ioo c d) :=
         by apply iteratedFDerivWithin_of_isOpen interior_index (isOpen_Ioo)
       rw [Set.EqOn] at derives_eq
       simp
 
-      simp only [Set.subset_def] at cd_subset_c_open
-      specialize cd_subset_c_open x hx
-      specialize derives_eq cd_subset_c_open
-
-      have zero_on_open: (iteratedFDerivWithin ℝ interior_index f (Set.Ioo c_open d_open)) x (fun x ↦ 1) = 0 := by
+      have zero_on_open: (iteratedFDerivWithin ℝ interior_index f (Set.Ioo c d)) x (fun x ↦ 1) = 0 := by
         simp only [derives_eq]
+        specialize derives_eq hx
+        rw [derives_eq]
         exact iter_x
 
-
-      sorry
+      apply zero_on_open
 
     have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d interior_index c_lt_d cont_diff_on sorry -- zero_on_cd
-    have cd_subset_omega: Set.Icc c d ⊆ poly_omega := by
+    have cd_subset_omega: Set.Ioo c d ⊆ poly_omega := by
       simp [poly_omega]
       rw [Set.subset_def]
       intro x hx
       simp only [Set.mem_sUnion]
-      use Set.Ioo c_open d_open
+      use Set.Ioo c d
       simp only [Set.mem_setOf_eq]
       constructor
       dsimp [RestrictsToPoly]
       obtain ⟨p, hp⟩ := poly_on_cd
-      use c_open
-      use d_open
+      use c
+      use d
       simp only [and_imp, true_and]
       use p
       simp at cd_int_open
