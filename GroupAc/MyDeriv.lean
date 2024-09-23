@@ -41,30 +41,81 @@ def RestrictsToPoly (f: ℝ → ℝ) (a b: ℝ) :=
 
 -- f = λ y => p.eval y
 
-lemma const_ioo_implies_endpoint (a b k: ℝ) (hlt: a ≤ b) (hc: Continuous f) (hConst: ∀ x, x ∈ (Set.Ioo a b) → f x = k) : f a = k := by
+lemma const_ioo_implies_endpoint (a b k: ℝ) (hlt: a < b) (hc: Continuous f) (hConst: ∀ x, x ∈ (Set.Ioo a b) → f x = k) : f a = k := by
   have tendsto_left: Tendsto f (𝓝[Set.Icc a b] a) (𝓝 (f a)) := by
     apply ContinuousWithinAt.tendsto (ContinuousOn.continuousWithinAt _ _)
     apply Continuous.continuousOn
     exact hc
     simp
+    exact le_of_lt hlt
+
+  have ab_subset: Set.Ioo a b ⊆ Set.Icc a b := by
+    apply Set.Ioo_subset_Icc_self
+
+  have tendsto_shrink: Tendsto f (𝓝[Set.Ioo a b] a) (𝓝 (f a)) := by
+    apply tendsto_nhdsWithin_mono_left ab_subset tendsto_left
+
+  let midpoint := a + ((b - a) / 2)
+  have midpoint_in_ioo: midpoint ∈ Set.Ioo a b := by
+    simp [Set.mem_Ioo]
+    simp [midpoint]
+    refine ⟨hlt, ?_⟩
+    linarith
+
+  have midpoint_in_icc: midpoint ∈ Set.Icc a b := by
+    exact Set.mem_Icc_of_Ioo midpoint_in_ioo
+
+  have ioo_nhds: Set.Icc a b ∈ 𝓝[Set.Icc a b] a := by
+    exact self_mem_nhdsWithin
+
+  have midpoint_k: f midpoint = k := by
+    apply hConst
+    exact midpoint_in_ioo
+
+  have k_in_self: ∀ n, n ∈ (𝓝 (k)) → k ∈ n := by
+    exact fun n a ↦ mem_of_mem_nhds a
+
+  have h2: Tendsto f (𝓝[Set.Ioo a b] a) (𝓝 (k)) := by
+    rw [Filter.tendsto_def]
+    intro s hs
+    simp [mem_nhdsWithin]
+    use Set.Ioo (a - 1) b
+    refine ⟨isOpen_Ioo, ?_, ?_⟩
+    simp
     exact hlt
+    rw [Set.subset_def]
+    intro h ⟨bad_hx, hx⟩
+    simp
+    rw [hConst]
+    exact k_in_self s hs
+    exact hx
 
-  have h2: Tendsto f (𝓝[Set.Icc a b] a) (𝓝 (k)) := by
-    sorry
-
-  have ne_bot: (𝓝[Set.Icc a b] a).NeBot := by
+  have ne_bot: (𝓝[Set.Ioo a b] a).NeBot := by
     apply IsGLB.nhdsWithin_neBot
-    apply isGLB_Icc
+    apply isGLB_Ioo
     exact hlt
-    simp [Set.nonempty_Icc]
+    simp [Set.nonempty_Ioo]
     exact hlt
 
   have h_left_eq: f a = k := by
-    apply tendsto_nhds_unique tendsto_left h2
+    apply tendsto_nhds_unique tendsto_shrink h2
 
   exact h_left_eq
 
-  -- rw [Filter.tendsto_def] at h
+
+  -- have ne_bot: (𝓝[Set.Icc a b] a).NeBot := by
+  --   apply IsGLB.nhdsWithin_neBot
+  --   apply isGLB_Icc
+  --   exact hlt
+  --   simp [Set.nonempty_Icc]
+  --   exact hlt
+
+  -- have h_left_eq: f a = k := by
+  --   apply tendsto_nhds_unique tendsto_left h2
+
+  -- exact h_left_eq
+
+  --
 
 
 
