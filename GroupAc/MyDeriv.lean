@@ -41,7 +41,7 @@ def RestrictsToPoly (f: ℝ → ℝ) (a b: ℝ) :=
 
 -- f = λ y => p.eval y
 
-lemma const_ioo_implies_endpoint (a b k: ℝ) (hlt: a < b) (hc: Continuous f) (hConst: ∀ x, x ∈ (Set.Ioo a b) → f x = k) : f a = k := by
+lemma const_ioo_implies_endpoint_left (a b k: ℝ) (hlt: a < b) (hc: Continuous f) (hConst: ∀ x, x ∈ (Set.Ioo a b) → f x = k) : f a = k := by
   have tendsto_left: Tendsto f (𝓝[Set.Icc a b] a) (𝓝 (f a)) := by
     apply ContinuousWithinAt.tendsto (ContinuousOn.continuousWithinAt _ _)
     apply Continuous.continuousOn
@@ -84,6 +84,29 @@ lemma const_ioo_implies_endpoint (a b k: ℝ) (hlt: a < b) (hc: Continuous f) (h
     apply tendsto_nhds_unique tendsto_shrink h2
 
   exact h_left_eq
+
+lemma const_ioo_implies_endpoint_right (a b k: ℝ) (hlt: a < b) (hc: Continuous f) (hConst: ∀ x, x ∈ (Set.Ioo a b) → f x = k) : f b = k := by
+  let f_swap := f ∘ (λ x: ℝ => (b + (a - x)))
+  have f_swap_const: ∀ x, x ∈ (Set.Ioo a b) → f_swap x = k := by
+    intro x hx
+    simp [f_swap]
+    apply hConst
+    simp
+    simp at hx
+    refine ⟨?_, ?_⟩
+    linarith
+    linarith
+
+  have f_swap_left: f_swap a = k := by
+    apply const_ioo_implies_endpoint_left a b k hlt _ f_swap_const
+    simp [f_swap]
+    apply Continuous.comp hc _
+    refine Continuous.add ?hf ?hg
+    exact continuous_const
+    exact continuous_sub_left a
+
+  simp [f_swap] at f_swap_left
+  exact f_swap_left
 
 lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiffOn ℝ ⊤ f (Set.Ioo a b)) (hf: ∀ (x : ℝ), (x ∈ Set.Ioo a b) → (iteratedDerivWithin n f (Set.Ioo a b)) x = 0): RestrictsToPoly f a b := by
   have unique_diff: UniqueDiffOn ℝ (Set.Ioo a b) := by exact uniqueDiffOn_Ioo a b
