@@ -55,23 +55,6 @@ lemma const_ioo_implies_endpoint (a b k: ℝ) (hlt: a < b) (hc: Continuous f) (h
   have tendsto_shrink: Tendsto f (𝓝[Set.Ioo a b] a) (𝓝 (f a)) := by
     apply tendsto_nhdsWithin_mono_left ab_subset tendsto_left
 
-  let midpoint := a + ((b - a) / 2)
-  have midpoint_in_ioo: midpoint ∈ Set.Ioo a b := by
-    simp [Set.mem_Ioo]
-    simp [midpoint]
-    refine ⟨hlt, ?_⟩
-    linarith
-
-  have midpoint_in_icc: midpoint ∈ Set.Icc a b := by
-    exact Set.mem_Icc_of_Ioo midpoint_in_ioo
-
-  have ioo_nhds: Set.Icc a b ∈ 𝓝[Set.Icc a b] a := by
-    exact self_mem_nhdsWithin
-
-  have midpoint_k: f midpoint = k := by
-    apply hConst
-    exact midpoint_in_ioo
-
   have k_in_self: ∀ n, n ∈ (𝓝 (k)) → k ∈ n := by
     exact fun n a ↦ mem_of_mem_nhds a
 
@@ -84,7 +67,7 @@ lemma const_ioo_implies_endpoint (a b k: ℝ) (hlt: a < b) (hc: Continuous f) (h
     simp
     exact hlt
     rw [Set.subset_def]
-    intro h ⟨bad_hx, hx⟩
+    intro h ⟨_, hx⟩
     simp
     rw [hConst]
     exact k_in_self s hs
@@ -101,25 +84,6 @@ lemma const_ioo_implies_endpoint (a b k: ℝ) (hlt: a < b) (hc: Continuous f) (h
     apply tendsto_nhds_unique tendsto_shrink h2
 
   exact h_left_eq
-
-
-  -- have ne_bot: (𝓝[Set.Icc a b] a).NeBot := by
-  --   apply IsGLB.nhdsWithin_neBot
-  --   apply isGLB_Icc
-  --   exact hlt
-  --   simp [Set.nonempty_Icc]
-  --   exact hlt
-
-  -- have h_left_eq: f a = k := by
-  --   apply tendsto_nhds_unique tendsto_left h2
-
-  -- exact h_left_eq
-
-  --
-
-
-
-
 
 lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiffOn ℝ ⊤ f (Set.Ioo a b)) (hf: ∀ (x : ℝ), (x ∈ Set.Ioo a b) → (iteratedDerivWithin n f (Set.Ioo a b)) x = 0): RestrictsToPoly f a b := by
   have unique_diff: UniqueDiffOn ℝ (Set.Ioo a b) := by exact uniqueDiffOn_Ioo a b
