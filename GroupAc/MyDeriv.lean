@@ -629,12 +629,12 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
 
     have cont_diff_on: ContDiffOn ℝ ⊤ f (Set.Icc c d) := ContDiff.contDiffOn hCInfinity
-    have deriv_zero_on_cd_omega: ∀ (x : ℝ), x ∈ Set.Icc c d → (iteratedDerivWithin n_x_int f (Set.Icc c d)) x = 0 := by
+    have deriv_zero_on_cd_omega: ∀ (x : ℝ), x ∈ Set.Ioo c d → (iteratedDeriv n_x_int f) x = 0 := by
       intro x hx
 
       sorry
 
-    have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d n_x_int c_lt_d sorry sorry --  cont_diff_on deriv_zero_on_cd_omega
+    have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d n_x_int c_lt_d hCInfinity deriv_zero_on_cd_omega
     have cd_subset_omega: Set.Ioo c d ⊆ poly_omega := by
       simp [poly_omega]
       rw [Set.subset_def]
