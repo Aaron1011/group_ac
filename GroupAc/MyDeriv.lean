@@ -1,6 +1,11 @@
 import Mathlib
 import Mathlib.Data.Set.Defs
 import Mathlib.Data.Set.Basic
+import Mathlib.Topology.Defs.Filter
+import Mathlib.Order.Filter.Basic
+
+open Topology
+open Filter
 
 variable {f: ℝ → ℝ}
 
@@ -36,9 +41,38 @@ def RestrictsToPoly (f: ℝ → ℝ) (a b: ℝ) :=
 
 -- f = λ y => p.eval y
 
-lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiffOn ℝ ⊤ f (Set.Icc a b)) (hf: ∀ (x : ℝ), (x ∈ Set.Icc a b) → (iteratedDerivWithin n f (Set.Icc a b)) x = 0): RestrictsToPoly f a b := by
-  have unique_diff: UniqueDiffOn ℝ (Set.Icc a b) := by exact uniqueDiffOn_Icc a_lt_b
-  have unique_diff_at : ∀ (x: ℝ), x ∈ (Set.Icc a b) → UniqueDiffWithinAt ℝ (Set.Icc a b) x := unique_diff
+lemma const_ioo_implies_endpoint (a b k: ℝ) (hlt: a ≤ b) (hc: Continuous f) (hConst: ∀ x, x ∈ (Set.Ioo a b) → f x = k) : f a = k := by
+  have tendsto_left: Tendsto f (𝓝[Set.Icc a b] a) (𝓝 (f a)) := by
+    apply ContinuousWithinAt.tendsto (ContinuousOn.continuousWithinAt _ _)
+    apply Continuous.continuousOn
+    exact hc
+    simp
+    exact hlt
+
+  have h2: Tendsto f (𝓝[Set.Icc a b] a) (𝓝 (k)) := by
+    sorry
+
+  have ne_bot: (𝓝[Set.Icc a b] a).NeBot := by
+    apply IsGLB.nhdsWithin_neBot
+    apply isGLB_Icc
+    exact hlt
+    simp [Set.nonempty_Icc]
+    exact hlt
+
+  have h_left_eq: f a = k := by
+    apply tendsto_nhds_unique tendsto_left h2
+
+  exact h_left_eq
+
+  -- rw [Filter.tendsto_def] at h
+
+
+
+
+
+lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiffOn ℝ ⊤ f (Set.Ioo a b)) (hf: ∀ (x : ℝ), (x ∈ Set.Ioo a b) → (iteratedDerivWithin n f (Set.Ioo a b)) x = 0): RestrictsToPoly f a b := by
+  have unique_diff: UniqueDiffOn ℝ (Set.Ioo a b) := by exact uniqueDiffOn_Ioo a b
+  have unique_diff_at : ∀ (x: ℝ), x ∈ (Set.Ioo a b) → UniqueDiffWithinAt ℝ (Set.Ioo a b) x := unique_diff
   induction n generalizing f with
   | zero =>
     simp only [iteratedDerivWithin_zero] at hf
@@ -49,8 +83,8 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff
     apply hf
     exact hy
   | succ k hk =>
-    have k_restrict_poly: (∀ x ∈ Set.Icc a b, iteratedDerivWithin k f (Set.Icc a b) x = 0) → RestrictsToPoly f a b := hk hd
-    have deriv_succ: ∀ (x: ℝ), x ∈ Set.Icc a b → (iteratedDerivWithin k (derivWithin f (Set.Icc a b)) (Set.Icc a b)) x = 0 := by
+    have k_restrict_poly: (∀ x ∈ Set.Ioo a b, iteratedDerivWithin k f (Set.Ioo a b) x = 0) → RestrictsToPoly f a b := hk hd
+    have deriv_succ: ∀ (x: ℝ), x ∈ Set.Ioo a b → (iteratedDerivWithin k (derivWithin f (Set.Icc a b)) (Set.Icc a b)) x = 0 := by
       intro x hx
       rw [← iteratedDerivWithin_succ']
       apply hf
