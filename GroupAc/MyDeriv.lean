@@ -217,7 +217,7 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff
       exact eq_of_sub_eq_zero deriv_minus_eq_zero_at_a
 
     have f_eq_deriv_integral: ∀(x: ℝ), x ∈ Set.Ioo a b → f x = Polynomial.eval x poly_integral := by
-      intro x
+      intro x hx
       have eq_on_icc: ∀ y ∈ Set.Icc a b, f y = poly_integral.eval y:= by
         apply eq_of_derivWithin_eq f_differentiable
         apply Polynomial.differentiableOn
@@ -226,7 +226,8 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff
         rw [deriv_integral_eq_poly_deeriv]
         rw [deriv_integral]
         by_cases y_eq_a: y = a
-        . sorry
+        . rw [y_eq_a]
+          apply deriv_eq_at_a
         . apply hp
           apply Set.eq_left_or_mem_Ioo_of_mem_Ico at hy
           simp [y_eq_a] at hy
@@ -236,7 +237,9 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff
         apply Set.mem_Icc_of_Ico
         exact hy
         apply eq_at_a
-      sorry
+      apply eq_on_icc
+      apply Set.mem_Icc_of_Ioo
+      exact hx
 
     exact ⟨poly_integral, f_eq_deriv_integral⟩
 
