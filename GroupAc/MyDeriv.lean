@@ -116,8 +116,6 @@ lemma const_ioo_implies_endpoint_right (a b k: ℝ) (hlt: a < b) (hc: Continuous
   exact f_swap_left
 
 lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff ℝ ⊤ f) (hf: ∀ (x : ℝ), (x ∈ Set.Ioo a b) → (iteratedDeriv n f) x = 0): RestrictsToPoly f a b := by
-  have unique_diff: UniqueDiffOn ℝ (Set.Icc a b) := by exact uniqueDiffOn_Icc a_lt_b
-  have unique_diff_at : ∀ (x: ℝ), x ∈ (Set.Icc a b) → UniqueDiffWithinAt ℝ (Set.Icc a b) x := unique_diff
   induction n generalizing f with
   | zero =>
     simp only [iteratedDeriv_zero] at hf
@@ -128,7 +126,6 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff
     apply hf
     exact hy
   | succ k hk =>
-    have k_restrict_poly: (∀ x ∈ Set.Ioo a b, iteratedDeriv k f x = 0) → RestrictsToPoly f a b := hk hd
     have deriv_succ: ∀ (x: ℝ), x ∈ Set.Ioo a b → (iteratedDeriv k (deriv f)) x = 0 := by
       intro x hx
       rw [← iteratedDeriv_succ']
@@ -142,18 +139,10 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff
       apply ContDiff.iterate_deriv 1
       exact hd
 
-    have deriv_continuous: Continuous (deriv f) := by
-      apply ContDiff.continuous_deriv hd
-      simp
-
     have deriv_f_poly: RestrictsToPoly (deriv f) a b := by
       apply hk
       apply contdiff_derivative
       exact deriv_succ
-
-    have f_differentiable: Differentiable ℝ f := by
-      apply ContDiff.differentiable hd
-      simp
 
     obtain ⟨p, hp⟩ := deriv_f_poly
     -- The integral of our polynomial, with the constant term set to 0
@@ -188,8 +177,8 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff
         simp
 
 
-    have deriv_integral_eq_poly_deeriv: ∀ (x: ℝ), x ∈ Set.Icc a b → deriv (fun (y : ℝ) => Polynomial.eval y poly_integral) x = Polynomial.eval x (Polynomial.derivative poly_integral) := by
-      intro x hx
+    have deriv_integral_eq_poly_deriv: ∀ (x: ℝ), x ∈ Set.Icc a b → deriv (fun (y : ℝ) => Polynomial.eval y poly_integral) x = Polynomial.eval x (Polynomial.derivative poly_integral) := by
+      intro x _
       apply Polynomial.deriv poly_integral
 
     have eq_at_a: f a = Polynomial.eval a poly_integral := by
@@ -218,7 +207,7 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff
       intro x hx
       have eq_on_icc: ∀ y ∈ Set.Icc a b, f y = poly_integral.eval y:= by
         apply @eq_of_has_deriv_right_eq _ _ _ f
-        intro q hq
+        intro q _
         have strict_deriv_at: HasStrictDerivAt f (deriv f q) q := by
           apply hd.hasStrictDerivAt
           simp
@@ -227,7 +216,7 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff
         intro q hq
         have temp_poly_deriv: HasDerivWithinAt (fun y ↦ Polynomial.eval y poly_integral) (Polynomial.eval q (Polynomial.derivative poly_integral)) (Set.Ici q) q := by
           apply Polynomial.hasDerivWithinAt
-        rw [← deriv_integral_eq_poly_deeriv] at temp_poly_deriv
+        rw [← deriv_integral_eq_poly_deriv] at temp_poly_deriv
         simp [deriv_integral] at temp_poly_deriv
         by_cases q_eq_a: q = a
         -- Case 1: q = a
