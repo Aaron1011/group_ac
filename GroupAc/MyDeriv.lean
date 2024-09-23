@@ -10,7 +10,7 @@ open Filter
 variable {f: ℝ → ℝ}
 
 def RestrictsToPoly (f: ℝ → ℝ) (a b: ℝ) :=
-  ∃ (p: Polynomial ℝ), ∀ (y: ℝ), y ∈ Set.Icc a b → f y = p.eval y
+  ∃ (p: Polynomial ℝ), ∀ (y: ℝ), y ∈ Set.Ioo a b → f y = p.eval y
 
 -- variable {f' g : ℝ → ℝ }
 
@@ -108,9 +108,9 @@ lemma const_ioo_implies_endpoint_right (a b k: ℝ) (hlt: a < b) (hc: Continuous
   simp [f_swap] at f_swap_left
   exact f_swap_left
 
-lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiffOn ℝ ⊤ f (Set.Ioo a b)) (hf: ∀ (x : ℝ), (x ∈ Set.Ioo a b) → (iteratedDerivWithin n f (Set.Ioo a b)) x = 0): RestrictsToPoly f a b := by
-  have unique_diff: UniqueDiffOn ℝ (Set.Ioo a b) := by exact uniqueDiffOn_Ioo a b
-  have unique_diff_at : ∀ (x: ℝ), x ∈ (Set.Ioo a b) → UniqueDiffWithinAt ℝ (Set.Ioo a b) x := unique_diff
+lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiffOn ℝ ⊤ f (Set.Icc a b)) (hf: ∀ (x : ℝ), (x ∈ Set.Ioo a b) → (iteratedDerivWithin n f (Set.Icc a b)) x = 0): RestrictsToPoly f a b := by
+  have unique_diff: UniqueDiffOn ℝ (Set.Icc a b) := by exact uniqueDiffOn_Icc a_lt_b
+  have unique_diff_at : ∀ (x: ℝ), x ∈ (Set.Icc a b) → UniqueDiffWithinAt ℝ (Set.Icc a b) x := unique_diff
   induction n generalizing f with
   | zero =>
     simp only [iteratedDerivWithin_zero] at hf
@@ -121,24 +121,26 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff
     apply hf
     exact hy
   | succ k hk =>
-    have k_restrict_poly: (∀ x ∈ Set.Ioo a b, iteratedDerivWithin k f (Set.Ioo a b) x = 0) → RestrictsToPoly f a b := hk hd
+    have k_restrict_poly: (∀ x ∈ Set.Ioo a b, iteratedDerivWithin k f (Set.Icc a b) x = 0) → RestrictsToPoly f a b := hk hd
     have deriv_succ: ∀ (x: ℝ), x ∈ Set.Ioo a b → (iteratedDerivWithin k (derivWithin f (Set.Icc a b)) (Set.Icc a b)) x = 0 := by
       intro x hx
       rw [← iteratedDerivWithin_succ']
       apply hf
       exact hx
       exact unique_diff
-      exact hx
+      exact Set.mem_Icc_of_Ioo hx
 
     --have contdiff_derivative: ContDiff ℝ ⊤ (iteratedDerivWithin k f (Set.Icc a b)) := by
     --  apply ContDiff.of_succ
-
-
 
     have contdiffon_derivative: ContDiffOn ℝ ⊤ (derivWithin f (Set.Icc a b)) (Set.Icc a b) := by
       rw [contDiffOn_top_iff_derivWithin] at hd
       exact hd.2
       exact unique_diff
+
+    have deriv_continuous: ContinuousOn (derivWithin f (Set.Icc a b)) (Set.Icc a b) := by
+      apply ContDiffOn.continuousOn contdiffon_derivative
+
     have deriv_f_poly: RestrictsToPoly (derivWithin f (Set.Icc a b)) a b := by
       apply hk
       apply contdiffon_derivative
@@ -190,20 +192,34 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff
     have eq_at_a: f a = Polynomial.eval a poly_integral := by
       simp [poly_integral, initial_poly_integral, poly_constant]
 
-    have f_eq_deriv_integral: ∀(x: ℝ), x ∈ Set.Icc a b → f x = Polynomial.eval x poly_integral := by
+    have deriv_eq_at_a: (derivWithin f (Set.Icc a b)) a = Polynomial.eval a p := by
+      apply @const_ioo_implies_endpoint_left (derivWithin f (Set.Icc a b)) a b
+      exact a_lt_b
+      apply deriv_continuous
+
+
+
+    have f_eq_deriv_integral: ∀(x: ℝ), x ∈ Set.Ioo a b → f x = Polynomial.eval x poly_integral := by
       intro x
-      apply eq_of_derivWithin_eq f_differentiable
-      apply Polynomial.differentiableOn
-      rw [Set.EqOn]
-      intro y hy
-      rw [deriv_integral_eq_poly_deeriv]
-      rw [deriv_integral]
-      apply hp
-      apply Set.mem_Icc_of_Ico
-      exact hy
-      apply Set.mem_Icc_of_Ico
-      exact hy
-      apply eq_at_a
+      have eq_on_icc: ∀ y ∈ Set.Icc a b, f y = poly_integral.eval y:= by
+        apply eq_of_derivWithin_eq f_differentiable
+        apply Polynomial.differentiableOn
+        rw [Set.EqOn]
+        intro y hy
+        rw [deriv_integral_eq_poly_deeriv]
+        rw [deriv_integral]
+        by_cases y_eq_a: y = a
+        . sorry
+        . apply hp
+          apply Set.eq_left_or_mem_Ioo_of_mem_Ico at hy
+          simp [y_eq_a] at hy
+          simp
+          exact hy
+
+        apply Set.mem_Icc_of_Ico
+        exact hy
+        apply eq_at_a
+      sorry
 
     exact ⟨poly_integral, f_eq_deriv_integral⟩
 
