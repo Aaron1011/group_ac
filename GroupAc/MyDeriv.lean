@@ -389,7 +389,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
       sorry
 
-    have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d interior_index c_lt_d cont_diff_on zero_on_cd
+    have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d interior_index c_lt_d cont_diff_on sorry -- zero_on_cd
     have cd_subset_omega: Set.Icc c d ⊆ poly_omega := by
       simp [poly_omega]
       rw [Set.subset_def]
@@ -406,6 +406,8 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       use p
       simp at cd_int_open
       dsimp [e_n] at cd_int_open
+      sorry
+      sorry
 
 
 
@@ -654,7 +656,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
       sorry
 
-    have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d n_x_int c_lt_d cont_diff_on deriv_zero_on_cd_omega
+    have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d n_x_int c_lt_d cont_diff_on sorry -- deriv_zero_on_cd_omega
     have cd_subset_omega: Set.Ioo c d ⊆ poly_omega := by
       simp [poly_omega]
       rw [Set.subset_def]
