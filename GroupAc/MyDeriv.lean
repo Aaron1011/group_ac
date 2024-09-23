@@ -217,22 +217,34 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff
     have f_eq_deriv_integral: ∀(x: ℝ), x ∈ Set.Ioo a b → f x = Polynomial.eval x poly_integral := by
       intro x hx
       have eq_on_icc: ∀ y ∈ Set.Icc a b, f y = poly_integral.eval y:= by
-        apply eq_of_has_deriv_right_eq
-        . intro q hq
-          have strict_deriv_at: HasStrictDerivAt f (deriv f q) q := by
-            apply hd.hasStrictDerivAt
-            simp
-          apply HasDerivAt.hasDerivWithinAt (HasStrictDerivAt.hasDerivAt strict_deriv_at)
-        . intro q hq
-          rw [hp]
-          have temp_poly_deriv: HasDerivWithinAt (fun y ↦ Polynomial.eval y poly_integral) (Polynomial.eval q (Polynomial.derivative poly_integral)) (Set.Ici q) q := by
-            apply Polynomial.hasDerivWithinAt
-          rw [← deriv_integral_eq_poly_deeriv] at temp_poly_deriv
-          simp [deriv_integral] at temp_poly_deriv
-          apply temp_poly_deriv
-          exact Set.mem_Icc_of_Ico hq
-          sorry
+        apply @eq_of_has_deriv_right_eq _ _ _ f
+        intro q hq
+        have strict_deriv_at: HasStrictDerivAt f (deriv f q) q := by
+          apply hd.hasStrictDerivAt
+          simp
+        apply HasDerivAt.hasDerivWithinAt (HasStrictDerivAt.hasDerivAt strict_deriv_at)
 
+        intro q hq
+        have temp_poly_deriv: HasDerivWithinAt (fun y ↦ Polynomial.eval y poly_integral) (Polynomial.eval q (Polynomial.derivative poly_integral)) (Set.Ici q) q := by
+          apply Polynomial.hasDerivWithinAt
+        rw [← deriv_integral_eq_poly_deeriv] at temp_poly_deriv
+        simp [deriv_integral] at temp_poly_deriv
+        by_cases q_eq_a: q = a
+        -- Case 1: q = a
+        rw [q_eq_a]
+        rw [deriv_eq_at_a]
+        rw [← deriv_integral]
+        apply Polynomial.hasDerivWithinAt
+        -- Case 2: q ≠ a
+        rw [hp]
+        rw [← deriv_integral]
+        apply Polynomial.hasDerivWithinAt
+        apply Set.eq_left_or_mem_Ioo_of_mem_Ico at hq
+        simp [q_eq_a] at hq
+        simp
+        exact hq
+
+        apply Set.mem_Icc_of_Ico hq
         apply Continuous.continuousOn
         apply ContDiff.continuous hd
         apply Polynomial.continuousOn
@@ -240,27 +252,18 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff
 
 
 
-        -- apply Polynomial.differentiableOn
-        -- rw [Set.EqOn]
-        -- intro y hy
-        -- rw [deriv_integral_eq_poly_deeriv]
-        -- rw [deriv_integral]
-        -- by_cases y_eq_a: y = a
-        -- . rw [y_eq_a]
-        --   apply eq_of_has_deriv_right_eq
-        --   intro z hz
+        --apply Polynomial.hasStrictDerivAt
+        --apply HasDerivAt.hasDerivWithinAt (HasStrictDerivAt.hasDerivAt strict_deriv_at)
 
+        -- exact Set.mem_Icc_of_Ico hq
 
-        -- . apply hp
-        --   apply Set.eq_left_or_mem_Ioo_of_mem_Ico at hy
-        --   simp [y_eq_a] at hy
-        --   simp
-        --   exact hy
-
-
-        -- apply Set.mem_Icc_of_Ico
-        -- exact hy
+        -- intro q hq
+        -- rw [hp]
+        -- apply Continuous.continuousOn
+        -- apply ContDiff.continuous hd
+        -- apply Polynomial.continuousOn
         -- apply eq_at_a
+
       apply eq_on_icc
       apply Set.mem_Icc_of_Ioo
       exact hx
