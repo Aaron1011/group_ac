@@ -385,8 +385,10 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
     have cd_subet_omega_ab: Set.Icc c d ⊆ (Set.Icc a b) ∩ poly_omega := by
       apply Set.subset_inter
-      apply subset_trans cd_int int_subset_a_b
-      apply cd_subset_omega
+      --apply subset_trans cd_int int_subset_a_b
+      --apply cd_subset_omega
+      sorry
+      sorry
 
     -- rw [Set.nonempty_def]
 
