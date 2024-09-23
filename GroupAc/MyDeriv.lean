@@ -12,34 +12,6 @@ variable {f: ℝ → ℝ}
 def RestrictsToPoly (f: ℝ → ℝ) (a b: ℝ) :=
   ∃ (p: Polynomial ℝ), ∀ (y: ℝ), y ∈ Set.Ioo a b → f y = p.eval y
 
--- variable {f' g : ℝ → ℝ }
-
--- open Metric Set Asymptotics ContinuousLinearMap Filter
--- open scoped Topology NNReal
-
--- theorem eq_of_has_deriv_right_eq_open (derivf : ∀ x ∈ Set.Ioo a b, HasDerivWithinAt f (f' x) (Set.Ici x) x)
---     (derivg : ∀ x ∈ Set.Ioo a b, HasDerivWithinAt g (f' x) (Set.Ici x) x) (fcont : ContinuousOn f (Set.Ioo a b))
---     (gcont : ContinuousOn g (Set.Ioo a b)) (hi : ∃ p ∈ (Set.Ioo) a b, f p = g p) : ∀ y ∈ Set.Ioo a b, f y = g y := by
---   simp only [← @sub_eq_zero _ _ (f _)] at hi ⊢
---   obtain ⟨p, hp⟩ := hi
---   exact hp.2 ▸ constant_of_has_deriv_right_zero (fcont.sub gcont) fun y hy => by
---     simpa only [sub_self] using (derivf y hy).sub (derivg y hy)
-
--- theorem eq_of_derivWithin_eq_open (a b: ℝ) (fdiff : DifferentiableOn ℝ f (Set.Ioo a b))
---     (gdiff : DifferentiableOn ℝ g (Set.Ioo a b))
---     (hderiv : Set.EqOn (derivWithin f (Set.Ioo a b)) (derivWithin g (Set.Ioo a b)) (Set.Ioo a b)) (hi : ∃ p ∈ Set.Icc a b, f p = g p) :
---     ∀ y ∈ Set.Ioo a b, f y = g y := by
---   have A : ∀ y ∈ Set.Ioo a b, HasDerivWithinAt f (derivWithin f (Set.Ioo a b) y) (Set.Ici y) y := fun y hy =>
---     (fdiff y hy).hasDerivWithinAt.mono_of_mem (Ioo_mem_nhdsWithin_Ici hy)
---   have B : ∀ y ∈ Set.Ioo a b, HasDerivWithinAt g (derivWithin g (Set.Ioo a b) y) (Set.Ici y) y := fun y hy =>
---     (gdiff y hy).hasDerivWithinAt.mono_of_mem (Ioo_mem_nhdsWithin_Ici hy)
---   exact
---     eq_of_has_deriv_right_eq A (fun y hy => (hderiv hy).symm ▸ B y hy) fdiff.continuousOn
---       gdiff.continuousOn hi
-
--- end
-
--- f = λ y => p.eval y
 
 lemma const_ioo_implies_endpoint_left (a b k: ℝ) (hlt: a < b) (hc: ContinuousOn f (Set.Icc a b)) (hConst: ∀ x, x ∈ (Set.Ioo a b) → f x = k) : f a = k := by
   have tendsto_left: Tendsto f (𝓝[Set.Icc a b] a) (𝓝 (f a)) := by
@@ -131,9 +103,6 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff
       rw [← iteratedDeriv_succ']
       apply hf
       exact hx
-
-    --have contdiff_derivative: ContDiff ℝ ⊤ (iteratedDerivWithin k f (Set.Icc a b)) := by
-    --  apply ContDiff.of_succ
 
     have contdiff_derivative: ContDiff ℝ ⊤ (deriv f) := by
       apply ContDiff.iterate_deriv 1
@@ -238,20 +207,6 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff
         apply ContDiff.continuous hd
         apply Polynomial.continuousOn
         apply eq_at_a
-
-
-
-        --apply Polynomial.hasStrictDerivAt
-        --apply HasDerivAt.hasDerivWithinAt (HasStrictDerivAt.hasDerivAt strict_deriv_at)
-
-        -- exact Set.mem_Icc_of_Ico hq
-
-        -- intro q hq
-        -- rw [hp]
-        -- apply Continuous.continuousOn
-        -- apply ContDiff.continuous hd
-        -- apply Polynomial.continuousOn
-        -- apply eq_at_a
 
       apply eq_on_icc
       apply Set.mem_Icc_of_Ioo
