@@ -199,12 +199,22 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff
     have eq_at_a: f a = Polynomial.eval a poly_integral := by
       simp [poly_integral, initial_poly_integral, poly_constant]
 
-    have deriv_eq_at_a: (derivWithin f (Set.Icc a b)) a = Polynomial.eval a p := by
-      apply @const_ioo_implies_endpoint_left (derivWithin f (Set.Icc a b)) a b
-      exact a_lt_b
+    have deriv_minus_is_const: ∀y, y ∈ Set.Ioo a b → (derivWithin f (Set.Icc a b) y) - p.eval y = 0 := by
+      intro y hy
+      rw [hp]
+      simp
+      exact hy
+
+    have deriv_minus_eq_zero_at_a: (derivWithin f (Set.Icc a b)) a - p.eval a = 0 := by
+      apply @const_ioo_implies_endpoint_left (λ y => (derivWithin f (Set.Icc a b) y) - p.eval y)
+      apply a_lt_b
+      apply ContinuousOn.sub
       apply deriv_continuous
+      exact Polynomial.continuousOn_aeval p
+      apply deriv_minus_is_const
 
-
+    have deriv_eq_at_a: (derivWithin f (Set.Icc a b)) a = Polynomial.eval a p := by
+      exact eq_of_sub_eq_zero deriv_minus_eq_zero_at_a
 
     have f_eq_deriv_integral: ∀(x: ℝ), x ∈ Set.Ioo a b → f x = Polynomial.eval x poly_integral := by
       intro x
