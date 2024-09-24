@@ -629,6 +629,69 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
   have poly_full: poly_omega = (Set.univ) := by
     exact Set.compl_empty_iff.mp X_empty
 
+  -- TODO: use `AnalyticOn.eval_polynomial` and the identity theorem `AnalyticOn.eq_of_frequently_eq`
+  -- to show that since f is a polynomial on that interval, it must be a polynomial everywhere
+  -- Can we just get rid of most of the proof once we have this interval?
+
+  -- NO - we only know that f is C^∞ , so we can't assume that it's analaytic
+  -- instead:
+
+  have is_connected: IsConnected poly_omega := by
+    rw [poly_full]
+    exact isConnected_univ
+  have poly_omega_preconnected: IsPreconnected poly_omega := by
+    rw [IsConnected] at is_connected
+    exact is_connected.2
+
+  let poly_omega_sets := { i | ∃ (a b : ℝ ), i = Set.Ioo a b ∧ RestrictsToPoly f a b }
+  have poly_omega_nonempty: poly_omega.Nonempty := by
+    rw [poly_full]
+    exact Set.univ_nonempty
+
+  obtain ⟨s, hs, hs_nonempty⟩ := Set.nonempty_sUnion.mp poly_omega_nonempty
+  have s_open: IsOpen s := by
+    simp only [Set.mem_setOf_eq] at hs
+    obtain ⟨a, b, h, h'⟩ := hs
+    rw [h]
+    apply isOpen_Ioo
+
+  have is_singleton: ∀ r ∈ poly_omega_sets, r = s := by
+    by_contra!
+    let other_sets := poly_omega_sets \ {s}
+    have other_sets_nonempty: other_sets.Nonempty := by
+      rw [Set.nonempty_def]
+      obtain ⟨r, hr, hr_nonempty⟩ := this
+      use r
+      simp [other_sets]
+      exact ⟨hr, hr_nonempty⟩
+
+    have union_open: IsOpen (Set.sUnion other_sets) := by
+      apply isOpen_sUnion
+      intro t ht
+      simp [other_sets] at ht
+      simp [poly_omega_sets] at ht
+      obtain ⟨⟨t_a, t_b, t_eq_ioo, _⟩, _⟩ := ht
+      rw [t_eq_ioo]
+      apply isOpen_Ioo
+
+    let poly_omega_new: poly_omega = s ∪ Set.sUnion other_sets := by
+      sorry
+
+    rw [IsPreconnected] at poly_omega_preconnected
+
+    have omega_subset: poly_omega ⊆ s ∪ ⋃₀ other_sets := by
+      rw [poly_omega_new]
+
+    have poly_omega_s_nonempty: (poly_omega ∩ s).Nonempty := by
+      sorry
+
+    have poly_omega_other_s_nonempty: (poly_omega ∩ ⋃₀ other_sets).Nonempty := by
+      sorry
+
+    specialize poly_omega_preconnected s (Set.sUnion other_sets) s_open union_open omega_subset poly_omega_s_nonempty poly_omega_other_s_nonempty
+    apply Set.Nonempty.right at poly_omega_preconnected
+    contradiction
+
 
   sorry
 
