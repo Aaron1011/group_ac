@@ -643,7 +643,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     rw [IsConnected] at is_connected
     exact is_connected.2
 
-  let poly_omega_sets := { i | ∃ (a b : ℝ ), i = Set.Ioo a b ∧ RestrictsToPoly f a b }
   have poly_omega_nonempty: poly_omega.Nonempty := by
     rw [poly_full]
     exact Set.univ_nonempty
@@ -655,9 +654,9 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     rw [h]
     apply isOpen_Ioo
 
-  have is_singleton: ∀ r ∈ poly_omega_sets, r = s := by
+  have is_singleton: ∀ r ∈ poly_intervals, r = s := by
     by_contra!
-    let other_sets := poly_omega_sets \ {s}
+    let other_sets := poly_intervals \ {s}
     have other_sets_nonempty: other_sets.Nonempty := by
       rw [Set.nonempty_def]
       obtain ⟨r, hr, hr_nonempty⟩ := this
@@ -669,9 +668,10 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       apply isOpen_sUnion
       intro t ht
       simp [other_sets] at ht
-      simp [poly_omega_sets] at ht
-      obtain ⟨⟨t_a, t_b, t_eq_ioo, _⟩, _⟩ := ht
-      rw [t_eq_ioo]
+      have h_new := by apply Set.mem_of_mem_of_subset ht.1 hIntervals.1
+      simp [Set.mem_iUnion] at h_new
+      obtain ⟨tLeft, tRight, t_left_right, t_ioo⟩ := h_new
+      simp [t_ioo]
       apply isOpen_Ioo
 
     let poly_omega_new: poly_omega = s ∪ Set.sUnion other_sets := by
@@ -690,10 +690,17 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
     specialize poly_omega_preconnected s (Set.sUnion other_sets) s_open union_open omega_subset poly_omega_s_nonempty poly_omega_other_s_nonempty
     apply Set.Nonempty.right at poly_omega_preconnected
-    contradiction
+    sorry
 
 
-  sorry
+  have poly_interval_s: poly_intervals = {s} := by
+    sorry
+
+  have s_eq_r: s = poly_omega := by
+    sorry
+
+  simp [poly_full] at s_eq_r
+  
 
     --apply is_closed_iff_forall_subset_is_closed.mp (en_closed k)
     --apply Set.Icc_subset_Icc
