@@ -406,7 +406,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         simp [Set.mem_Ioo] at x_in_gh
         exact x_in_gh.2
 
-      have _: ∀ y: ℝ, y ∈ (Set.Ioo g x) → y ∈ poly_omega := by
+      have left_y_omega: ∀ y: ℝ, y ∈ (Set.Ioo g x) → y ∈ poly_omega := by
         intro y hy
         have y_neq_x: y ≠ x := by
           simp [Set.mem_Ioo] at hy
@@ -428,8 +428,28 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         simp at y_notin_x
         exact y_notin_x
 
-      have _: ∀ y: ℝ, y ∈ (Set.Ioo x h) → y ∈ poly_omega := by
-        sorry
+      -- TODO - can we do something like `wlog` to combine this with the above 'g x' case?
+      have right_y_omega: ∀ y: ℝ, y ∈ (Set.Ioo x h) → y ∈ poly_omega := by
+        intro y hy
+        have y_neq_x: y ≠ x := by
+          simp [Set.mem_Ioo] at hy
+          linarith
+        have y_in_u: y ∈ u := by
+          apply gh_in_u
+          simp
+          simp at hy
+          refine ⟨?_, hy.2⟩
+          linarith
+
+        have y_notin_x: y ∉ X := by
+          specialize hu_singleton y y_in_u
+          rw [← not_imp_not] at hu_singleton
+          simp at y_neq_x
+          apply hu_singleton y_neq_x
+
+        rw [Set.mem_compl_iff] at y_notin_x
+        simp at y_notin_x
+        exact y_notin_x
 
       -- TODO - get this intervals from the fact that x is an isolated point
       have _: (Set.Ioo g x) ⊆ poly_omega := by sorry
