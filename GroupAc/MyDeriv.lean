@@ -395,8 +395,8 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       obtain ⟨x, ⟨x_in, x_not_acc⟩⟩ := this
       rw [accPt_iff_nhds] at x_not_acc
       simp at x_not_acc
-      obtain ⟨u, hu⟩ := x_not_acc
-      obtain ⟨g, h, x_in_gh, gh_in_u⟩ := mem_nhds_iff_exists_Ioo_subset.mp hu.1
+      obtain ⟨u, hu_neighbor, hu_singleton⟩ := x_not_acc
+      obtain ⟨g, h, x_in_gh, gh_in_u⟩ := mem_nhds_iff_exists_Ioo_subset.mp hu_neighbor
 
       have g_lt_x: g < x := by
         simp [Set.mem_Ioo] at x_in_gh
@@ -407,7 +407,26 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         exact x_in_gh.2
 
       have _: ∀ y: ℝ, y ∈ (Set.Ioo g x) → y ∈ poly_omega := by
-        sorry
+        intro y hy
+        have y_neq_x: y ≠ x := by
+          simp [Set.mem_Ioo] at hy
+          linarith
+        have y_in_u: y ∈ u := by
+          apply gh_in_u
+          simp
+          simp at hy
+          refine ⟨hy.1, ?_⟩
+          linarith
+
+        have y_notin_x: y ∉ X := by
+          specialize hu_singleton y y_in_u
+          rw [← not_imp_not] at hu_singleton
+          simp at y_neq_x
+          apply hu_singleton y_neq_x
+
+        rw [Set.mem_compl_iff] at y_notin_x
+        simp at y_notin_x
+        exact y_notin_x
 
       have _: ∀ y: ℝ, y ∈ (Set.Ioo x h) → y ∈ poly_omega := by
         sorry
@@ -700,6 +719,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     sorry
 
   simp [poly_full] at s_eq_r
+
   sorry
 
 
