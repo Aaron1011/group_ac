@@ -700,7 +700,8 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     sorry
 
   simp [poly_full] at s_eq_r
-  
+  sorry
+
 
     --apply is_closed_iff_forall_subset_is_closed.mp (en_closed k)
     --apply Set.Icc_subset_Icc
