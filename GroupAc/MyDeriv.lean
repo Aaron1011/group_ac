@@ -271,9 +271,28 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       simp
       linarith
 
+    have ab_subspace_enk_eq : ∀ k: ℕ, ({x : ab_subspace | x.1 ∈ (e_n k)}) = (Set.Icc a b) ∩ e_n k := by
+      intro k
+      ext p
+      refine ⟨?_, ?_⟩
+      intro p_in_val
+      simp at p_in_val
+      simp
+      refine ⟨p_in_val.2, p_in_val.1⟩
+
+      intro p_in_intersect
+      simp
+      simp at p_in_intersect
+      exact ⟨p_in_intersect.2, p_in_intersect.1⟩
+
 
     have en_closed_subtype: ∀ k: ℕ, IsClosed ({x : ab_subspace | x.1 ∈ e_n k}) := by
+      intro k
+      specialize ab_subspace_enk_eq k
       sorry
+
+
+
 
 
     have en_intersect_closed: ∀ k: ℕ , IsClosed (X := ab_subspace) ((Set.Icc ⟨a, a_in_subtype⟩ ⟨b, b_in_subtype⟩) ∩ {x: { x: ℝ // x ∈ Set.Icc a b } | x.1 ∈ e_n k }) := by
@@ -338,6 +357,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
     --obtain ⟨interior_index, int_nonempty⟩ := @nonempty_interior_of_iUnion_of_closed (Set.Icc a b) _ _ _ _ _ _ en_intersect_closed en_covers
     -- TODO - we need to apply this to an entire topolgical space. We need [a, b] with the subspace topology
+    -- Apply Baire category theorem
     obtain ⟨interior_index, int_nonempty⟩ := nonempty_interior_of_iUnion_of_closed en_intersect_closed en_covers.symm
     have int_open: IsOpen (interior ({x: ab_subspace | x.1 ∈ Set.Icc a b ∩ e_n interior_index})) := by apply isOpen_interior
     obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset int_open int_nonempty
@@ -596,6 +616,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     by_contra!
 
     rw [eq_comm] at x_union_en
+    -- Apply baire category theorem again
     obtain ⟨n_x_int, x_int_nonempty⟩ := nonempty_interior_of_iUnion_of_closed x_intersect_closed en_cov_univ_set_x
     let x_int := (interior (X ∩ e_n n_x_int))
     have x_int_open: IsOpen x_int := by apply isOpen_interior
