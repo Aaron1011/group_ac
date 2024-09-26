@@ -451,6 +451,17 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         simp at y_notin_x
         exact y_notin_x
 
+      have left_subset_omega: Set.Ioo g x ⊆ poly_omega := by
+        rw [Set.subset_def]
+        apply left_y_omega
+
+      have right_subset_omega: Set.Ioo x h ⊆ poly_omega := by
+        rw [Set.subset_def]
+        apply right_y_omega
+
+      -- TODO we need to have poly_omega as a union of disjoint open intervals
+      --obtain ⟨leftPoly, h_leftPoly⟩ := left_subset_omega
+
       -- TODO - get this intervals from the fact that x is an isolated point
       have _: (Set.Ioo g x) ⊆ poly_omega := by sorry
       have _: (Set.Ioo x h) ⊆ poly_omega := by sorry
