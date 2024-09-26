@@ -283,10 +283,10 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       apply en_closed_subtype k
 
 
-    have en_covers: (Set.Icc a b) = Set.iUnion fun j => ((e_n j) ∩ Set.Icc a b) := by
+    have en_covers: (@Set.univ ab_subspace) = Set.iUnion fun j => (Set.Icc ⟨a, a_in_subtype⟩ ⟨b, b_in_subtype⟩ ∩ ({x: ab_subspace | x.1 ∈ e_n j})) := by
       ext p
       obtain ⟨n, hn⟩ := hf p
-      have p_in_en: p ∈ (e_n n) := by
+      have p_in_en: p.1 ∈ (e_n n) := by
         simp only [e_n]
         simp
         exact hn
@@ -299,16 +299,20 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       constructor
       -- first case
       intro p_in_interval
-      have p_in_intersect: p ∈ (e_n n) ∩ Set.Icc a b := by
+      have p_in_intersect: p.1 ∈ (e_n n) ∩ Set.Icc a b := by
         apply Set.mem_inter
         exact p_in_en
-        exact p_in_interval
+        obtain ⟨real_p, hp⟩ := p
+        exact hp
+
 
       simp only [Set.mem_iUnion]
-      exact ⟨n, p_in_intersect⟩
+      use n
       -- second case
 
       simp
+      sorry
+      sorry
 
     have nonempty: (Set.Icc a b).Nonempty := by
       rw [Set.nonempty_Icc]
@@ -330,7 +334,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
     --obtain ⟨interior_index, int_nonempty⟩ := @nonempty_interior_of_iUnion_of_closed (Set.Icc a b) _ _ _ _ _ _ en_intersect_closed en_covers
     -- TODO - we need to apply this to an entire topolgical space. We need [a, b] with the subspace topology
-    obtain ⟨interior_index, int_nonempty⟩ := nonempty_interior_of_iUnion_of_closed en_intersect_closed sorry -- en_covers
+    obtain ⟨interior_index, int_nonempty⟩ := nonempty_interior_of_iUnion_of_closed en_intersect_closed en_covers.symm
     have int_open: IsOpen (interior ({x: ab_subspace | x.1 ∈ Set.Icc a b ∩ e_n interior_index})) := by apply isOpen_interior
     obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset int_open int_nonempty
 
