@@ -260,12 +260,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     --have ab_topology: TopologicalSpace { x: ℝ // x ∈ Set.Icc a b } := by
     --  exact instTopologicalSpaceSubtype
 
-    have ab_proper: ProperSpace  { x: ℝ // x ∈ Set.Icc a b } := by
-      exact proper_of_compact
-
-    have ab_local: LocallyCompactSpace { x: ℝ // x ∈ Set.Icc a b } := by
-      apply @locally_compact_of_proper _ _ ab_proper
-
+    let ab_subspace :=  { x: ℝ // x ∈ Set.Icc a b }
 
     have a_in_subtype: a ∈ Set.Icc a b := by
       simp
@@ -277,11 +272,11 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       linarith
 
 
-    have en_closed_subtype: ∀ k: ℕ, IsClosed ({x : { x: ℝ // x ∈ Set.Icc a b } | x.1 ∈ e_n k}) := by
+    have en_closed_subtype: ∀ k: ℕ, IsClosed ({x : ab_subspace | x.1 ∈ e_n k}) := by
       sorry
 
 
-    have en_intersect_closed: ∀ k: ℕ , IsClosed (X := { x: ℝ // x ∈ Set.Icc a b }) ((Set.Icc ⟨a, a_in_subtype⟩ ⟨b, b_in_subtype⟩) ∩ {x: { x: ℝ // x ∈ Set.Icc a b } | x.1 ∈ e_n k }) := by
+    have en_intersect_closed: ∀ k: ℕ , IsClosed (X := ab_subspace) ((Set.Icc ⟨a, a_in_subtype⟩ ⟨b, b_in_subtype⟩) ∩ {x: { x: ℝ // x ∈ Set.Icc a b } | x.1 ∈ e_n k }) := by
       intro k
       apply IsClosed.inter
       apply isClosed_Icc
@@ -326,12 +321,14 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       exact Set.nonempty_iff_ne_empty.mp nonempty
 
 
+    have nontrivial_ab: Nontrivial ab_subspace := by
+      sorry
 
 
     --obtain ⟨interior_index, int_nonempty⟩ := @nonempty_interior_of_iUnion_of_closed (Set.Icc a b) _ _ _ _ _ _ en_intersect_closed en_covers
     -- TODO - we need to apply this to an entire topolgical space. We need [a, b] with the subspace topology
     obtain ⟨interior_index, int_nonempty⟩ := nonempty_interior_of_iUnion_of_closed en_intersect_closed sorry -- en_covers
-    have int_open: IsOpen (interior (Set.Icc a b ∩ e_n interior_index)) := by apply isOpen_interior
+    have int_open: IsOpen (interior ({x: ab_subspace | x.1 ∈ Set.Icc a b ∩ e_n interior_index})) := by apply isOpen_interior
     obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset int_open int_nonempty
 
     have int_subset_a_b: interior (Set.Icc a b ∩ e_n interior_index) ⊆ Set.Icc a b := by
@@ -345,7 +342,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
 
     have cont_diff_on: ContDiffOn ℝ ⊤ f (Set.Icc c d) := ContDiff.contDiffOn hCInfinity
-    have zero_on_cd: ∀ (x: ℝ), x ∈ (Set.Ioo c d) → (iteratedDeriv interior_index f) x = 0 := by
+    have zero_on_cd: ∀ (x: ℝ), x ∈ (Set.Ioo c.1 d.1) → (iteratedDeriv interior_index f) x = 0 := by
       intro x hx
       simp at cd_int
       sorry
@@ -375,7 +372,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       -- apply zero_on_open
 
     have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d interior_index c_lt_d hCInfinity zero_on_cd
-    have cd_subset_omega: Set.Ioo c d ⊆ poly_omega := by
+    have cd_subset_omega: Set.Ioo c.1 d.1 ⊆ poly_omega := by
       simp [poly_omega]
       rw [Set.subset_def]
       intro x hx
@@ -392,7 +389,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       simp at cd_int
       exact hx
 
-    have cd_subet_omega_ab: Set.Icc c d ⊆ (Set.Icc a b) ∩ poly_omega := by
+    have cd_subet_omega_ab: Set.Icc c.1 d.1 ⊆ (Set.Icc a b) ∩ poly_omega := by
       apply Set.subset_inter
       --apply subset_trans cd_int int_subset_a_b
       --apply cd_subset_omega
@@ -418,7 +415,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     rw [Set.nonempty_def] at cd_nonempty
     obtain ⟨elem_cd, h_elem_cd⟩ := cd_nonempty
 
-    have elem_target: elem_cd ∈ (Set.Icc a b) ∩ poly_omega := by
+    have elem_target: elem_cd.1 ∈ (Set.Icc a b) ∩ poly_omega := by
       rw [Set.subset_def] at cd_subet_omega_ab
       apply cd_subet_omega_ab elem_cd _
       exact h_elem_cd
