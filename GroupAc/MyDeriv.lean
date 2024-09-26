@@ -322,7 +322,10 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
 
     have nontrivial_ab: Nontrivial ab_subspace := by
-      sorry
+      rw [nontrivial_iff]
+      use ⟨a, a_in_subtype⟩
+      use ⟨b, b_in_subtype⟩
+      exact ne_of_lt a_lt_b
 
 
     --obtain ⟨interior_index, int_nonempty⟩ := @nonempty_interior_of_iUnion_of_closed (Set.Icc a b) _ _ _ _ _ _ en_intersect_closed en_covers
