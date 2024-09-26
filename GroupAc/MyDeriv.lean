@@ -7,11 +7,11 @@ import Mathlib.Order.Filter.Basic
 open Topology
 open Filter
 
+
 variable {f: ℝ → ℝ}
 
 def RestrictsToPoly (f: ℝ → ℝ) (a b: ℝ) :=
   ∃ (p: Polynomial ℝ), ∀ (y: ℝ), y ∈ Set.Ioo a b → f y = p.eval y
-
 
 lemma const_ioo_implies_endpoint_left (a b k: ℝ) (hlt: a < b) (hc: ContinuousOn f (Set.Icc a b)) (hConst: ∀ x, x ∈ (Set.Ioo a b) → f x = k) : f a = k := by
   have tendsto_left: Tendsto f (𝓝[Set.Icc a b] a) (𝓝 (f a)) := by
@@ -231,6 +231,9 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     exact fun x c d a ↦ uniqueDiffWithinAt_Ioo a
 
 
+  -- LEAN BUG - try moving this into a 'have' block that already contains errors
+  have r_closed: OrderClosedTopology ℝ := by
+    apply NormedLatticeAddCommGroup.orderClosedTopology
 
   let e_n := fun k => { x: ℝ | (iteratedDeriv k f) x = 0 }
   have en_closed: ∀ k: ℕ, IsClosed (e_n k) := by
@@ -244,11 +247,29 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     exact OrderTop.le_top _
     exact isClosed_singleton
 
-
   --have nonempty_closed_interval: ∀ a b : ℝ, a < b → ((Set.Icc a b) ∩ poly_omega).Nonempty := by
   have nonempty_closed_interval: ∀ a b : ℝ, a < b → ((Set.Icc a b) ∩ poly_omega).Nonempty := by
     intro a b a_lt_b
-    have en_intersect_closed: ∀ k: ℕ , IsClosed ((Set.Icc a b ) ∩ (e_n k)) := by
+
+    let ab_subspace := { x: ℝ // x ∈ Set.Icc a b }
+    have ab_topology: TopologicalSpace ab_subspace := by
+      exact instTopologicalSpaceSubtype
+
+    have r_topology: TopologicalSpace ℝ := by
+      apply UniformSpace.toTopologicalSpace
+
+    have a_in_subtype: a ∈ Set.Icc a b := by
+      simp
+      linarith
+
+    have b_in_subtype: b ∈ Set.Icc a b := by
+      simp
+      linarith
+
+    have order_top: OrderClosedTopology { x: ℝ // x ∈ Set.Icc a b } := by
+      apply Subtype.instOrderClosedTopology
+
+    have en_intersect_closed: ∀ k: ℕ , IsClosed (X := { x: ℝ // x ∈ Set.Icc a b }) ((Set.Icc ⟨a, a_in_subtype⟩ ⟨b, b_in_subtype⟩) ∩ {x: ab_subspace | x.1 ∈ e_n k }) := by
       intro k
       apply IsClosed.inter
       apply isClosed_Icc
@@ -292,9 +313,9 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
     --obtain ⟨interior_index, int_nonempty⟩ := @nonempty_interior_of_iUnion_of_closed (Set.Icc a b) _ _ _ _ _ _ en_intersect_closed en_covers
     -- TODO - we need to apply this to an entire topolgical space. We need [a, b] with the subspace topology
-    obtain ⟨interior_index, int_nonempty⟩ := nonempty_interior_of_iUnion_of_closed en_intersect_closed sorry -- en_covers
+    obtain ⟨interior_index, int_nonempty⟩ := nonempty_interior_of_iUnion_of_closed sorry sorry --en_intersect_closed sorry -- en_covers
     have int_open: IsOpen (interior (Set.Icc a b ∩ e_n interior_index)) := by apply isOpen_interior
-    obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset int_open int_nonempty
+    obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset sorry sorry --int_open int_nonempty
 
     have int_subset_a_b: interior (Set.Icc a b ∩ e_n interior_index) ⊆ Set.Icc a b := by
       rw [Set.subset_def]
