@@ -308,11 +308,15 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
       simp only [Set.mem_iUnion]
       use n
+      obtain ⟨real_p, hp⟩ := p
+      refine ⟨hp, ?_⟩
+      simp at p_in_intersect
+      simp
+      exact p_in_intersect.1
+
       -- second case
 
       simp
-      sorry
-      sorry
 
     have nonempty: (Set.Icc a b).Nonempty := by
       rw [Set.nonempty_Icc]
