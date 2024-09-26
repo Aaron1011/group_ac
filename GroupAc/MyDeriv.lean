@@ -226,14 +226,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     rw [h]
     apply isOpen_Ioo
 
-  obtain ⟨poly_intervals, hIntervals⟩ := TopologicalSpace.IsTopologicalBasis.open_eq_sUnion Real.isTopologicalBasis_Ioo_rat poly_open
-  have unique_diff: ∀ (x c d: ℝ), x ∈ Set.Ioo c d → UniqueDiffWithinAt ℝ (Set.Ioo c d) x := by
-    exact fun x c d a ↦ uniqueDiffWithinAt_Ioo a
-
-
-  -- LEAN BUG - try moving this into a 'have' block that already contains errors
-  have r_closed: OrderClosedTopology ℝ := by
-    apply NormedLatticeAddCommGroup.orderClosedTopology
 
   let e_n := fun k => { x: ℝ | (iteratedDeriv k f) x = 0 }
   have en_closed: ∀ k: ℕ, IsClosed (e_n k) := by
@@ -243,37 +235,58 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     simp [← Set.mem_singleton_iff]
     rw [← Set.preimage]
     apply IsClosed.preimage
+    -- refine Continuous.comp' ?_ ?_
+    --apply Continuous.comp
+    --apply continuous_subtype_val
     apply ContDiff.continuous_iteratedDeriv k hCInfinity _
     exact OrderTop.le_top _
     exact isClosed_singleton
+    --dsimp [ab_subspace]
+    --sorry
+    --apply continuous_id'
 
+  obtain ⟨poly_intervals, hIntervals⟩ := TopologicalSpace.IsTopologicalBasis.open_eq_sUnion Real.isTopologicalBasis_Ioo_rat poly_open
+  have unique_diff: ∀ (x c d: ℝ), x ∈ Set.Ioo c d → UniqueDiffWithinAt ℝ (Set.Ioo c d) x := by
+    exact fun x c d a ↦ uniqueDiffWithinAt_Ioo a
+
+
+  -- LEAN BUG - try moving this into a 'have' block that already contains errors
+  have r_closed: OrderClosedTopology ℝ := by
+    apply NormedLatticeAddCommGroup.orderClosedTopology
   --have nonempty_closed_interval: ∀ a b : ℝ, a < b → ((Set.Icc a b) ∩ poly_omega).Nonempty := by
   have nonempty_closed_interval: ∀ a b : ℝ, a < b → ((Set.Icc a b) ∩ poly_omega).Nonempty := by
     intro a b a_lt_b
 
-    let ab_subspace := { x: ℝ // x ∈ Set.Icc a b }
-    have ab_topology: TopologicalSpace ab_subspace := by
-      exact instTopologicalSpaceSubtype
+    --have ab_topology: TopologicalSpace { x: ℝ // x ∈ Set.Icc a b } := by
+    --  exact instTopologicalSpaceSubtype
 
-    have r_topology: TopologicalSpace ℝ := by
-      apply UniformSpace.toTopologicalSpace
+    have ab_proper: ProperSpace  { x: ℝ // x ∈ Set.Icc a b } := by
+      exact proper_of_compact
+
+    have ab_local: LocallyCompactSpace { x: ℝ // x ∈ Set.Icc a b } := by
+      apply @locally_compact_of_proper _ _ ab_proper
+
 
     have a_in_subtype: a ∈ Set.Icc a b := by
       simp
       linarith
 
+
     have b_in_subtype: b ∈ Set.Icc a b := by
       simp
       linarith
 
-    have order_top: OrderClosedTopology { x: ℝ // x ∈ Set.Icc a b } := by
-      apply Subtype.instOrderClosedTopology
 
-    have en_intersect_closed: ∀ k: ℕ , IsClosed (X := { x: ℝ // x ∈ Set.Icc a b }) ((Set.Icc ⟨a, a_in_subtype⟩ ⟨b, b_in_subtype⟩) ∩ {x: ab_subspace | x.1 ∈ e_n k }) := by
+    have en_closed_subtype: ∀ k: ℕ, IsClosed ({x : { x: ℝ // x ∈ Set.Icc a b } | x.1 ∈ e_n k}) := by
+      sorry
+
+
+    have en_intersect_closed: ∀ k: ℕ , IsClosed (X := { x: ℝ // x ∈ Set.Icc a b }) ((Set.Icc ⟨a, a_in_subtype⟩ ⟨b, b_in_subtype⟩) ∩ {x: { x: ℝ // x ∈ Set.Icc a b } | x.1 ∈ e_n k }) := by
       intro k
       apply IsClosed.inter
       apply isClosed_Icc
-      apply en_closed k
+      apply en_closed_subtype k
+
 
     have en_covers: (Set.Icc a b) = Set.iUnion fun j => ((e_n j) ∩ Set.Icc a b) := by
       ext p
@@ -306,16 +319,20 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       rw [Set.nonempty_Icc]
       linarith
 
+
+
     have real_nonempty: Nonempty (Set.Icc a b) := by
       rw [Set.nonempty_iff_ne_empty']
       exact Set.nonempty_iff_ne_empty.mp nonempty
 
 
+
+
     --obtain ⟨interior_index, int_nonempty⟩ := @nonempty_interior_of_iUnion_of_closed (Set.Icc a b) _ _ _ _ _ _ en_intersect_closed en_covers
     -- TODO - we need to apply this to an entire topolgical space. We need [a, b] with the subspace topology
-    obtain ⟨interior_index, int_nonempty⟩ := nonempty_interior_of_iUnion_of_closed sorry sorry --en_intersect_closed sorry -- en_covers
+    obtain ⟨interior_index, int_nonempty⟩ := nonempty_interior_of_iUnion_of_closed en_intersect_closed sorry -- en_covers
     have int_open: IsOpen (interior (Set.Icc a b ∩ e_n interior_index)) := by apply isOpen_interior
-    obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset sorry sorry --int_open int_nonempty
+    obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset int_open int_nonempty
 
     have int_subset_a_b: interior (Set.Icc a b ∩ e_n interior_index) ⊆ Set.Icc a b := by
       rw [Set.subset_def]
@@ -331,29 +348,31 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     have zero_on_cd: ∀ (x: ℝ), x ∈ (Set.Ioo c d) → (iteratedDeriv interior_index f) x = 0 := by
       intro x hx
       simp at cd_int
-      dsimp [e_n] at cd_int
-      simp only [Set.subset_def] at cd_int
-      simp only [mem_interior] at cd_int
-      simp only [Set.subset_def] at cd_int
-      simp only [Set.mem_setOf_eq] at cd_int
-      obtain ⟨t, ht⟩ := cd_int
-      specialize ht x hx
-      simp only [Set.mem_def] at ht
-      obtain ⟨other_t, h_other_t⟩ := ht
-      have iter_x: (∀ (x : ℝ), other_t x → iteratedDeriv interior_index f x = 0) := h_other_t.1
-      specialize iter_x x h_other_t.2.2
-      rw [iteratedDeriv]
-      rw [iteratedDeriv] at iter_x
-      have derives_eq: Set.EqOn (iteratedFDerivWithin ℝ interior_index f (Set.Ioo c d)) (iteratedFDeriv ℝ interior_index f) (Set.Ioo c d) :=
-        by apply iteratedFDerivWithin_of_isOpen interior_index (isOpen_Ioo)
-      rw [Set.EqOn] at derives_eq
-      simp
+      sorry
 
-      have zero_on_open: (iteratedFDeriv ℝ interior_index f) x (fun x ↦ 1) = 0 := by
-        simp only [derives_eq]
-        specialize derives_eq hx
-        exact iter_x
-      apply zero_on_open
+      -- dsimp [e_n] at cd_int
+      -- simp only [Set.subset_def] at cd_int
+      -- simp only [mem_interior] at cd_int
+      -- simp only [Set.subset_def] at cd_int
+      -- simp only [Set.mem_setOf_eq] at cd_int
+      -- obtain ⟨t, ht⟩ := cd_int
+      -- specialize ht x hx
+      -- simp only [Set.mem_def] at ht
+      -- obtain ⟨other_t, h_other_t⟩ := ht
+      -- have iter_x: (∀ (x : ℝ), other_t x → iteratedDeriv interior_index f x = 0) := h_other_t.1
+      -- specialize iter_x x h_other_t.2.2
+      -- rw [iteratedDeriv]
+      -- rw [iteratedDeriv] at iter_x
+      -- have derives_eq: Set.EqOn (iteratedFDerivWithin ℝ interior_index f (Set.Ioo c d)) (iteratedFDeriv ℝ interior_index f) (Set.Ioo c d) :=
+      --   by apply iteratedFDerivWithin_of_isOpen interior_index (isOpen_Ioo)
+      -- rw [Set.EqOn] at derives_eq
+      -- simp
+
+      -- have zero_on_open: (iteratedFDeriv ℝ interior_index f) x (fun x ↦ 1) = 0 := by
+      --   simp only [derives_eq]
+      --   specialize derives_eq hx
+      --   exact iter_x
+      -- apply zero_on_open
 
     have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d interior_index c_lt_d hCInfinity zero_on_cd
     have cd_subset_omega: Set.Ioo c d ⊆ poly_omega := by
