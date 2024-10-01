@@ -361,12 +361,17 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     obtain ⟨interior_index, int_nonempty⟩ := nonempty_interior_of_iUnion_of_closed en_intersect_closed en_covers.symm
     have int_open: IsOpen (interior ({x: ab_subspace | x.1 ∈ Set.Icc a b ∩ e_n interior_index})) := by apply isOpen_interior
     obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset int_open int_nonempty
+    have _: a ≤ c.1 := by
+      obtain ⟨c_val, hc⟩ := c
+      simp
+      simp [Set.mem_Iic] at hc
+      linarith
 
-    have a_lt_c: a < c := by
-      sorry
-
-    have d_lt_b: d < b := by
-      sorry
+    have _: d.1 ≤ b := by
+      obtain ⟨d_val, hd⟩ := d
+      simp
+      simp [Set.mem_Iic] at hd
+      linarith
 
     have cd_int_imp_ab: ∀ y: ab_subspace, y ∈ Set.Ioo c d → y.1 ∈ Set.Icc a b := by
       intro y hy
