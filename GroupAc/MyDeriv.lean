@@ -587,14 +587,25 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
       let n := max first_poly.natDegree second_poly.natDegree
       have zero_on_new: ∀ (y: ℝ), y ∈ (Set.Ioo g x ∪ Set.Ioo x h) → (iteratedDerivWithin n f (Set.Ioo g x ∪ Set.Ioo x h)) y = 0 := by
-        have degree_zero: ((⇑Polynomial.derivative)^[n] first_poly).natDegree ≤ first_poly.natDegree - n := by
+        have orig_first_degree_zero: ((⇑Polynomial.derivative)^[n] first_poly).natDegree ≤ first_poly.natDegree - n := by
           apply Polynomial.natDegree_iterate_derivative first_poly n
-        simp at degree_zero
+        simp at orig_first_degree_zero
         have first_le_n : first_poly.natDegree ≤ n := by exact Nat.le_max_left first_poly.natDegree second_poly.natDegree
         have first_degree_zero': ((⇑Polynomial.derivative)^[n] first_poly).natDegree - (first_poly.natDegree - n) = 0 := by
-          apply tsub_eq_zero_of_le degree_zero
+          apply tsub_eq_zero_of_le orig_first_degree_zero
         have first_degree_zero: ((⇑Polynomial.derivative)^[n] first_poly).natDegree = 0 := by
           simp [n] at first_degree_zero'
+          linarith
+
+        -- FIXME - remove copy-paste with 'orig_first_degree_zero' code above
+        have orig_second_degree_zero: ((⇑Polynomial.derivative)^[n] second_poly).natDegree ≤ second_poly.natDegree - n := by
+          apply Polynomial.natDegree_iterate_derivative second_poly n
+        simp at orig_second_degree_zero
+        have second_le_n : second_poly.natDegree ≤ n := by exact Nat.le_max_right first_poly.natDegree second_poly.natDegree
+        have second_degree_zero': ((⇑Polynomial.derivative)^[n] second_poly).natDegree - (second_poly.natDegree - n) = 0 := by
+          apply tsub_eq_zero_of_le orig_second_degree_zero
+        have second_degree_zero: ((⇑Polynomial.derivative)^[n] second_poly).natDegree = 0 := by
+          simp [n] at second_degree_zero'
           linarith
 
         have first_zero: ((⇑Polynomial.derivative)^[n] first_poly) = 0 := by sorry
