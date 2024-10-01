@@ -362,6 +362,18 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     have int_open: IsOpen (interior ({x: ab_subspace | x.1 ∈ Set.Icc a b ∩ e_n interior_index})) := by apply isOpen_interior
     obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset int_open int_nonempty
 
+    have cd_int_imp_ab: ∀ y: ab_subspace, y ∈ Set.Ioo c d → y.1 ∈ Set.Icc a b := by
+      intro y hy
+      rw [Set.subset_def] at cd_int
+      specialize cd_int y hy
+      simp only [mem_interior] at cd_int
+      simp only [Set.subset_def] at cd_int
+      obtain ⟨t, ht, h_other_t, y_in_t⟩ := cd_int
+      specialize ht y y_in_t
+      simp only [Set.mem_setOf_eq] at ht
+      exact ht.1
+
+
     have int_subset_a_b: interior (Set.Icc a b ∩ e_n interior_index) ⊆ Set.Icc a b := by
       rw [Set.subset_def]
       intro y hy
@@ -373,13 +385,18 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
 
     have cont_diff_on: ContDiffOn ℝ ⊤ f (Set.Icc c d) := ContDiff.contDiffOn hCInfinity
-    have zero_on_cd: ∀ (x: ℝ), (Set.Ioo c.1 d.1) → (iteratedDeriv interior_index f) x = 0 := by
+    have zero_on_cd: ∀ (x: ℝ), x ∈ (Set.Ioo c.1 d.1) → (iteratedDeriv interior_index f) x = 0 := by
       intro x hx
       simp at cd_int
 
       have x_in_ab: x ∈ Set.Icc a b := by
         simp only [Set.subset_def] at cd_int
-        
+        apply cd_int_imp_ab x
+
+
+
+
+
 
       dsimp [e_n] at cd_int
       simp only [Set.subset_def] at cd_int
