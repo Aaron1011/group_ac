@@ -576,8 +576,8 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       --obtain ⟨leftPoly, h_leftPoly⟩ := left_subset_omega
 
       -- TODO - get this intervals from the fact that x is an isolated point
-      have _: (Set.Ioo g x) ⊆ poly_omega := by sorry
-      have _: (Set.Ioo x h) ⊆ poly_omega := by sorry
+      --have _: (Set.Ioo g x) ⊆ poly_omega := by sorry
+      --have _: (Set.Ioo x h) ⊆ poly_omega := by sorry
 
       have is_first_poly: RestrictsToPoly f g x := by sorry
       have is_second_poly: RestrictsToPoly f x h := by sorry
@@ -608,14 +608,62 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           simp [n] at second_degree_zero'
           linarith
 
-        have first_zero: ((⇑Polynomial.derivative)^[n] first_poly) = 0 := by sorry
-        have second_zero: ((⇑Polynomial.derivative)^[n] second_poly) = 0 := by sorry
+        have first_zero: (Polynomial.derivative ((⇑Polynomial.derivative)^[n] first_poly)) = 0 := by
+          apply Polynomial.derivative_of_natDegree_zero first_degree_zero
 
-        have f_deriv_zero: ∀ (y: ℝ), y ∈ (Set.Ioo g x ∪ Set.Ioo x h) → (iteratedDerivWithin n f (Set.Ioo g x ∪ Set.Ioo x h)) y = 0 := by
-          sorry
+        have first_zero_within: ∀y, y ∈ Set.Ioo g x → (Polynomial.derivative ((⇑Polynomial.derivative)^[n] first_poly)).eval y = 0 := by
+          intro y hy
+          simp [first_zero]
+
+        have second_zero: (Polynomial.derivative ((⇑Polynomial.derivative)^[n] second_poly)) = 0 := by
+          apply Polynomial.derivative_of_natDegree_zero second_degree_zero
+
+        have second_zero_within: ∀y, y ∈ Set.Ioo g x → (Polynomial.derivative ((⇑Polynomial.derivative)^[n] second_poly)).eval y = 0 := by
+          intro y hy
+          simp [second_zero]
+
+        --have zero_at_x: Polynomial.eval x (Polynomial.derivative ((⇑Polynomial.derivative)^[n] first_poly)) = 0 := by
+        --  apply @const_ioo_implies_endpoint_right (λ y => Polynomial.eval y (Polynomial.derivative ((⇑Polynomial.derivative)^[n] first_poly))) g x 0
+        --   apply g_lt_x
+        --   apply Polynomial.continuousOn
+        --   apply first_zero_within
+
+        -- have zero_at_x: Polynomial.eval x (Polynomial.derivative ((⇑Polynomial.derivative)^[n] first_poly)) = 0 := by
+        --   apply @const_ioo_implies_endpoint_right (λ y => Polynomial.eval y (Polynomial.derivative ((⇑Polynomial.derivative)^[n] first_poly))) g x 0
+        --   apply g_lt_x
+        --   apply Polynomial.continuousOn
+        --   apply first_zero_within
+
+        have f_deriv_zero: ∀ (y: ℝ), y ∈ (Set.Ioo g x ∪ Set.Ioo x h) → (iteratedDeriv (n + 1) f) y = 0 := by
+          intro y hy
+          rw [Set.mem_union] at hy
+          cases hy with
+          | inl y_in_left =>
+            have y_eq_eval: f y = first_poly.eval y := by
+              apply h_first_poly
+              exact y_in_left
+            rw [iteratedDeriv_succ]
+            sorry
+
+          | inr y_in_right =>
+            sorry
 
         -- Use continuity here
-        have f_deriv_at_x: (iteratedDerivWithin n f (Set.Ioo g h)) x = 0 := sorry
+        have f_deriv_at_x: (iteratedDeriv (n + 1) f) x = 0 := by
+          apply const_ioo_implies_endpoint_right g x 0 g_lt_x _
+          have zero_on_interval: ∀ (y: ℝ), y ∈ Set.Ioo g x → (iteratedDeriv (n + 1) f) y = 0 := by
+            intro y hy
+            have y_in_union: y ∈ (Set.Ioo g x ∪ Set.Ioo x h) := by
+              rw [Set.mem_union]
+              left
+              exact hy
+            apply f_deriv_zero y y_in_union
+          intro z hz
+          apply zero_on_interval z hz
+          apply (ContDiff.continuous_iteratedDeriv _ hCInfinity _).continuousOn
+          simp
+
+
         -- f^(n) is zero on (g, x) and (x, h), and x, so it's zero on (g, h)
         have f_zero_full: ∀ (y: ℝ), y ∈ (Set.Ioo g h) → (iteratedDerivWithin n f (Set.Ioo g h)) y = 0 := sorry
         sorry
