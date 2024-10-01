@@ -511,6 +511,13 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       obtain ⟨u, hu_neighbor, hu_singleton⟩ := x_not_acc
       obtain ⟨g, h, x_in_gh, gh_in_u⟩ := mem_nhds_iff_exists_Ioo_subset.mp hu_neighbor
 
+      have gh_nonempty: Set.Nonempty (Set.Ioo g h) := by
+        rw [Set.nonempty_def]
+        use x
+
+      have g_lt_h: g < h := by
+        apply Set.nonempty_Ioo.mp gh_nonempty
+
       have g_lt_x: g < x := by
         simp [Set.mem_Ioo] at x_in_gh
         exact x_in_gh.1
@@ -586,7 +593,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       obtain ⟨second_poly, h_second_poly⟩ := is_second_poly
 
       let n := max first_poly.natDegree second_poly.natDegree
-      have zero_on_new: ∀ (y: ℝ), y ∈ (Set.Ioo g x ∪ Set.Ioo x h) → (iteratedDerivWithin n f (Set.Ioo g x ∪ Set.Ioo x h)) y = 0 := by
+      have zero_on_new: ∀ (y: ℝ), y ∈ (Set.Ioo g h) → (iteratedDeriv (n + 1) f) y = 0 := by
         have orig_first_degree_zero: ((⇑Polynomial.derivative)^[n] first_poly).natDegree ≤ first_poly.natDegree - n := by
           apply Polynomial.natDegree_iterate_derivative first_poly n
         simp at orig_first_degree_zero
@@ -665,10 +672,14 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
 
         -- f^(n) is zero on (g, x) and (x, h), and x, so it's zero on (g, h)
-        have f_zero_full: ∀ (y: ℝ), y ∈ (Set.Ioo g h) → (iteratedDerivWithin n f (Set.Ioo g h)) y = 0 := sorry
-        sorry
+        have f_zero_full: ∀ (y: ℝ), y ∈ (Set.Ioo g h) → (iteratedDeriv (n + 1) f) y = 0 := sorry
+        exact f_zero_full
 
-      have f_poly_full: RestrictsToPoly f g h := by sorry
+      have f_poly_full: RestrictsToPoly f g h := by
+        apply zero_deriv_implies_poly
+        apply g_lt_h
+        assumption
+        apply zero_on_new
       have gh_in_omega: Set.Ioo g h ⊆ poly_omega := by
         simp [poly_omega]
         rw [Set.subset_def]
