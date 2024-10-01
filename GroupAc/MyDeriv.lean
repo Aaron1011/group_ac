@@ -373,7 +373,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       simp only [Set.mem_setOf_eq] at ht
       exact ht.1
 
-
     have int_subset_a_b: interior (Set.Icc a b ∩ e_n interior_index) ⊆ Set.Icc a b := by
       rw [Set.subset_def]
       intro y hy
@@ -386,16 +385,8 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
     have cont_diff_on: ContDiffOn ℝ ⊤ f (Set.Icc c d) := ContDiff.contDiffOn hCInfinity
     have zero_on_cd: ∀ (x: ℝ), x ∈ (Set.Ioo c.1 d.1) → (iteratedDeriv interior_index f) x = 0 := by
-      intro x hx
+      intro x x_in_ab
       simp at cd_int
-
-      have x_in_ab: x ∈ Set.Icc a b := by
-        simp only [Set.subset_def] at cd_int
-        apply cd_int_imp_ab x
-
-
-
-
 
 
       dsimp [e_n] at cd_int
@@ -403,19 +394,21 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       simp only [mem_interior] at cd_int
       simp only [Set.subset_def] at cd_int
       simp only [Set.mem_setOf_eq] at cd_int
-      let x_subspace: ab_subspace := ⟨x, hx.1⟩
+      let x_subspace: ab_subspace := ⟨x, sorry⟩
       have x_subspace_in: x_subspace ∈ Set.Ioo c d := by
-        apply hx.2
-      obtain ⟨other_t, other_ht, other_t_isopen, x_in_other_t⟩ := cd_int x_subspace x_subspace_in
-      have iter_x: (∀ (x : ab_subspace), other_t x → iteratedDeriv interior_index f x = 0) := by
+        --exact hx
         sorry
-        -- intro new_x ⟨hx_ab, hx_cd⟩
-        -- let new_x_subspace: ab_subspace := ⟨new_x, hx_ab⟩
-        -- have new_x_cd: new_x_subspace ∈ Set.Ioo c d := by
-        --   exact hx_cd
-        -- apply other_ht new_x_subspace
-        -- obtain ⟨new_x_cd_int⟩ := cd_int new_x_subspace new_x_cd
-        -- obtain ⟨iter_val, h_iter_val⟩ := cd_int new_x_subspace new_x_cd
+      obtain ⟨other_t, other_ht, other_t_isopen, x_in_other_t⟩ := cd_int x_subspace x_subspace_in
+      have iter_x: (∀ (x : ab_subspace), iteratedDeriv interior_index f x = 0) := by
+        intro new_x
+        let new_x_subspace: ab_subspace := ⟨new_x, ?_⟩
+        have new_x_cd: new_x_subspace ∈ Set.Ioo c d := by
+          sorry
+        apply other_ht new_x_subspace
+        obtain ⟨new_x_cd_int⟩ := cd_int new_x_subspace new_x_cd
+        obtain ⟨iter_val, h_iter_val⟩ := cd_int new_x_subspace new_x_cd
+        sorry
+        sorry
 
 
 
@@ -430,9 +423,11 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
       have zero_on_open: (iteratedFDeriv ℝ interior_index f) x (fun x ↦ 1) = 0 := by
         simp only [derives_eq]
-        specialize derives_eq hx.2
-        apply iter_x
+        specialize derives_eq sorry -- hx
         sorry
+        sorry
+        -- apply iter_x
+
       apply zero_on_open
 
     have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d interior_index c_lt_d hCInfinity zero_on_cd
