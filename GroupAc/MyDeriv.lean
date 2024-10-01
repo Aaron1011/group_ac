@@ -591,7 +591,11 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           apply Polynomial.natDegree_iterate_derivative first_poly n
         simp at degree_zero
         have first_le_n : first_poly.natDegree ≤ n := by exact Nat.le_max_left first_poly.natDegree second_poly.natDegree
-        have real_degree_zero: ((⇑Polynomial.derivative)^[n] first_poly).natDegree ≤ 0 := by sorry
+        have first_degree_zero': ((⇑Polynomial.derivative)^[n] first_poly).natDegree - (first_poly.natDegree - n) = 0 := by
+          apply tsub_eq_zero_of_le degree_zero
+        have first_degree_zero: ((⇑Polynomial.derivative)^[n] first_poly).natDegree = 0 := by
+          simp [n] at first_degree_zero'
+          linarith
 
         have first_zero: ((⇑Polynomial.derivative)^[n] first_poly) = 0 := by sorry
         have second_zero: ((⇑Polynomial.derivative)^[n] second_poly) = 0 := by sorry
