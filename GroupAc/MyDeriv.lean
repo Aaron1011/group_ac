@@ -465,12 +465,10 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       simp at cd_int
       exact hx
 
-    have cd_subet_omega_ab: Set.Icc c.1 d.1 ⊆ (Set.Icc a b) ∩ poly_omega := by
+    have cd_subet_omega_ab: Set.Ioo c.1 d.1 ⊆ (Set.Icc a b) ∩ poly_omega := by
       apply Set.subset_inter
-      sorry
-      sorry
-      --apply subset_trans cd_int int_subset_a_b
-      --apply cd_subset_omega
+      apply cd_subset_ab
+      apply cd_subset_omega
 
 
     -- rw [Set.nonempty_def]
@@ -497,9 +495,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       apply cd_subet_omega_ab elem_cd _
       simp
       simp at h_elem_cd
-      refine ⟨?_, ?_⟩
-      apply le_of_lt h_elem_cd.1
-      apply le_of_lt h_elem_cd.2
+      apply h_elem_cd
 
     exact ⟨elem_cd, elem_target⟩
 
