@@ -13,6 +13,9 @@ variable {f: ℝ → ℝ}
 def RestrictsToPoly (f: ℝ → ℝ) (a b: ℝ) :=
   ∃ (p: Polynomial ℝ), ∀ (y: ℝ), y ∈ Set.Ioo a b → f y = p.eval y
 
+def RestrictsToPolyBundle (f: ℝ → ℝ) (a b: ℝ) (p: Polynomial ℝ) :=
+  ∀ (y: ℝ), y ∈ Set.Ioo a b → f y = p.eval y
+
 lemma const_ioo_implies_endpoint_left (a b k: ℝ) (hlt: a < b) (hc: ContinuousOn f (Set.Icc a b)) (hConst: ∀ x, x ∈ (Set.Ioo a b) → f x = k) : f a = k := by
   have tendsto_left: Tendsto f (𝓝[Set.Icc a b] a) (𝓝 (f a)) := by
     apply ContinuousWithinAt.tendsto (ContinuousOn.continuousWithinAt _ _)
@@ -214,10 +217,10 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff
 
     exact ⟨poly_integral, f_eq_deriv_integral⟩
 
-lemma subset_omega_imp_poly: ∀s, s ⊆ Set.sUnion { i | ∃ (a b : ℝ ), i = Set.Ioo a b ∧ RestrictsToPoly f a b } → ∃ (a b : ℝ), s ⊆ Set.Ioo a b ∧ RestrictsToPoly f a b := by
+lemma subset_omega_imp_poly: ∀s, s ⊆ Set.sUnion { i | ∃ (a b : ℝ ), i = Set.Ioo a b ∧ RestrictsToPoly f a b } → ∃ (a b : ℝ), s = Set.Ioo a b ∧ RestrictsToPoly f a b := by
   intro s hs
-  have overlap_eq: ∀ a b c d, RestrictsToPoly f a b ∧ RestrictsToPoly f c d → ∀x, x ∈ Set.Ioo a b ∩ Set.Ioo c d → f x = f a := by
-    intro a b c d ⟨⟨pa, hpa⟩, ⟨pb, hpb⟩⟩ x ⟨hx_left, hx_right⟩
+  have overlap_eq: ∀ a b c d pl pr, RestrictsToPolyBundle f a b pl ∧ RestrictsToPolyBundle f c d pr → ∀x, x ∈ Set.Ioo a b ∩ Set.Ioo c d → pl = pr := by
+    intro a b c d pa pb ⟨hpa, hpb⟩ x ⟨hx1, hx2⟩
     have eq_zero_intersect: ∀ y, y ∈ Set.Ioo a b ∩ Set.Ioo c d → (pa - pb).eval y = 0 := by
       intro y ⟨hy1, hy2⟩
       simp
@@ -237,8 +240,21 @@ lemma subset_omega_imp_poly: ∀s, s ⊆ Set.sUnion { i | ∃ (a b : ℝ ), i = 
       rw [zeros_card]
       simp
 
-
-
+    simp at diff_zero_all
+    apply eq_of_sub_eq_zero diff_zero_all
+  let lower_bound := sInf s
+  let upper_bound := sSup s
+  use lower_bound
+  use upper_bound
+  refine ⟨?_, ?_⟩
+  ext x
+  refine ⟨?_, ?_⟩
+  . intro x_in_s
+    have x_gte_lower: lower_bound ≤ x := by
+      simp [lower_bound]
+      sorry
+    sorry
+  . sorry
 
 
 
