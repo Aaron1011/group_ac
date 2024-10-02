@@ -16,6 +16,9 @@ def RestrictsToPoly (f: ℝ → ℝ) (a b: ℝ) :=
 def RestrictsToPolyBundle (f: ℝ → ℝ) (a b: ℝ) (p: Polynomial ℝ) :=
   ∀ (y: ℝ), y ∈ Set.Ioo a b → f y = p.eval y
 
+def image' {α : Type _} {β : Type _} (s : Set α) (f : (a : α) → a ∈ s → β) : Set β :=
+  {b | ∃ a ha, f a ha = b}
+
 lemma const_ioo_implies_endpoint_left (a b k: ℝ) (hlt: a < b) (hc: ContinuousOn f (Set.Icc a b)) (hConst: ∀ x, x ∈ (Set.Ioo a b) → f x = k) : f a = k := by
   have tendsto_left: Tendsto f (𝓝[Set.Icc a b] a) (𝓝 (f a)) := by
     apply ContinuousWithinAt.tendsto (ContinuousOn.continuousWithinAt _ _)
@@ -261,8 +264,38 @@ lemma omega_r_imp_poly: ⋃₀ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly
 
     have cd_compact: IsCompact (Set.Icc c d) := by
       apply isCompact_Icc
-
     obtain ⟨fin_cover, h_fin_subset, h_fin_cover_finite, h_covers_cd⟩ := IsCompact.elim_finite_subcover_image cd_compact all_open cd_subset
+    rw [Set.subset_def] at h_fin_subset
+    simp only [all_intervals] at h_fin_subset
+    simp only [Set.mem_setOf_eq] at h_fin_subset
+    let covering_intervals := image' fin_cover (fun i hi => by
+      specialize h_fin_subset i hi
+      -- CANNOT use 'obtain' here: see https://leanprover.zulipchat.com/#narrow/stream/113489-new-members/topic/Problems.20with.20obtain/near/467580722
+      choose a b hab ab_poly using h_fin_subset
+      simp only [RestrictsToPoly] at ab_poly
+      choose my_poly h_my_poly using ab_poly
+      exact (Set.Ioo a b, my_poly)
+    )
+    have covering_is_finite: covering_intervals.Finite := by
+      sorry
+    have covering_nonempty: covering_intervals.Nonempty := by
+      sorry
+
+    let covering_finset := Set.Finite.toFinset covering_is_finite
+    let poly_degrees := ((fun interval_and_poly => interval_and_poly.2.natDegree) '' covering_intervals)
+    have degrees_nonempty: poly_degrees.Nonempty := by
+      exact
+        Set.Nonempty.image (fun interval_and_poly ↦ interval_and_poly.2.natDegree) covering_nonempty
+    have degrees_finite: poly_degrees.Finite := by
+      exact Set.Finite.image (fun interval_and_poly ↦ interval_and_poly.2.natDegree) covering_is_finite
+
+    let degrees_poly_finset := Set.Finite.toFinset degrees_finite
+    have degrees_nonempty_finset: degrees_poly_finset.Nonempty := by
+      sorry
+    obtain ⟨max_degree, h_max_degree⟩ := Finset.max_of_nonempty degrees_nonempty_finset
+
+
+
 
 
   -- let p: ℝ := 0
