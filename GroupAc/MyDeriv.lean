@@ -214,6 +214,34 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff
 
     exact ⟨poly_integral, f_eq_deriv_integral⟩
 
+lemma subset_omega_imp_poly: ∀s, s ⊆ Set.sUnion { i | ∃ (a b : ℝ ), i = Set.Ioo a b ∧ RestrictsToPoly f a b } → ∃ (a b : ℝ), s ⊆ Set.Ioo a b ∧ RestrictsToPoly f a b := by
+  intro s hs
+  have overlap_eq: ∀ a b c d, RestrictsToPoly f a b ∧ RestrictsToPoly f c d → ∀x, x ∈ Set.Ioo a b ∩ Set.Ioo c d → f x = f a := by
+    intro a b c d ⟨⟨pa, hpa⟩, ⟨pb, hpb⟩⟩ x ⟨hx_left, hx_right⟩
+    have eq_zero_intersect: ∀ y, y ∈ Set.Ioo a b ∩ Set.Ioo c d → (pa - pb).eval y = 0 := by
+      intro y ⟨hy1, hy2⟩
+      simp
+      rw [← hpa y hy1]
+      rw [← hpb y hy2]
+      simp
+
+    have diff_zero_all: (pa - pb) = 0 := by
+      obtain ⟨nplusone_zeros, zeros_subset, zeros_card⟩ := @Set.Infinite.exists_subset_card_eq _ (Set.Ioo a b ∩ Set.Ioo c d) _ ((pa - pb).natDegree + 1)
+      apply Polynomial.eq_zero_of_natDegree_lt_card_of_eval_eq_zero' (pa - pb) nplusone_zeros
+      intro y hy
+      simp only [Set.subset_def] at zeros_subset
+      have y_in_intersect: y ∈ Set.Ioo a b ∩ Set.Ioo c d := by
+        exact zeros_subset y hy
+      apply eq_zero_intersect
+      apply y_in_intersect
+      rw [zeros_card]
+      simp
+
+
+
+
+
+
 -- https://mathoverflow.net/questions/34059/if-f-is-infinitely-differentiable-then-f-coincides-with-a-polynomial
 theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n f) x = 0) (hCInfinity: ContDiff ℝ ⊤ f): RestrictsToPoly f 0 1 := by
   -- let real_powset := 𝒫 { z: ℝ | True }
@@ -680,6 +708,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         apply g_lt_h
         assumption
         apply zero_on_new
+
       have gh_in_omega: Set.Ioo g h ⊆ poly_omega := by
         simp [poly_omega]
         rw [Set.subset_def]
