@@ -217,8 +217,8 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff
 
     exact ⟨poly_integral, f_eq_deriv_integral⟩
 
-lemma subset_omega_imp_poly: ∀s, s ⊆ Set.sUnion { i | ∃ (a b : ℝ ), i = Set.Ioo a b ∧ RestrictsToPoly f a b } → ∃ (a b : ℝ), s = Set.Ioo a b ∧ RestrictsToPoly f a b := by
-  intro s hs
+lemma omega_r_imp_poly: ⋃₀ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b} = Set.univ → ∃ p: Polynomial ℝ, f = p.eval := by
+  intro omega_eq_r
   have overlap_eq: ∀ a b c d pl pr, RestrictsToPolyBundle f a b pl ∧ RestrictsToPolyBundle f c d pr → ∀x, x ∈ Set.Ioo a b ∩ Set.Ioo c d → pl = pr := by
     intro a b c d pa pb ⟨hpa, hpb⟩ x ⟨hx1, hx2⟩
     have eq_zero_intersect: ∀ y, y ∈ Set.Ioo a b ∩ Set.Ioo c d → (pa - pb).eval y = 0 := by
@@ -242,19 +242,40 @@ lemma subset_omega_imp_poly: ∀s, s ⊆ Set.sUnion { i | ∃ (a b : ℝ ), i = 
 
     simp at diff_zero_all
     apply eq_of_sub_eq_zero diff_zero_all
-  let lower_bound := sInf s
-  let upper_bound := sSup s
-  use lower_bound
-  use upper_bound
-  refine ⟨?_, ?_⟩
-  ext x
-  refine ⟨?_, ?_⟩
-  . intro x_in_s
-    have x_gte_lower: lower_bound ≤ x := by
-      simp [lower_bound]
-      sorry
+
+  let all_intervals := {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b}
+  let all_union := ⋃₀ all_intervals
+  have all_open: ∀ s, s ∈ all_intervals → IsOpen (id s) := by
     sorry
-  . sorry
+  have union_subset: all_union ⊆ Set.univ := by
+    exact fun ⦃a⦄ a ↦ trivial
+
+  have poly_on_closed: ∀ c d, RestrictsToPoly f c d := by
+    intro c d
+    have cd_subset: Set.Icc c d ⊆ ⋃ i ∈ all_intervals, id i := by
+      simp only [all_union, all_intervals]
+      simp only [id]
+      rw [← Set.sUnion_eq_biUnion]
+      rw [omega_eq_r]
+      simp
+
+    have cd_compact: IsCompact (Set.Icc c d) := by
+      apply isCompact_Icc
+
+    obtain ⟨fin_cover, h_fin_subset, h_fin_cover_finite, h_covers_cd⟩ := IsCompact.elim_finite_subcover_image cd_compact all_open cd_subset
+
+
+  -- let p: ℝ := 0
+  -- have p_in_union: p ∈ Set.sUnion { i | ∃ (a b : ℝ ), i = Set.Ioo a b ∧ RestrictsToPoly f a b } := by
+  --   simp only [p]
+  --   rw [omega_eq_r]
+  --   simp
+
+  -- let maximal_with_p := Set.sUnion { i | ∃ (a b : ℝ ), i = Set.Ioo a b ∧ RestrictsToPoly f a b ∧ p ∈ i }
+
+  -- rw [Set.mem_sUnion] at p_in_union
+  -- obtain ⟨p_int, p_int_in_set, p_in_p_int⟩ := p_in_union
+  -- let other_points := Set.univ \ p_int
 
 
 
