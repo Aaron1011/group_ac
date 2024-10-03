@@ -341,8 +341,6 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
     --let large_degree := largest_degree + 1
 
     let all_x_data: Set (XData c d f) := {x_data | ∃ x: ℝ, ∃ hx: x ∈ Set.Icc c d, x_data = x_to_data x c d fin_cover hx h_covers_cd h_fin_subset}
-    have h_contains_all: ∀ x_data: XData c d f, x_data ∈ all_x_data := by
-      sorry
     have all_x_data_finite: all_x_data.Finite := by
       sorry
 
@@ -408,8 +406,14 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
         simp only [all_degrees, extract_degree]
         simp
         use x_data
-        refine ⟨h_contains_all x_data, ?_⟩
+        refine ⟨?_, ?_⟩
         simp [x_data]
+        simp only [all_x_data]
+        simp only [Set.mem_setOf_eq]
+        use x
+        use hx
+        simp [x_data]
+
 
       have ab_poly_le_max': ab_poly.natDegree ≤ max_degree := by
         exact Finset.le_max' all_degrees_finset ab_poly.natDegree ab_degree_in
