@@ -240,6 +240,9 @@ noncomputable def x_to_data (x c d: ℝ) (fin_cover: Set (Set ℝ)) (hx: x ∈ S
   let x_data := XData.mk (c := c) (d := d) x a b ab_poly x_in_i h_ab_poly
   exact x_data
 
+lemma x_data_preserves_x (x c d fin_cover hx h_covers_cd) (h_fin_subset) : (x_to_data (f := f) x c d fin_cover hx h_covers_cd h_fin_subset).x = x := by
+  simp [x_to_data]
+
 lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b} = Set.univ → ∃ p: Polynomial ℝ, f = p.eval := by
   intro omega_eq_r
   have overlap_eq: ∀ a b c d pl pr,RestrictsToPolyBundle f a b pl ∧ RestrictsToPolyBundle f c d pr → ∀x, x ∈ Set.Ioo a b ∩ Set.Ioo c d → pl = pr := by
@@ -337,14 +340,23 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
     have fn_zero: ∀ (x: ℝ), x ∈ Set.Icc c d → (iteratedDeriv large_degree f) x = 0 := by
       intro x hx
       let x_data := x_to_data x c d fin_cover hx h_covers_cd h_fin_subset
+      have x_eq_data_x: x_data.x = x := by
+        simp [x_data]
+        simp [x_to_data]
+      let a := x_data.a
+      let b := x_data.b
+      let h_ab_poly := x_data.poly_eq
+      let ab_poly := x_data.poly
+      let x_in_i := x_data.x_in_int
+      rw [x_eq_data_x] at x_in_i
 
-      have x_in_cover: x ∈ ⋃ i ∈ fin_cover, id i := h_covers_cd hx
-      rw [Set.mem_iUnion] at x_in_cover
-      simp at x_in_cover
-      obtain ⟨i, i_in_fin, x_in_i⟩ := x_in_cover
-      specialize h_fin_subset i i_in_fin
-      choose a b hab has_ab_poly using h_fin_subset
-      obtain ⟨ab_poly, h_ab_poly⟩ := has_ab_poly
+      -- have x_in_cover: x ∈ ⋃ i ∈ fin_cover, id i := h_covers_cd hx
+      -- rw [Set.mem_iUnion] at x_in_cover
+      -- simp at x_in_cover
+      -- obtain ⟨i, i_in_fin, x_in_i⟩ := x_in_cover
+      -- specialize h_fin_subset i i_in_fin
+      -- choose a b hab has_ab_poly using h_fin_subset
+      -- obtain ⟨ab_poly, h_ab_poly⟩ := has_ab_poly
 
 
       have derivwith_eq: Set.EqOn (iteratedDerivWithin large_degree f (Set.Ioo a b)) (iteratedDerivWithin large_degree ab_poly.eval (Set.Ioo a b)) (Set.Ioo a b) := by
@@ -354,10 +366,8 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
         apply h_ab_poly
       specialize derivwith_eq
       rw [Set.EqOn] at derivwith_eq
-      rw [hab] at x_in_i
       specialize derivwith_eq x_in_i
       rw [iteratedDerivWithin] at derivwith_eq
-
       rw [iteratedDeriv]
 
       have eq_normal_deriv: Set.EqOn ((iteratedFDerivWithin ℝ large_degree f (Set.Ioo a b))) ((iteratedFDeriv ℝ large_degree f)) (Set.Ioo a b) := by
@@ -378,19 +388,14 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
         simp
         use x_data
         refine ⟨h_contains_all x_data, ?_⟩
+        simp [x_data]
 
-
+      have ab_poly_le_max': ab_poly.natDegree ≤ max_degree := by
+        exact Finset.le_max' all_degrees_finset ab_poly.natDegree ab_degree_in
 
       have degree_lt: ab_poly.natDegree < large_degree := by
         simp only [large_degree]
-
-
-
-
-
-
-
-
+        linarith
 
 
 
