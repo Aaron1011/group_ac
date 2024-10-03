@@ -220,9 +220,9 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff
 
     exact ⟨poly_integral, f_eq_deriv_integral⟩
 
-lemma omega_r_imp_poly: ⋃₀ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b} = Set.univ → ∃ p: Polynomial ℝ, f = p.eval := by
+lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b} = Set.univ → ∃ p: Polynomial ℝ, f = p.eval := by
   intro omega_eq_r
-  have overlap_eq: ∀ a b c d pl pr, RestrictsToPolyBundle f a b pl ∧ RestrictsToPolyBundle f c d pr → ∀x, x ∈ Set.Ioo a b ∩ Set.Ioo c d → pl = pr := by
+  have overlap_eq: ∀ a b c d pl pr,RestrictsToPolyBundle f a b pl ∧ RestrictsToPolyBundle f c d pr → ∀x, x ∈ Set.Ioo a b ∩ Set.Ioo c d → pl = pr := by
     intro a b c d pa pb ⟨hpa, hpb⟩ x ⟨hx1, hx2⟩
     have eq_zero_intersect: ∀ y, y ∈ Set.Ioo a b ∩ Set.Ioo c d → (pa - pb).eval y = 0 := by
       intro y ⟨hy1, hy2⟩
@@ -253,8 +253,8 @@ lemma omega_r_imp_poly: ⋃₀ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly
   have union_subset: all_union ⊆ Set.univ := by
     exact fun ⦃a⦄ a ↦ trivial
 
-  have poly_on_closed: ∀ c d, RestrictsToPoly f c d := by
-    intro c d
+  have poly_on_closed: ∀ c d, c < d →  RestrictsToPoly f c d := by
+    intro c d c_lt_d
     have cd_subset: Set.Icc c d ⊆ ⋃ i ∈ all_intervals, id i := by
       simp only [all_union, all_intervals]
       simp only [id]
@@ -292,7 +292,43 @@ lemma omega_r_imp_poly: ⋃₀ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly
     let degrees_poly_finset := Set.Finite.toFinset degrees_finite
     have degrees_nonempty_finset: degrees_poly_finset.Nonempty := by
       sorry
-    obtain ⟨max_degree, h_max_degree⟩ := Finset.max_of_nonempty degrees_nonempty_finset
+    obtain ⟨largest_degree, h_max_degree⟩ := Finset.max_of_nonempty degrees_nonempty_finset
+    let large_degree := largest_degree + 1
+    have fn_zero: ∀ (x: ℝ), x ∈ Set.Icc c d → (iteratedDeriv large_degree f) x = 0 := by
+      intro x hx
+      have x_in_cover: x ∈ ⋃ i ∈ fin_cover, id i := h_covers_cd hx
+      rw [Set.mem_iUnion] at x_in_cover
+      simp at x_in_cover
+      obtain ⟨i, i_in_fin, x_in_i⟩ := x_in_cover
+      specialize h_fin_subset i i_in_fin
+      choose a b hab has_ab_poly using h_fin_subset
+      obtain ⟨ab_poly, h_ab_poly⟩ := has_ab_poly
+      have derivwith_eq: Set.EqOn (iteratedDerivWithin large_degree f (Set.Ioo a b)) (iteratedDerivWithin large_degree ab_poly.eval (Set.Ioo a b)) (Set.Ioo a b) := by
+        apply iteratedDerivWithin_congr
+        apply uniqueDiffOn_Ioo
+        rw [Set.EqOn]
+        apply h_ab_poly
+      specialize derivwith_eq
+      rw [Set.EqOn] at derivwith_eq
+      rw [hab] at x_in_i
+      specialize derivwith_eq x_in_i
+      rw [iteratedDerivWithin] at derivwith_eq
+
+      rw [iteratedDeriv]
+
+      have eq_normal_deriv: Set.EqOn ((iteratedFDerivWithin ℝ large_degree f (Set.Ioo a b))) ((iteratedFDeriv ℝ large_degree f)) (Set.Ioo a b) := by
+        apply iteratedFDerivWithin_of_isOpen large_degree (isOpen_Ioo)
+
+      --rw [Set.EqOn] at eq_normal_deriv
+      --specialize eq_normal_deriv x_in_i
+      rw [iteratedDerivWithin] at derivwith_eq
+      rw [iteratedFDerivWithin_of_isOpen large_degree (isOpen_Ioo) x_in_i] at derivwith_eq
+      rw [iteratedFDerivWithin_of_isOpen large_degree (isOpen_Ioo) x_in_i] at derivwith_eq
+      rw [← iteratedDeriv] at derivwith_eq
+      rw [← iteratedDeriv] at derivwith_eq
+
+
+
 
 
 
