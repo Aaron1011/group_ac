@@ -287,7 +287,13 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
   let all_intervals := {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b}
   let all_union := ⋃₀ all_intervals
   have all_open: ∀ s, s ∈ all_intervals → IsOpen (id s) := by
-    sorry
+    intro s hs
+    simp [all_intervals] at hs
+    obtain ⟨a, b, hab, h⟩ := hs
+    simp
+    rw [hab]
+    apply isOpen_Ioo
+
   have union_subset: all_union ⊆ Set.univ := by
     exact fun ⦃a⦄ a ↦ trivial
 
