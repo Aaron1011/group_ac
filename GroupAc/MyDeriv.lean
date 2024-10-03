@@ -245,7 +245,7 @@ lemma x_data_preserves_x (x c d fin_cover hx h_covers_cd) (h_fin_subset) : (x_to
 
 lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b} = Set.univ → ∃ p: Polynomial ℝ, f = p.eval := by
   intro omega_eq_r
-  have overlap_eq: ∀ a b c d pl pr,RestrictsToPolyBundle f a b pl ∧ RestrictsToPolyBundle f c d pr → ∀x, x ∈ Set.Ioo a b ∩ Set.Ioo c d → pl = pr := by
+  have overlap_eq: ∀ a b c d pl pr, RestrictsToPolyBundle f a b pl ∧ RestrictsToPolyBundle f c d pr → ∀x, x ∈ Set.Ioo a b ∩ Set.Ioo c d → pl = pr := by
     intro a b c d pa pb ⟨hpa, hpb⟩ x ⟨hx1, hx2⟩
     have eq_zero_intersect: ∀ y, y ∈ Set.Ioo a b ∩ Set.Ioo c d → (pa - pb).eval y = 0 := by
       intro y ⟨hy1, hy2⟩
@@ -254,8 +254,11 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
       rw [← hpb y hy2]
       simp
 
+    have intersect_infinite: (Set.Ioo a b ∩ Set.Ioo c d).Infinite := by
+      sorry
+
     have diff_zero_all: (pa - pb) = 0 := by
-      obtain ⟨nplusone_zeros, zeros_subset, zeros_card⟩ := @Set.Infinite.exists_subset_card_eq _ (Set.Ioo a b ∩ Set.Ioo c d) _ ((pa - pb).natDegree + 1)
+      obtain ⟨nplusone_zeros, zeros_subset, zeros_card⟩ := @Set.Infinite.exists_subset_card_eq _ (Set.Ioo a b ∩ Set.Ioo c d) intersect_infinite ((pa - pb).natDegree + 1)
       apply Polynomial.eq_zero_of_natDegree_lt_card_of_eval_eq_zero' (pa - pb) nplusone_zeros
       intro y hy
       simp only [Set.subset_def] at zeros_subset
@@ -411,7 +414,7 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
     apply zero_deriv_implies_poly c d large_degree c_lt_d hCInfinity
     intro y hy
     apply fn_zero
-    apply?
+    exact Set.mem_Icc_of_Ioo hy
   sorry
 
   -- let p: ℝ := 0
