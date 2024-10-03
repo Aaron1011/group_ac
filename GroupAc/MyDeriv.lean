@@ -220,6 +220,26 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff
 
     exact ⟨poly_integral, f_eq_deriv_integral⟩
 
+class XData (c d: ℝ) (f: ℝ → ℝ) :=
+  (x: ℝ)
+  (a: ℝ)
+  (b: ℝ)
+  (poly: Polynomial ℝ)
+  (x_in_int : x ∈ Set.Ioo a b)
+  (poly_eq: RestrictsToPolyBundle f a b poly)
+
+noncomputable def x_to_data (x c d: ℝ) (fin_cover: Set (Set ℝ)) (hx: x ∈ Set.Icc c d) (h_covers_cd : Set.Icc c d ⊆ ⋃ i ∈ fin_cover, id i) (h_fin_subset : ∀ x ∈ fin_cover, ∃ a b, x = Set.Ioo a b ∧ RestrictsToPoly f a b): XData c d f := by
+  have x_in_cover: x ∈ ⋃ i ∈ fin_cover, id i := h_covers_cd hx
+  rw [Set.mem_iUnion] at x_in_cover
+  simp at x_in_cover
+  choose i i_in_fin x_in_i using x_in_cover
+  specialize h_fin_subset i i_in_fin
+  choose a b hab has_ab_poly using h_fin_subset
+  choose ab_poly h_ab_poly using has_ab_poly
+  rw [hab] at x_in_i
+  let x_data := XData.mk (c := c) (d := d) x a b ab_poly x_in_i h_ab_poly
+  exact x_data
+
 lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b} = Set.univ → ∃ p: Polynomial ℝ, f = p.eval := by
   intro omega_eq_r
   have overlap_eq: ∀ a b c d pl pr,RestrictsToPolyBundle f a b pl ∧ RestrictsToPolyBundle f c d pr → ∀x, x ∈ Set.Ioo a b ∩ Set.Ioo c d → pl = pr := by
@@ -276,6 +296,7 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
       choose my_poly h_my_poly using ab_poly
       exact (Set.Ioo a b, my_poly)
     )
+
     have covering_is_finite: covering_intervals.Finite := by
       sorry
     have covering_nonempty: covering_intervals.Nonempty := by
@@ -289,13 +310,34 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
     have degrees_finite: poly_degrees.Finite := by
       exact Set.Finite.image (fun interval_and_poly ↦ interval_and_poly.2.natDegree) covering_is_finite
 
-    obtain ⟨degrees_poly_finset, h_degree_poly_finset⟩ := Set.Finite.exists_finset degrees_finite
-    have degrees_nonempty_finset: degrees_poly_finset.Nonempty := by
+    --obtain ⟨degrees_poly_finset, h_degree_poly_finset⟩ := Set.Finite.exists_finset degrees_finite
+    --have degrees_nonempty_finset: degrees_poly_finset.Nonempty := by
+    --  sorry
+    --let largest_degree := Finset.max' degrees_poly_finset degrees_nonempty_finset
+    --let large_degree := largest_degree + 1
+
+    let all_x_data: Set (XData c d f) := {x_data | ∃ x: ℝ, ∃ hx: x ∈ Set.Icc c d, x_data = x_to_data x c d fin_cover hx h_covers_cd h_fin_subset}
+    have h_contains_all: ∀ x_data: XData c d f, x_data ∈ all_x_data := by
       sorry
-    let largest_degree := Finset.max' degrees_poly_finset degrees_nonempty_finset
-    let large_degree := largest_degree + 1
+    have all_x_data_finite: all_x_data.Finite := by
+      sorry
+
+    let extract_degree := fun {c d: ℝ} (data: XData c d f) => data.poly.natDegree
+    let all_degrees := extract_degree '' all_x_data
+
+    have all_degrees_finite: all_degrees.Finite := by
+      exact Set.Finite.image (fun data ↦ data.poly.natDegree) all_x_data_finite
+
+    have ⟨all_degrees_finset, h_all_degrees_finset⟩ := Set.Finite.exists_finset all_degrees_finite
+    have all_degrees_finset_nonempty: all_degrees_finset.Nonempty := by
+      sorry
+    let max_degree := Finset.max' all_degrees_finset all_degrees_finset_nonempty
+    let large_degree := max_degree + 1
+
     have fn_zero: ∀ (x: ℝ), x ∈ Set.Icc c d → (iteratedDeriv large_degree f) x = 0 := by
       intro x hx
+      let x_data := x_to_data x c d fin_cover hx h_covers_cd h_fin_subset
+
       have x_in_cover: x ∈ ⋃ i ∈ fin_cover, id i := h_covers_cd hx
       rw [Set.mem_iUnion] at x_in_cover
       simp at x_in_cover
@@ -303,6 +345,8 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
       specialize h_fin_subset i i_in_fin
       choose a b hab has_ab_poly using h_fin_subset
       obtain ⟨ab_poly, h_ab_poly⟩ := has_ab_poly
+
+
       have derivwith_eq: Set.EqOn (iteratedDerivWithin large_degree f (Set.Ioo a b)) (iteratedDerivWithin large_degree ab_poly.eval (Set.Ioo a b)) (Set.Ioo a b) := by
         apply iteratedDerivWithin_congr
         apply uniqueDiffOn_Ioo
@@ -328,21 +372,13 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
       rw [← iteratedDeriv] at derivwith_eq
       rw [← iteratedDeriv]
       rw [derivwith_eq]
-      have ab_degree_in: ab_poly.natDegree ∈ degrees_poly_finset := by
-        rw [h_degree_poly_finset]
-        simp only [poly_degrees]
+      have ab_degree_in: ab_poly.natDegree ∈ all_degrees_finset := by
+        rw [h_all_degrees_finset]
+        simp only [all_degrees, extract_degree]
         simp
-        use Set.Ioo a b
-        use ab_poly
-        refine ⟨?_, ?_⟩
-        simp only [covering_intervals]
-        simp only [image']
-        simp
-        use Set.Ioo a b
-        rw [hab] at i_in_fin
-        use i_in_fin
-        refine ⟨?_, ?_⟩
-        simp
+        use x_data
+        refine ⟨h_contains_all x_data, ?_⟩
+
 
 
       have degree_lt: ab_poly.natDegree < large_degree := by
