@@ -312,27 +312,49 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
     rw [Set.subset_def] at h_fin_subset
     simp only [all_intervals] at h_fin_subset
     simp only [Set.mem_setOf_eq] at h_fin_subset
+
     let covering_intervals := image' fin_cover (fun i hi => by
       specialize h_fin_subset i hi
       -- CANNOT use 'obtain' here: see https://leanprover.zulipchat.com/#narrow/stream/113489-new-members/topic/Problems.20with.20obtain/near/467580722
-      choose a b hab ab_poly using h_fin_subset
-      simp only [RestrictsToPoly] at ab_poly
-      choose my_poly h_my_poly using ab_poly
-      exact (Set.Ioo a b, my_poly)
+      choose a b hab _ using h_fin_subset
+      exact Set.Ioo a b
     )
 
-    have covering_is_finite: covering_intervals.Finite := by
-      sorry
-    have covering_nonempty: covering_intervals.Nonempty := by
-      sorry
+    -- let intervals_cover_cd: Set.Icc c d ⊆ ⋃₀ covering_intervals := by
+    --   intro x hx
+    --   simp only [Set.mem_sUnion]
+    --   rw [Set.subset_def] at h_covers_cd
+    --   specialize h_covers_cd x hx
+    --   simp only [Set.mem_iUnion] at h_covers_cd
+    --   obtain ⟨i, i_in_fin, x_in_i⟩ := h_covers_cd
+    --   simp at x_in_i
+    --   use i
+    --   refine ⟨?_, ?_⟩
+    --   simp only [covering_intervals]
+    --   simp only [image']
+    --   simp
+    --   use i
+    --   use i_in_fin
 
-    let covering_finset := Set.Finite.toFinset covering_is_finite
-    let poly_degrees := ((fun interval_and_poly => interval_and_poly.2.natDegree) '' covering_intervals)
-    have degrees_nonempty: poly_degrees.Nonempty := by
-      exact
-        Set.Nonempty.image (fun interval_and_poly ↦ interval_and_poly.2.natDegree) covering_nonempty
-    have degrees_finite: poly_degrees.Finite := by
-      exact Set.Finite.image (fun interval_and_poly ↦ interval_and_poly.2.natDegree) covering_is_finite
+    --   ext p
+    --   refine ⟨?_, ?_⟩
+    --   simp
+    --   intro choose_lt_p
+    --   intro p_lt_other_choose
+
+
+
+
+
+
+    --   simp only [id_eq, Set.mem_range] at i_in_fin
+    --   use i
+    --   refine ⟨?_, ?_⟩
+    --   simp only [covering_intervals]
+    --   simp only [image']
+    --   simp
+    --   use i
+
 
     --obtain ⟨degrees_poly_finset, h_degree_poly_finset⟩ := Set.Finite.exists_finset degrees_finite
     --have degrees_nonempty_finset: degrees_poly_finset.Nonempty := by
@@ -343,6 +365,7 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
     let all_x_data: Set (XData c d f) := {x_data | ∃ x: ℝ, ∃ hx: x ∈ Set.Icc c d, x_data = x_to_data x c d fin_cover hx h_covers_cd h_fin_subset}
     have all_x_data_finite: all_x_data.Finite := by
       sorry
+
 
     let extract_degree := fun {c d: ℝ} (data: XData c d f) => data.poly.natDegree
     let all_degrees := extract_degree '' all_x_data
