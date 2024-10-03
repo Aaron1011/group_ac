@@ -398,6 +398,18 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
         linarith
 
 
+      have deriv_fun_eq: deriv (fun (p : ℝ) => Polynomial.eval p ab_poly) = (fun (p: ℝ) => Polynomial.eval p (Polynomial.derivative ab_poly)) := by
+        ext
+        simp
+
+      have iterated_deriv_fun_eq: ∀ (n: ℕ), deriv^[n] (fun (p : ℝ) => Polynomial.eval p ab_poly) = (fun (p: ℝ) => Polynomial.eval p (Polynomial.derivative^[n] ab_poly)) := by
+        sorry
+      rw [iteratedDeriv_eq_iterate]
+      rw [iterated_deriv_fun_eq]
+      rw [Polynomial.iterate_derivative_eq_zero degree_lt]
+      simp
+    apply zero_deriv_implies_poly
+  sorry
 
   -- let p: ℝ := 0
   -- have p_in_union: p ∈ Set.sUnion { i | ∃ (a b : ℝ ), i = Set.Ioo a b ∧ RestrictsToPoly f a b } := by
