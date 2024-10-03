@@ -408,7 +408,10 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
       rw [iterated_deriv_fun_eq]
       rw [Polynomial.iterate_derivative_eq_zero degree_lt]
       simp
-    apply zero_deriv_implies_poly
+    apply zero_deriv_implies_poly c d large_degree c_lt_d hCInfinity
+    intro y hy
+    apply fn_zero
+    apply?
   sorry
 
   -- let p: ℝ := 0
