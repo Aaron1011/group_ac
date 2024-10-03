@@ -289,10 +289,10 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
     have degrees_finite: poly_degrees.Finite := by
       exact Set.Finite.image (fun interval_and_poly ↦ interval_and_poly.2.natDegree) covering_is_finite
 
-    let degrees_poly_finset := Set.Finite.toFinset degrees_finite
+    obtain ⟨degrees_poly_finset, h_degree_poly_finset⟩ := Set.Finite.exists_finset degrees_finite
     have degrees_nonempty_finset: degrees_poly_finset.Nonempty := by
       sorry
-    obtain ⟨largest_degree, h_max_degree⟩ := Finset.max_of_nonempty degrees_nonempty_finset
+    let largest_degree := Finset.max' degrees_poly_finset degrees_nonempty_finset
     let large_degree := largest_degree + 1
     have fn_zero: ∀ (x: ℝ), x ∈ Set.Icc c d → (iteratedDeriv large_degree f) x = 0 := by
       intro x hx
@@ -326,6 +326,30 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
       rw [iteratedFDerivWithin_of_isOpen large_degree (isOpen_Ioo) x_in_i] at derivwith_eq
       rw [← iteratedDeriv] at derivwith_eq
       rw [← iteratedDeriv] at derivwith_eq
+      rw [← iteratedDeriv]
+      rw [derivwith_eq]
+      have ab_degree_in: ab_poly.natDegree ∈ degrees_poly_finset := by
+        rw [h_degree_poly_finset]
+        simp only [poly_degrees]
+        simp
+        use Set.Ioo a b
+        use ab_poly
+        refine ⟨?_, ?_⟩
+        simp only [covering_intervals]
+        simp only [image']
+        simp
+        use Set.Ioo a b
+        rw [hab] at i_in_fin
+        use i_in_fin
+        refine ⟨?_, ?_⟩
+        simp
+
+
+      have degree_lt: ab_poly.natDegree < large_degree := by
+        simp only [large_degree]
+
+
+
 
 
 
