@@ -245,8 +245,8 @@ lemma x_data_preserves_x (x c d fin_cover hx h_covers_cd) (h_fin_subset) : (x_to
 
 lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b} = Set.univ → ∃ p: Polynomial ℝ, f = p.eval := by
   intro omega_eq_r
-  have overlap_eq: ∀ a b c d pl pr, RestrictsToPolyBundle f a b pl ∧ RestrictsToPolyBundle f c d pr → ∀x, x ∈ Set.Ioo a b ∩ Set.Ioo c d → pl = pr := by
-    intro a b c d pa pb ⟨hpa, hpb⟩ x ⟨hx1, hx2⟩
+  have overlap_eq: ∀ a b c d pl pr, a < b ∧ a < d ∧ c < d ∧ RestrictsToPolyBundle f a b pl ∧ RestrictsToPolyBundle f c d pr → ∀x, x ∈ Set.Ioo a b ∩ Set.Ioo c d → pl = pr := by
+    intro a b c d pa pb ⟨a_lt_b, a_lt_d, c_lt_d, hpa, hpb⟩ x ⟨hx1, hx2⟩
     have eq_zero_intersect: ∀ y, y ∈ Set.Ioo a b ∩ Set.Ioo c d → (pa - pb).eval y = 0 := by
       intro y ⟨hy1, hy2⟩
       simp
@@ -255,7 +255,17 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
       simp
 
     have intersect_infinite: (Set.Ioo a b ∩ Set.Ioo c d).Infinite := by
-      sorry
+      rw [Set.Ioo_inter_Ioo]
+      apply Set.Ioo_infinite
+      simp
+      refine ⟨⟨?_, ?_⟩, ?_, ?_,⟩
+      assumption
+      simp at hx1
+      simp at hx2
+      linarith
+      linarith
+      linarith
+
 
     have diff_zero_all: (pa - pb) = 0 := by
       obtain ⟨nplusone_zeros, zeros_subset, zeros_card⟩ := @Set.Infinite.exists_subset_card_eq _ (Set.Ioo a b ∩ Set.Ioo c d) intersect_infinite ((pa - pb).natDegree + 1)
