@@ -1271,7 +1271,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     simp [instTopologicalSpaceSubtype, TopologicalSpace.induced] at x_int_open
     -- An open set in the topology on R
     obtain ⟨full_set, full_set_open, full_set_preimage⟩ := x_int_open
-    rw [Set.preimage_eq_iff_eq_image] at full_set_preimage
+    --rw [Set.preimage_eq_iff_eq_image] at full_set_preimage
 
     have full_set_nonempty: full_set.Nonempty := by
       rw [Set.nonempty_def]
@@ -1288,11 +1288,15 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       rw [Set.subset_def] at cd_int
       intro x hx
       specialize cd_int x hx.1
-      rw [full_set_preimage, Subtype.coe_image] at cd_int
-      simp at cd_int
-      obtain ⟨x_in_subspace, h_int⟩ := cd_int
-      simp only [mem_interior] at h_int
-      obtain ⟨t, t_subset, t_open, x_in_t⟩ := h_int
+      have full_set_preimage_reverse: interior {x: x_subspace | ↑x ∈ e_n n_x_int} = (Subtype.val ⁻¹' full_set) := full_set_preimage.symm
+      rw [Set.eq_preimage_subtype_val_iff] at full_set_preimage_reverse
+      --rw [full_set_preimage, Subtype.coe_image] at cd_int
+      specialize full_set_preimage_reverse x hx.2
+      have x_in_interior := by
+        apply full_set_preimage_reverse.mpr cd_int
+
+      simp only [mem_interior] at x_in_interior
+      obtain ⟨t, t_subset, t_open, x_in_t⟩ := x_in_interior
       apply Set.mem_of_subset_of_mem t_subset at x_in_t
       dsimp [interior, e_n] at x_in_t
       exact x_in_t
@@ -1399,6 +1403,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       exact hq.1
 
     contradiction
+
 
   have poly_comp_empty: poly_omegaᶜ = ∅ := by
     apply X_empty
