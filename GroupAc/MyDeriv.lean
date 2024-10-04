@@ -1283,7 +1283,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset full_set_open full_set_nonempty
     let cd_intersect_x := Set.Ioo c d ∩ X
 
-    have x_zero_on_cd: ∀ (x: ℝ), x ∈ cd_intersect_x → (iteratedDerivWithin n_x_int f cd_intersect_x) x = 0 := by
+    have x_zero_on_cd: ∀ (x: ℝ), x ∈ cd_intersect_x → (iteratedDeriv n_x_int f) x = 0 := by
       -- dsimp [x_int] at cd_int
       -- dsimp [interior, e_n] at cd_int
       rw [Set.subset_def] at cd_int
@@ -1304,13 +1304,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       apply Set.mem_of_subset_of_mem t_subset at hxt
       apply Set.mem_of_mem_inter_right at hxt
       rw [Set.mem_setOf_eq] at hxt
-      have eq_on: Set.EqOn (iteratedFDerivWithin ℝ n_x_int f cd_intersect_x) (iteratedFDeriv ℝ n_x_int f) cd_intersect_x :=
-        by apply iteratedFDerivWithin_of_isOpen n_x_int sorry
-      dsimp [Set.EqOn] at eq_on
-      specialize eq_on hx
-      dsimp [iteratedDeriv] at hxt
-      dsimp [iteratedDerivWithin]
-      rw [eq_on]
       apply hxt
 
     have n_succ_deriv_zero: ∀ (x: ℝ), x ∈ cd_intersect_x → (iteratedDerivWithin (n_x_int + 1) f cd_intersect_x) x = 0 := by
