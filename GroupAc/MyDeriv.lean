@@ -682,9 +682,14 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     have en_closed_subtype: ∀ k: ℕ, IsClosed ({x : ab_subspace | x.1 ∈ e_n k}) := by
       intro k
       specialize ab_subspace_enk_eq k
-      sorry
-
-
+      simp only [e_n]
+      simp
+      apply isClosed_eq
+      refine Continuous.comp' ?hf.hg ?hf.hf
+      apply ContDiff.continuous_iteratedDeriv k hCInfinity
+      simp
+      exact continuous_subtype_val
+      exact continuous_const
 
 
 
@@ -1396,6 +1401,8 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       obtain ⟨x, hx⟩ := x_int_nonempty
       rw [mem_interior] at hx
       obtain ⟨t, ht, h_other_t, x_in_t⟩ := hx
+      sorry
+
 
 
 
