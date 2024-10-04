@@ -506,15 +506,48 @@ lemma omega_r_imp_poly (q r: ℝ) (hNonempty: (Set.Ioo q r).Nonempty) (hCInfinit
     right
     exact c_lt_d
 
+  have q_lt_c: q < c := by
+    simp only [c]
+    simp [Set.Ioo_subset_Ioo_iff c_lt_d'] at cd_int'
+    linarith
+
+  have d_lt_d: d < r := by
+    simp only [d]
+    simp [Set.Ioo_subset_Ioo_iff c_lt_d'] at cd_int'
+    linarith
+
   obtain ⟨p_enclosing, h_p_enclosing⟩ := by
     apply poly_on_closed (min bad_x c) (max bad_x d) min_lt_max
-
     intro x hx
     simp
-    simp at hx
     refine ⟨?_, ?_⟩
-    sorry
-    sorry
+    have x_gt_min: (min bad_x c) ≤ x := by
+      simp at hx
+      simp
+      exact hx.1
+    have q_lt_bad_x: q < bad_x := by
+      exact h_bad_x.1.1
+    have q_lt_min: q < min bad_x c := by
+      apply lt_min q_lt_bad_x q_lt_c
+    linarith
+
+    have x_lt_max: x ≤ (max bad_x d) := by
+      simp at hx
+      simp
+      exact hx.2
+
+    have bad_x_lt_r: bad_x < r := by
+      exact h_bad_x.1.2
+
+    have max_lt_r: (max bad_x d) < r := by
+      apply max_lt
+      exact bad_x_lt_r
+      exact d_lt_d
+    linarith
+
+
+
+
 
 
   -- TODO - deduplicate this
