@@ -1284,7 +1284,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset full_set_open full_set_nonempty
     let cd_intersect_x := Set.Ioo c d ∩ X
 
-    have x_zero_on_cd: ∀ (x: ℝ), x ∈ cd_intersect_x → (iteratedDeriv n_x_int f) x = 0 := by
+    have x_zero_on_cd_intersect: ∀ (x: ℝ), x ∈ cd_intersect_x → (iteratedDeriv n_x_int f) x = 0 := by
       rw [Set.subset_def] at cd_int
       intro x hx
       specialize cd_int x hx.1
@@ -1301,10 +1301,9 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       intro x hx
       rw [iteratedDeriv_succ]
       have deriv_x_zero: (iteratedDeriv n_x_int f) x = 0 := by
-        apply x_zero_on_cd x hx
+        apply x_zero_on_cd_intersect x hx
 
       have cont_diff_within_at: ContDiffWithinAt ℝ ⊤ (iteratedDeriv n_x_int f) (Set.Ioo c d) c := by
-        --apply ContDiff.contDiffWithinAt hCInfinity
         sorry
 
       have continuous_within_at_c: ContinuousWithinAt (iteratedDeriv n_x_int f) (Set.Ioo c d) c := by
@@ -1313,6 +1312,8 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       have deriv_tendsto_at_a: Filter.Tendsto (iteratedDeriv n_x_int f) (nhdsWithin c (Set.Ioo c d)) (nhds ((iteratedDeriv n_x_int f) c)) := by
         apply ContinuousWithinAt.tendsto _
         apply continuous_within_at_c
+
+
 
 
       have deriv_zero_at_c: (iteratedDeriv n_x_int f) c = 0 := by
@@ -1369,25 +1370,33 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       . exact hx
 
 
-    have int_subset_x_int: x_int ⊆ X ∩ e_n n_x_int := interior_subset
-    have int_subset_x: x_int ⊆ X := by
-      simp [Set.subset_inter_iff] at int_subset_x_int
-      exact int_subset_x_int.1
+    -- have int_subset_x_int: x_int ⊆ X ∩ e_n n_x_int := interior_subset
+    -- have int_subset_x: x_int ⊆ X := by
+    --   simp [Set.subset_inter_iff] at int_subset_x_int
+    --   exact int_subset_x_int.1
     have cd_subset_x: Set.Ioo c d ⊆ X := by
-      apply subset_trans cd_int int_subset_x
+      apply subset_trans cd_int sorry -- int_subset_x
     simp [X] at cd_subset_x
 
     have cd_nonempty: (Set.Ioo c d).Nonempty := by
       simp
       exact c_lt_d
 
-    obtain ⟨q, hq⟩ := Set.nonempty_def.mp cd_nonempty
+    have cd_intersect_x_nonempty: cd_intersect_x.Nonempty := by
+      simp only [cd_intersect_x]
+      simp only [Set.inter_nonempty]
+
+      obtain ⟨q, hq⟩ := cd_nonempty
+      use q
+      refine ⟨hq, ?_⟩
+      apply cd_subset_x hq
+
+    obtain ⟨q, hq⟩ := Set.nonempty_def.mp cd_intersect_x_nonempty
     have _: q ∈ X := by
-      apply cd_subset_x
-      exact hq
+      apply hq.2
     have _: q ∈ poly_omega := by
       apply cd_subset_omega
-      exact hq
+      exact hq.1
 
     contradiction
 
