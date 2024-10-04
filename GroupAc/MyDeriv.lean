@@ -1362,17 +1362,17 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         ext y
         sorry
         -- by_cases h_mem_interval: y ∈ closure (Set.Ioo c d)
-        -- . sorry
+        -- . s orry
         -- . by_cases n_x_int_zero: n_x_int = 0
         --   . rw [n_x_int_zero]
         --     simp
 
 
-        --   . sorry
+        --   . s orry
 
         --   have deriv_zero: derivi derivWithin_zero_of_nmem_closure h_mem_interval
         --   . simp
-        --     sorry
+        --     s orry
         --   . rw [Set.eq_endpoints_or_mem_Ioo_of_mem_Icc] at y_mem_endpoints
 
       sorry
@@ -1380,8 +1380,8 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     -- have forall_deriv_zero: ∀ (m: ℕ), m ≥ n_x_int →  ∀ (x: ℝ), x ∈ X ∩ Set.Ioo c d → (iteratedDerivWithin m f (Set.Ioo c d)) x = 0 := by
     --   intro m hm
     --   induction m with
-    --   | zero => sorry
-    --   | succ a ha => sorry
+    --   | zero => s orry
+    --   | succ a ha => s orry
 
 
     have cont_diff_on: ContDiffOn ℝ ⊤ f (Set.Icc c d) := ContDiff.contDiffOn hCInfinity
@@ -1410,7 +1410,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     --   exact int_subset_x_int.1
 
     --have cd_subset_x: Set.Ioo c d ⊆ X := by
-    --  apply subset_trans cd_int sorry -- int_subset_x
+    --  apply subset_trans cd_int s orry -- int_subset_x
     --simp [X] at cd_subset_x
 
     have cd_nonempty: (Set.Ioo c d).Nonempty := by
