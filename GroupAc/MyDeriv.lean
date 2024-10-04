@@ -382,14 +382,48 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
       exact Classical.choose (interval_to_poly i hi)
     )
 
-    let new_poly_intervals := image' fin_cover interval_to_poly
+    let polys_from_intervals := image' fin_cover interval_to_poly
+    have polys_from_intervals_finite: polys_from_intervals.Finite := by
+      simp only [polys_from_intervals, image']
+      exact Set.Finite.dependent_image h_fin_cover_finite interval_to_poly
+    let new_all_degrees := Polynomial.natDegree '' polys_from_intervals
+    have new_all_degrees_finite: new_all_degrees.Finite := by
+      exact Set.Finite.image (fun p ↦ p.natDegree) polys_from_intervals_finite
+    have ⟨new_all_degrees_finset, h_new_all_degrees_finset⟩ := Set.Finite.exists_finset new_all_degrees_finite
+    have new_all_degrees_finset_nonempty: new_all_degrees_finset.Nonempty := by
+      let p := (c + d) / 2
+      have p_in_cd: p ∈ Set.Icc c d := by
+        simp [p]
+        refine ⟨?_, ?_⟩
+        linarith
+        linarith
+      have p_in_union: p ∈ ⋃ i ∈ fin_cover, id i := by
+        apply h_covers_cd p_in_cd
+      rw [Set.mem_iUnion] at p_in_union
+      obtain ⟨i, hi⟩ := p_in_union
+      simp at hi
+      obtain ⟨i_in_fin, p_in_i⟩ := hi
+      let poly := interval_to_poly i i_in_fin
+      rw [Finset.Nonempty]
+      use poly.natDegree
+      rw [h_new_all_degrees_finset]
+      simp only [new_all_degrees]
+      simp
+      use poly
+      simp
+      simp [polys_from_intervals]
+      simp only [image']
+      simp
+      use i
+      use i_in_fin
 
-    -- let new_covering_intervals := (fun i hi => by
-    --   specialize h_fin_subset i hi
-    --   -- CANNOT use 'obtain' here: see https://leanprover.zulipchat.com/#narrow/stream/113489-new-members/topic/Problems.20with.20obtain/near/467580722
-    --   choose a b hab r ab_poly using h_fin_subset
-    --   exact (Set.Ioo a b, ab_poly)
-    -- )
+
+
+
+
+    let max_degree := Finset.max' new_all_degrees_finset new_all_degrees_finset_nonempty
+    let large_degree := max_degree + 1
+
 
     let all_x_data: Set (XData c d fin_cover f) := {x_data | ∃ x: ℝ, ∃ hx: x ∈ Set.Icc c d, x_data = x_to_data x c d fin_cover hx h_covers_cd h_fin_subset}
     let all_intervals := (λ d => Set.Ioo d.a d.b) '' all_x_data
