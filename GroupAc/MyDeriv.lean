@@ -13,6 +13,9 @@ variable {f: ℝ → ℝ}
 def RestrictsToPoly (f: ℝ → ℝ) (a b: ℝ) :=
   ∃ (p: Polynomial ℝ), ∀ (y: ℝ), y ∈ Set.Ioo a b → f y = p.eval y
 
+def RestrictsToPolyOn (f: ℝ → ℝ) (s: Set ℝ) :=
+  ∃ (p: Polynomial ℝ), ∀ (y: ℝ), y ∈ s → f y = p.eval y
+
 def RestrictsToPolyBundle (f: ℝ → ℝ) (a b: ℝ) (p: Polynomial ℝ) :=
   ∀ (y: ℝ), y ∈ Set.Ioo a b → f y = p.eval y
 
@@ -220,15 +223,16 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff
 
     exact ⟨poly_integral, f_eq_deriv_integral⟩
 
-class XData (c d: ℝ) (f: ℝ → ℝ) :=
+class XData (c d: ℝ) (fin_cover: Set (Set ℝ)) (f: ℝ → ℝ) :=
   (x: ℝ)
   (a: ℝ)
   (b: ℝ)
   (poly: Polynomial ℝ)
   (x_in_int : x ∈ Set.Ioo a b)
+  (int_in_fin: Set.Ioo a b ∈ fin_cover)
   (poly_eq: RestrictsToPolyBundle f a b poly)
 
-noncomputable def x_to_data (x c d: ℝ) (fin_cover: Set (Set ℝ)) (hx: x ∈ Set.Icc c d) (h_covers_cd : Set.Icc c d ⊆ ⋃ i ∈ fin_cover, id i) (h_fin_subset : ∀ x ∈ fin_cover, ∃ a b, x = Set.Ioo a b ∧ RestrictsToPoly f a b): XData c d f := by
+noncomputable def x_to_data (x c d: ℝ) (fin_cover: Set (Set ℝ)) (hx: x ∈ Set.Icc c d) (h_covers_cd : Set.Icc c d ⊆ ⋃ i ∈ fin_cover, id i) (h_fin_subset : ∀ x ∈ fin_cover, ∃ a b, x = Set.Ioo a b ∧ RestrictsToPoly f a b): XData c d fin_cover f := by
   have x_in_cover: x ∈ ⋃ i ∈ fin_cover, id i := h_covers_cd hx
   rw [Set.mem_iUnion] at x_in_cover
   simp at x_in_cover
@@ -236,8 +240,9 @@ noncomputable def x_to_data (x c d: ℝ) (fin_cover: Set (Set ℝ)) (hx: x ∈ S
   specialize h_fin_subset i i_in_fin
   choose a b hab has_ab_poly using h_fin_subset
   choose ab_poly h_ab_poly using has_ab_poly
+  have i_in_fin: Set.Ioo a b ∈ fin_cover := by rwa [← hab]
   rw [hab] at x_in_i
-  let x_data := XData.mk (c := c) (d := d) x a b ab_poly x_in_i h_ab_poly
+  let x_data := XData.mk (c := c) (d := d) x a b ab_poly x_in_i i_in_fin h_ab_poly
   exact x_data
 
 lemma x_data_preserves_x (x c d fin_cover hx h_covers_cd) (h_fin_subset) : (x_to_data (f := f) x c d fin_cover hx h_covers_cd h_fin_subset).x = x := by
@@ -362,16 +367,70 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
     --let largest_degree := Finset.max' degrees_poly_finset degrees_nonempty_finset
     --let large_degree := largest_degree + 1
 
-    let all_x_data: Set (XData c d f) := {x_data | ∃ x: ℝ, ∃ hx: x ∈ Set.Icc c d, x_data = x_to_data x c d fin_cover hx h_covers_cd h_fin_subset}
+    have interval_to_poly: ∀ i ∈ fin_cover, RestrictsToPolyOn f i := by
+      intro i a_in_fin
+      specialize h_fin_subset i a_in_fin
+      choose a' b' hab has_ab_poly using h_fin_subset
+      rw [RestrictsToPolyOn]
+      rw [RestrictsToPoly] at has_ab_poly
+      obtain ⟨p, hp⟩ := has_ab_poly
+      rw [← hab] at hp
+      exact ⟨p, hp⟩
+
+    let interval_to_poly := (fun i hi => by
+      -- CANNOT use 'obtain' here: see https://leanprover.zulipchat.com/#narrow/stream/113489-new-members/topic/Problems.20with.20obtain/near/467580722
+      exact Classical.choose (interval_to_poly i hi)
+    )
+
+    let new_poly_intervals := image' fin_cover interval_to_poly
+
+    -- let new_covering_intervals := (fun i hi => by
+    --   specialize h_fin_subset i hi
+    --   -- CANNOT use 'obtain' here: see https://leanprover.zulipchat.com/#narrow/stream/113489-new-members/topic/Problems.20with.20obtain/near/467580722
+    --   choose a b hab r ab_poly using h_fin_subset
+    --   exact (Set.Ioo a b, ab_poly)
+    -- )
+
+    let all_x_data: Set (XData c d fin_cover f) := {x_data | ∃ x: ℝ, ∃ hx: x ∈ Set.Icc c d, x_data = x_to_data x c d fin_cover hx h_covers_cd h_fin_subset}
+    let all_intervals := (λ d => Set.Ioo d.a d.b) '' all_x_data
+    have intervals_in_finset: all_intervals ⊆ fin_cover := by
+      intro x hx
+      simp only [all_intervals] at hx
+      obtain ⟨x_data, x_data_in⟩ := hx
+      obtain ⟨x, hx⟩ := x_data_in
+      obtain ⟨hx1, hx2⟩ := hx
+      simp
+      apply x_data.int_in_fin
+
+    have all_intervals_finite: all_intervals.Finite := by
+      apply Set.Finite.subset h_fin_cover_finite
+      exact intervals_in_finset
+
+    have all_interval_has_poly: ∀ i, i ∈ all_intervals → ∃ a b p, i = Set.Ioo a b ∧ RestrictsToPolyBundle f a b p := by
+      intro i hi
+      simp only [all_intervals] at hi
+      simp at hi
+      obtain ⟨x_data, x_data_in⟩ := hi
+      use x_data.a
+      use x_data.b
+      use x_data.poly
+      use x_data_in.2.symm
+      exact x_data.poly_eq
+
     have all_x_data_finite: all_x_data.Finite := by
       sorry
 
 
-    let extract_degree := fun {c d: ℝ} (data: XData c d f) => data.poly.natDegree
+    let extract_degree := fun {c d: ℝ} (data: XData c d fin_cover f) => data.poly.natDegree
     let all_degrees := extract_degree '' all_x_data
 
     have all_degrees_finite: all_degrees.Finite := by
-      exact Set.Finite.image (fun data ↦ data.poly.natDegree) all_x_data_finite
+      simp only [all_degrees]
+      simp only [all_x_data]
+      sorry
+
+
+      --exact Set.Finite.image (fun data ↦ data.poly.natDegree) all_x_data_finite
 
     have ⟨all_degrees_finset, h_all_degrees_finset⟩ := Set.Finite.exists_finset all_degrees_finite
     have all_degrees_finset_nonempty: all_degrees_finset.Nonempty := by
