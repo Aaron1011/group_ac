@@ -1125,6 +1125,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         -- f^(n) is zero on (g, x) and (x, h), and x, so it's zero on (g, h)
         have f_zero_full: ∀ (y: ℝ), y ∈ (Set.Ioo g h) → (iteratedDeriv (n + 1) f) y = 0 := by
           intro y hy
+          simp at hy
           have y_cases: y = x ∨ y ≠ x := by
             apply eq_or_ne y x
           cases y_cases with
@@ -1133,7 +1134,23 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
             exact f_deriv_at_x
           | inr y_neq_x =>
             have y_in_union: y ∈ (Set.Ioo g x ∪ Set.Ioo x h) := by
-              sorry
+              have y_lt_or_gt: y < x ∨ x < y := by
+                apply lt_or_gt_of_ne y_neq_x
+              cases y_lt_or_gt with
+              | inl y_lt_x =>
+                rw [Set.mem_union]
+                left
+                simp
+                refine ⟨?_, ?_⟩
+                linarith
+                linarith
+              | inr x_lt_y =>
+                rw [Set.mem_union]
+                right
+                simp
+                refine ⟨?_, ?_⟩
+                linarith
+                linarith
             apply f_deriv_zero y y_in_union
         exact f_zero_full
 
