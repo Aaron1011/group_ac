@@ -13,6 +13,7 @@ variable {f: ℝ → ℝ}
 def RestrictsToPoly (f: ℝ → ℝ) (a b: ℝ) :=
   ∃ (p: Polynomial ℝ), ∀ (y: ℝ), y ∈ Set.Ioo a b → f y = p.eval y
 
+
 def RestrictsToPolyOn (f: ℝ → ℝ) (s: Set ℝ) :=
   ∃ (p: Polynomial ℝ), ∀ (y: ℝ), y ∈ s → f y = p.eval y
 
@@ -24,6 +25,7 @@ def RestrictsToPolyBundleOn (f: ℝ → ℝ) (s: Set ℝ) (p: Polynomial ℝ) :=
 
 def image' {α : Type _} {β : Type _} (s : Set α) (f : (a : α) → a ∈ s → β) : Set β :=
   {b | ∃ a ha, f a ha = b}
+
 
 lemma const_ioo_implies_endpoint_left (a b k: ℝ) (hlt: a < b) (hc: ContinuousOn f (Set.Icc a b)) (hConst: ∀ x, x ∈ (Set.Ioo a b) → f x = k) : f a = k := by
   have tendsto_left: Tendsto f (𝓝[Set.Icc a b] a) (𝓝 (f a)) := by
@@ -98,6 +100,46 @@ lemma const_ioo_implies_endpoint_right (a b k: ℝ) (hlt: a < b) (hc: Continuous
 
   simp [f_swap] at f_swap_left
   exact f_swap_left
+
+lemma poly_eq_open_imp_closed (a b: ℝ) (hab: a < b) (hd: ContDiff ℝ ⊤ f) (p: Polynomial ℝ): (∀ (y: ℝ), y ∈ Set.Ioo a b → f y = p.eval y) →  (∀ (y: ℝ), y ∈ Set.Icc a b → f y = p.eval y) := by
+  intro hy_open
+  have eq_zero: ∀ (z: ℝ), z ∈ Set.Ioo a b → (f z - p.eval z) = 0 := by
+    intro z hz
+    rw [← hy_open z hz]
+    simp
+  have f_sub_eq_a: f a - p.eval a = 0 := by
+    apply @const_ioo_implies_endpoint_left (λ z => f z - p.eval z) a b
+    apply hab
+    apply ContinuousOn.sub
+    apply Continuous.continuousOn
+    apply ContDiff.continuous hd
+    exact Polynomial.continuousOn_aeval p
+    apply eq_zero
+
+  -- TODO - can we combine the above two?
+  have f_sub_eq_b: f b - p.eval b = 0 := by
+    apply @const_ioo_implies_endpoint_right (λ z => f z - p.eval z) a b
+    apply hab
+    apply ContinuousOn.sub
+    apply Continuous.continuousOn
+    apply ContDiff.continuous hd
+    exact Polynomial.continuousOn_aeval p
+    apply eq_zero
+
+  intro y hy
+  apply Set.eq_endpoints_or_mem_Ioo_of_mem_Icc at hy
+  cases hy with
+  | inl y_eq_a =>
+    rw [y_eq_a]
+    exact eq_of_sub_eq_zero f_sub_eq_a
+  | inr hy' => cases hy' with
+    | inl y_eq_b =>
+      rw [y_eq_b]
+      exact eq_of_sub_eq_zero f_sub_eq_b
+    | inr y_in_ioo =>
+      apply hy_open
+      exact y_in_ioo
+
 
 lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff ℝ ⊤ f) (hf: ∀ (x : ℝ), (x ∈ Set.Ioo a b) → (iteratedDeriv n f) x = 0): RestrictsToPoly f a b := by
   induction n generalizing f with
