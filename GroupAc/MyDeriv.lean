@@ -82,25 +82,6 @@ lemma poly_iterated_deriv (n: ℕ) (p: Polynomial ℝ): iteratedDeriv n (fun (x 
     simp only [Polynomial.deriv]
     simp [← Function.iterate_succ_apply']
 
-lemma poly_iterated_derivWithin (n: ℕ) (p: Polynomial ℝ) (s: Set ℝ) (hs: UniqueDiffOn ℝ s): iteratedDerivWithin n (fun (x : ℝ) => Polynomial.eval x p) s = (fun (x: ℝ) => Polynomial.eval x (Polynomial.derivative^[n] p)) := by
-  induction n with
-  | zero =>
-    simp
-  | succ k ih =>
-    simp
-    ext x
-    have unique_at:  UniqueDiffWithinAt ℝ s x := by
-      apply UniqueDiffOn.uniqueDiffWithinAt hs
-      sorry
-
-    rw [iteratedDerivWithin_succ]
-    rw [ih]
-    have deriv_within_eq := by
-      apply Polynomial.derivWithin ((⇑Polynomial.derivative)^[k] p) unique_at
-    simp only [deriv_within_eq]
-    simp [← Function.iterate_succ_apply']
-    apply unique_at
-
 lemma const_ioo_implies_endpoint_right (a b k: ℝ) (hlt: a < b) (hc: ContinuousOn f (Set.Icc a b)) (hConst: ∀ x, x ∈ (Set.Ioo a b) → f x = k) : f b = k := by
   let f_swap := f ∘ (λ x: ℝ => (b + (a - x)))
   have f_swap_const: ∀ x, x ∈ (Set.Ioo a b) → f_swap x = k := by
@@ -1081,7 +1062,10 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
             rw [Set.EqOn] at derivwith_eq
             specialize derivwith_eq y_in_left
-            rw [poly_iterated_derivWithin (n + 1)] at derivwith_eq
+            nth_rewrite 2 [iteratedDerivWithin] at derivwith_eq
+            rw [iteratedFDerivWithin_of_isOpen (n + 1) (isOpen_Ioo) y_in_left] at derivwith_eq
+            rw [← iteratedDeriv] at derivwith_eq
+            rw [poly_iterated_deriv (n + 1)] at derivwith_eq
             rw [Polynomial.iterate_derivative_eq_zero] at derivwith_eq
             simp at derivwith_eq
             rw [iteratedDerivWithin] at derivwith_eq
@@ -1093,7 +1077,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
               simp
             rw [← Nat.lt_add_one_iff] at le_max
             exact le_max
-            exact fun x_1 ↦ unique_diff x_1 g x
           | inr y_in_right =>
             -- FIXME - deduplicate this with the left-hand proof
             have y_eq_eval: f y = second_poly.eval y := by
@@ -1107,7 +1090,10 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
             rw [Set.EqOn] at derivwith_eq
             specialize derivwith_eq y_in_right
-            rw [poly_iterated_derivWithin (n + 1)] at derivwith_eq
+            nth_rewrite 2 [iteratedDerivWithin] at derivwith_eq
+            rw [iteratedFDerivWithin_of_isOpen (n + 1) (isOpen_Ioo) y_in_right] at derivwith_eq
+            rw [← iteratedDeriv] at derivwith_eq
+            rw [poly_iterated_deriv (n + 1)] at derivwith_eq
             rw [Polynomial.iterate_derivative_eq_zero] at derivwith_eq
             simp at derivwith_eq
             rw [iteratedDerivWithin] at derivwith_eq
@@ -1119,7 +1105,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
               simp
             rw [← Nat.lt_add_one_iff] at le_max
             exact le_max
-            exact fun x_1 ↦ unique_diff x_1 x h
 
         -- Use continuity here
         have f_deriv_at_x: (iteratedDeriv (n + 1) f) x = 0 := by
