@@ -748,8 +748,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       exact ne_of_lt a_lt_b
 
 
-    --obtain ⟨interior_index, int_nonempty⟩ := @nonempty_interior_of_iUnion_of_closed (Set.Icc a b) _ _ _ _ _ _ en_intersect_closed en_covers
-    -- TODO - we need to apply this to an entire topolgical space. We need [a, b] with the subspace topology
     -- Apply Baire category theorem
     obtain ⟨interior_index, int_nonempty⟩ := nonempty_interior_of_iUnion_of_closed en_intersect_closed en_covers.symm
     have int_open: IsOpen (interior ({x: ab_subspace | x.1 ∈ Set.Icc a b ∩ e_n interior_index})) := by apply isOpen_interior
@@ -1180,11 +1178,17 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         exact x_in_gh
       contradiction
 
-    have x_intersect_closed: ∀ k: ℕ , IsClosed (X ∩ (e_n k)) := by
+    have en_closed_subtype_x: ∀ k: ℕ, IsClosed ({x : X | x.1 ∈ e_n k}) := by
+      intro k
+      sorry
+
+
+    let x_subspace :=  { x: ℝ // x ∈ X }
+    have x_intersect_closed: ∀ k: ℕ , IsClosed (X := x_subspace) (Set.univ ∩ {x: X | x.1 ∈ e_n k }) := by
       intro k
       apply IsClosed.inter
-      exact X_closed
-      apply en_closed k
+      apply isClosed_univ
+      apply en_closed_subtype_x k
 
     have x_union_en: X = Set.iUnion fun j => X ∩ (e_n j) := by
       ext p
@@ -1209,14 +1213,49 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       obtain ⟨_, p_in_intersect⟩ := p_in_union
       exact p_in_intersect.1
 
-    have en_cov_univ_set_x: (Set.iUnion fun j => X ∩ (e_n j)) = Set.univ := by
-      sorry
+
+    have en_cov_univ_set_x: (@Set.univ x_subspace) = Set.iUnion fun j => Set.univ ∩ ({x: x_subspace | x.1 ∈ e_n j}) := by
+      ext p
+      obtain ⟨n, hn⟩ := hf p
+      have p_in_en: p.1 ∈ (e_n n) := by
+        simp only [e_n]
+        simp
+        exact hn
+
+      constructor
+      -- first case
+      intro p_in_univ
+      have p_in_intersect: p.1 ∈ (e_n n) ∩ Set.univ := by
+        apply Set.mem_inter
+        exact p_in_en
+        exact p_in_univ
+
+      simp only [Set.mem_iUnion]
+      use n
+      obtain ⟨real_p, hp⟩ := p
+      simp
+      exact p_in_en
+
+      simp
+
+    have x_set_complete: IsComplete X := by
+      apply IsClosed.isComplete
+      exact X_closed
+
+    have complete_space: CompleteSpace x_subspace := by
+      apply IsComplete.completeSpace_coe
+      exact x_set_complete
 
     by_contra!
 
+    have subspace_nonempty: Nonempty x_subspace := by
+      exact Set.Nonempty.to_subtype this
+
+
     rw [eq_comm] at x_union_en
-    -- Apply baire category theorem again
-    obtain ⟨n_x_int, x_int_nonempty⟩ := nonempty_interior_of_iUnion_of_closed x_intersect_closed en_cov_univ_set_x
+    -- Apply baire category theorem again.
+    -- WRONG - we need to be applying this in the subspace X, not in R
+    obtain ⟨n_x_int, x_int_nonempty⟩ := nonempty_interior_of_iUnion_of_closed x_intersect_closed en_cov_univ_set_x.symm
     let x_int := (interior (X ∩ e_n n_x_int))
     have x_int_open: IsOpen x_int := by apply isOpen_interior
     obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset x_int_open x_int_nonempty
@@ -1302,6 +1341,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
 
     have cont_diff_on: ContDiffOn ℝ ⊤ f (Set.Icc c d) := ContDiff.contDiffOn hCInfinity
+    -- "We will prove that f(n)=0 on (a,b). This will imply that (a,b)⊂Ω which is a contradiction with (3)."
     have deriv_zero_on_cd_omega: ∀ (x : ℝ), x ∈ Set.Ioo c d → (iteratedDeriv n_x_int f) x = 0 := by
       intro x hx
 
