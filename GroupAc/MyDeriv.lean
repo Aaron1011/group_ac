@@ -70,6 +70,36 @@ lemma const_ioo_implies_endpoint_left (a b k: ℝ) (hlt: a < b) (hc: ContinuousO
 
   exact h_left_eq
 
+lemma poly_iterated_deriv (n: ℕ) (p: Polynomial ℝ): iteratedDeriv n (fun (x : ℝ) => Polynomial.eval x p) = (fun (x: ℝ) => Polynomial.eval x (Polynomial.derivative^[n] p)) := by
+  induction n with
+  | zero =>
+    simp
+  | succ k ih =>
+    simp
+    rw [iteratedDeriv_succ]
+    rw [ih]
+    ext p
+    simp only [Polynomial.deriv]
+    simp [← Function.iterate_succ_apply']
+
+lemma poly_iterated_derivWithin (n: ℕ) (p: Polynomial ℝ) (s: Set ℝ) (hs: UniqueDiffOn ℝ s): iteratedDerivWithin n (fun (x : ℝ) => Polynomial.eval x p) s = (fun (x: ℝ) => Polynomial.eval x (Polynomial.derivative^[n] p)) := by
+  induction n with
+  | zero =>
+    simp
+  | succ k ih =>
+    simp
+    ext x
+    have unique_at:  UniqueDiffWithinAt ℝ s x := by
+      apply UniqueDiffOn.uniqueDiffWithinAt hs
+      sorry
+    rw [iteratedDerivWithin_succ]
+    rw [ih]
+    have deriv_within_eq := by
+      apply Polynomial.derivWithin ((⇑Polynomial.derivative)^[k] p) unique_at
+    simp only [deriv_within_eq]
+    simp [← Function.iterate_succ_apply']
+    apply unique_at
+
 lemma const_ioo_implies_endpoint_right (a b k: ℝ) (hlt: a < b) (hc: ContinuousOn f (Set.Icc a b)) (hConst: ∀ x, x ∈ (Set.Ioo a b) → f x = k) : f b = k := by
   let f_swap := f ∘ (λ x: ℝ => (b + (a - x)))
   have f_swap_const: ∀ x, x ∈ (Set.Ioo a b) → f_swap x = k := by
@@ -613,7 +643,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
   have en_closed: ∀ k: ℕ, IsClosed (e_n k) := by
     intro k
     simp only [e_n]
-    --have closed_zero: IsClosed { @Set.Icc _ _ 0 0 } := sorry
     simp [← Set.mem_singleton_iff]
     rw [← Set.preimage]
     apply IsClosed.preimage
@@ -624,7 +653,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     exact OrderTop.le_top _
     exact isClosed_singleton
     --dsimp [ab_subspace]
-    --sorry
+    --s orry
     --apply continuous_id'
 
   obtain ⟨poly_intervals, hIntervals⟩ := TopologicalSpace.IsTopologicalBasis.open_eq_sUnion Real.isTopologicalBasis_Ioo_rat poly_open
@@ -980,13 +1009,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         simp only [poly_omega] at right_subset_omega
         apply right_subset_omega
 
-      -- TODO we need to have poly_omega as a union of disjoint open intervals
-      --obtain ⟨leftPoly, h_leftPoly⟩ := left_subset_omega
-
-      -- TODO - get this intervals from the fact that x is an isolated point
-      --have _: (Set.Ioo g x) ⊆ poly_omega := by sorry
-      --have _: (Set.Ioo x h) ⊆ poly_omega := by sorry
-
       have is_first_poly: RestrictsToPoly f g x := is_first_poly_on
       have is_second_poly: RestrictsToPoly f x h := is_second_poly_on
 
@@ -1051,7 +1073,16 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
               apply h_first_poly
               exact y_in_left
             rw [iteratedDeriv_succ]
-            sorry
+            have derivwith_eq: Set.EqOn (iteratedDerivWithin (n + 1) f (Set.Ioo g x)) (iteratedDerivWithin (n + 1) first_poly.eval (Set.Ioo g x)) (Set.Ioo g x) := by
+              apply iteratedDerivWithin_congr
+              apply uniqueDiffOn_Ioo
+              apply h_first_poly
+
+
+            rw [Set.EqOn] at derivwith_eq
+            specialize derivwith_eq y_in_left
+            apply Polynomial.iterate_derivative_eq_zero
+            rw [iteratedDerivWithin] at derivwith_eq
 
           | inr y_in_right =>
             sorry
