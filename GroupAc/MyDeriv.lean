@@ -961,6 +961,25 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         rw [Set.subset_def]
         apply right_y_omega
 
+      have gx_nonempty: Set.Nonempty (Set.Ioo g x) := by
+        apply Set.nonempty_Ioo.mpr g_lt_x
+
+      have hx_nonempty: Set.Nonempty (Set.Ioo x h) := by
+        apply Set.nonempty_Ioo.mpr x_lt_h
+
+
+      have is_first_poly_on: RestrictsToPolyOn f (Set.Ioo g x) := by
+        apply omega_r_imp_poly g x gx_nonempty
+        exact hCInfinity
+        simp only [poly_omega] at left_subset_omega
+        apply left_subset_omega
+
+      have is_second_poly_on: RestrictsToPolyOn f (Set.Ioo x h) := by
+        apply omega_r_imp_poly x h hx_nonempty
+        exact hCInfinity
+        simp only [poly_omega] at right_subset_omega
+        apply right_subset_omega
+
       -- TODO we need to have poly_omega as a union of disjoint open intervals
       --obtain ⟨leftPoly, h_leftPoly⟩ := left_subset_omega
 
@@ -968,8 +987,8 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       --have _: (Set.Ioo g x) ⊆ poly_omega := by sorry
       --have _: (Set.Ioo x h) ⊆ poly_omega := by sorry
 
-      have is_first_poly: RestrictsToPoly f g x := by sorry
-      have is_second_poly: RestrictsToPoly f x h := by sorry
+      have is_first_poly: RestrictsToPoly f g x := is_first_poly_on
+      have is_second_poly: RestrictsToPoly f x h := is_second_poly_on
 
       obtain ⟨first_poly, h_first_poly⟩ := is_first_poly
       obtain ⟨second_poly, h_second_poly⟩ := is_second_poly
