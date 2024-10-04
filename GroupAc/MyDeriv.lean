@@ -298,8 +298,8 @@ noncomputable def x_to_data (x c d: ℝ) (fin_cover: Set (Set ℝ)) (hx: x ∈ S
 lemma x_data_preserves_x (x c d fin_cover hx h_covers_cd) (h_fin_subset) : (x_to_data (f := f) x c d fin_cover hx h_covers_cd h_fin_subset).x = x := by
   simp [x_to_data]
 
-lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b} = Set.univ → ∃ p: Polynomial ℝ, f = p.eval := by
-  intro omega_eq_r
+lemma omega_r_imp_poly (q r: ℝ) (hNonempty: (Set.Ioo q r).Nonempty) (hCInfinity: ContDiff ℝ ⊤ f): Set.Ioo q r ⊆ ⋃₀ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b} → RestrictsToPolyOn f (Set.Ioo q r) := by
+  intro s_subset_omega
   let all_intervals := {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b}
   let all_union := ⋃₀ all_intervals
   have all_open: ∀ s, s ∈ all_intervals → IsOpen (id s) := by
@@ -311,14 +311,14 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
     apply isOpen_Ioo
 
 
-  have poly_on_closed: ∀ c d, c < d →  RestrictsToPoly f c d := by
-    intro c d c_lt_d
+  have poly_on_closed: ∀ c d, c < d → Set.Icc c d ⊆ Set.Ioo q r →  RestrictsToPoly f c d := by
+    intro c d c_lt_d cd_subset_s
+
     have cd_subset: Set.Icc c d ⊆ ⋃ i ∈ all_intervals, id i := by
       simp only [all_union, all_intervals]
       simp only [id]
       rw [← Set.sUnion_eq_biUnion]
-      rw [omega_eq_r]
-      simp
+      exact fun ⦃a⦄ a_1 ↦ s_subset_omega (cd_subset_s a_1)
 
     have cd_compact: IsCompact (Set.Icc c d) := by
       apply isCompact_Icc
@@ -472,37 +472,71 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
     intro y hy
     apply fn_zero
     exact Set.mem_Icc_of_Ioo hy
-  obtain ⟨p_zero_one, h_p_zero_one⟩ := by apply poly_on_closed 0 1 zero_lt_one
+
+
+  obtain ⟨c', d', c_lt_d', cd_int'⟩ := IsOpen.exists_Ioo_subset (isOpen_Ioo (a:= q) (b := r)) hNonempty
+  let c := c' + (d' - c') / 4
+  let d := d' - (d' - c') / 4
+  have c_lt_d: c < d := by
+    simp only [c, d]
+    linarith
+  have cd_subset_cd': Set.Icc c d ⊆ Set.Ioo c' d' := by
+    simp only [c, d]
+    intro x hx
+    simp
+    simp at hx
+    refine ⟨?_, ?_⟩
+    linarith
+    linarith
+
+  have cd_subset_s: Set.Icc c d ⊆ Set.Ioo q r := by
+    exact fun ⦃a⦄ a_1 ↦ cd_int' (cd_subset_cd' a_1)
+
+  obtain ⟨p_zero_one, h_p_zero_one⟩ := by apply poly_on_closed c d c_lt_d cd_subset_s
   use p_zero_one
   by_contra!
   simp [Function.ne_iff] at this
   obtain ⟨bad_x, h_bad_x⟩ := this
 
   -- Obtain an interval enclosing [0, 1] and having the bad point within (or an endpoint)
-  let enclosing_open := Set.Ioo (min bad_x 0) (max bad_x 1)
-  have min_lt_max: (min bad_x 0) < (max bad_x 1) := by
+  let enclosing_open := Set.Ioo (min bad_x c) (max bad_x d)
+  have min_lt_max: (min bad_x c) < (max bad_x d) := by
     simp
+    right
+    right
+    exact c_lt_d
 
-  obtain ⟨p_enclosing, h_p_enclosing⟩ := by apply poly_on_closed (min bad_x 0) (max bad_x 1) min_lt_max
+  obtain ⟨p_enclosing, h_p_enclosing⟩ := by
+    apply poly_on_closed (min bad_x c) (max bad_x d) min_lt_max
+
+    intro x hx
+    simp
+    simp at hx
+    refine ⟨?_, ?_⟩
+    sorry
+    sorry
+
+
   -- TODO - deduplicate this
-  have intersect_infinite: (enclosing_open ∩ Set.Ioo 0 1).Infinite := by
+  have intersect_infinite: (enclosing_open ∩ Set.Ioo c d).Infinite := by
     rw [Set.Ioo_inter_Ioo]
     apply Set.Ioo_infinite
     simp
+    exact c_lt_d
 
   have diff_zero_all: (p_enclosing - p_zero_one) = 0 := by
-    obtain ⟨nplusone_zeros, zeros_subset, zeros_card⟩ := @Set.Infinite.exists_subset_card_eq _ (enclosing_open ∩ Set.Ioo 0 1) intersect_infinite ((p_enclosing - p_zero_one).natDegree + 1)
+    obtain ⟨nplusone_zeros, zeros_subset, zeros_card⟩ := @Set.Infinite.exists_subset_card_eq _ (enclosing_open ∩ Set.Ioo c d) intersect_infinite ((p_enclosing - p_zero_one).natDegree + 1)
     apply Polynomial.eq_zero_of_natDegree_lt_card_of_eval_eq_zero' (p_enclosing - p_zero_one) nplusone_zeros
     intro y hy
     simp only [Set.subset_def] at zeros_subset
-    have y_in_intersect: y ∈ enclosing_open ∩ Set.Ioo 0 1 := by
+    have y_in_intersect: y ∈ enclosing_open ∩ Set.Ioo c d := by
       simp only [enclosing_open]
       have y_in_closed := zeros_subset y hy
       simp only [enclosing_open] at y_in_closed
       exact y_in_closed
 
 
-    have eq_zero_intersect: ∀ z, z ∈ enclosing_open ∩ Set.Ioo 0 1 → (p_enclosing - p_zero_one).eval z = 0 := by
+    have eq_zero_intersect: ∀ z, z ∈ enclosing_open ∩ Set.Ioo c d → (p_enclosing - p_zero_one).eval z = 0 := by
       intro z ⟨hz1, hz2⟩
       simp only [enclosing_open] at hz1
       simp
@@ -524,7 +558,7 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
   rw [h_p_enclosing, eq_poly] at h_bad_x
   simp at h_bad_x
   simp
-  simp
+  linarith
   exact hCInfinity
 
 
@@ -1183,8 +1217,13 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
   have poly_full: poly_omega = (Set.univ) := by
     exact Set.compl_empty_iff.mp X_empty
 
-  obtain ⟨the_final_poly, h_the_final_poly⟩ := omega_r_imp_poly (f := f) hCInfinity poly_full
+  have zero_one_subset_poly: Set.Ioo 0 1 ⊆ poly_omega := by
+    simp [poly_full]
+  simp only [poly_omega] at zero_one_subset_poly
+
+  have zero_one_nonemoty: (Set.Ioo (0: ℝ) 1).Nonempty := by
+    exact Set.nonempty_Ioo.mpr zero_lt_one
+
+  obtain ⟨the_final_poly, h_the_final_poly⟩ := omega_r_imp_poly (f := f) 0 1 zero_one_nonemoty hCInfinity zero_one_subset_poly
   simp only [RestrictsToPoly]
   use the_final_poly
-  intro z hz
-  rw [h_the_final_poly]
