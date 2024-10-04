@@ -627,9 +627,21 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
         ext
         simp
 
-      have iterated_deriv_fun_eq: ∀ (n: ℕ), deriv^[n] (fun (p : ℝ) => Polynomial.eval p i_data.poly) = (fun (p: ℝ) => Polynomial.eval p (Polynomial.derivative^[n] i_data.poly)) := by
-        sorry
-      rw [iteratedDeriv_eq_iterate]
+      have iterated_deriv_fun_eq: ∀ (n: ℕ), iteratedDeriv n (fun (p : ℝ) => Polynomial.eval p i_data.poly) = (fun (p: ℝ) => Polynomial.eval p (Polynomial.derivative^[n] i_data.poly)) := by
+        intro n
+        induction n with
+        | zero =>
+          simp
+        | succ k ih =>
+          simp
+          rw [iteratedDeriv_succ]
+          rw [ih]
+          ext p
+          simp only [Polynomial.deriv]
+          simp [← Function.iterate_succ_apply']
+
+
+
       rw [iterated_deriv_fun_eq]
       rw [Polynomial.iterate_derivative_eq_zero degree_lt]
       simp
