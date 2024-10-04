@@ -1306,12 +1306,15 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         apply x_zero_on_cd_intersect x hx
 
       have cont_diff_within_at: ContDiffWithinAt ℝ ⊤ (iteratedDeriv n_x_int f) (Set.Ioo c d) c := by
-        sorry
+        have iterate_deriv_cont := by apply ContDiff.iterate_deriv n_x_int hCInfinity
+        simp only [← iteratedDeriv_eq_iterate] at iterate_deriv_cont
+        apply ContDiff.contDiffWithinAt iterate_deriv_cont
+
 
       have continuous_within_at_c: ContinuousWithinAt (iteratedDeriv n_x_int f) (Set.Ioo c d) c := by
         apply ContDiffWithinAt.continuousWithinAt cont_diff_within_at
 
-      have deriv_tendsto_at_a: Filter.Tendsto (iteratedDeriv n_x_int f) (nhdsWithin c (Set.Ioo c d)) (nhds ((iteratedDeriv n_x_int f) c)) := by
+      have deriv_tendsto_at_c: Filter.Tendsto (iteratedDeriv n_x_int f) (nhdsWithin c (Set.Ioo c d)) (nhds ((iteratedDeriv n_x_int f) c)) := by
         apply ContinuousWithinAt.tendsto _
         apply continuous_within_at_c
 
@@ -1376,9 +1379,10 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     -- have int_subset_x: x_int ⊆ X := by
     --   simp [Set.subset_inter_iff] at int_subset_x_int
     --   exact int_subset_x_int.1
-    have cd_subset_x: Set.Ioo c d ⊆ X := by
-      apply subset_trans cd_int sorry -- int_subset_x
-    simp [X] at cd_subset_x
+
+    --have cd_subset_x: Set.Ioo c d ⊆ X := by
+    --  apply subset_trans cd_int sorry -- int_subset_x
+    --simp [X] at cd_subset_x
 
     have cd_nonempty: (Set.Ioo c d).Nonempty := by
       simp
@@ -1388,10 +1392,12 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       simp only [cd_intersect_x]
       simp only [Set.inter_nonempty]
 
-      obtain ⟨q, hq⟩ := cd_nonempty
-      use q
-      refine ⟨hq, ?_⟩
-      apply cd_subset_x hq
+      rw [Set.nonempty_def] at x_int_nonempty
+      obtain ⟨x, hx⟩ := x_int_nonempty
+      rw [mem_interior] at hx
+      obtain ⟨t, ht, h_other_t, x_in_t⟩ := hx
+
+
 
     obtain ⟨q, hq⟩ := Set.nonempty_def.mp cd_intersect_x_nonempty
     have _: q ∈ X := by
