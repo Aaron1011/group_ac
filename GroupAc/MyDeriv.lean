@@ -1271,6 +1271,8 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     simp [instTopologicalSpaceSubtype, TopologicalSpace.induced] at x_int_open
     -- An open set in the topology on R
     obtain ⟨full_set, full_set_open, full_set_preimage⟩ := x_int_open
+    have full_set_preimage_reverse: interior {x: x_subspace | ↑x ∈ e_n n_x_int} = (Subtype.val ⁻¹' full_set) := full_set_preimage.symm
+    rw [Set.eq_preimage_subtype_val_iff] at full_set_preimage_reverse
     --rw [Set.preimage_eq_iff_eq_image] at full_set_preimage
 
     have full_set_nonempty: full_set.Nonempty := by
@@ -1278,7 +1280,13 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       rw [Set.nonempty_def] at x_int_nonempty
       obtain ⟨x, hx⟩ := x_int_nonempty
       use x.1
-      sorry
+
+      have x_in_subspace_int: x ∈ interior {x: x_subspace | ↑x ∈ e_n n_x_int} := by
+        simp at hx
+        exact hx
+
+      specialize full_set_preimage_reverse x.1 x.2
+      exact full_set_preimage_reverse.mp x_in_subspace_int
 
 
     obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset full_set_open full_set_nonempty
@@ -1288,8 +1296,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       rw [Set.subset_def] at cd_int
       intro x hx
       specialize cd_int x hx.1
-      have full_set_preimage_reverse: interior {x: x_subspace | ↑x ∈ e_n n_x_int} = (Subtype.val ⁻¹' full_set) := full_set_preimage.symm
-      rw [Set.eq_preimage_subtype_val_iff] at full_set_preimage_reverse
       --rw [full_set_preimage, Subtype.coe_image] at cd_int
       specialize full_set_preimage_reverse x hx.2
       have x_in_interior := by
