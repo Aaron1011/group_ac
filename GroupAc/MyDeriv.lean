@@ -595,7 +595,52 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
     intro y hy
     apply fn_zero
     exact Set.mem_Icc_of_Ioo hy
-  sorry
+  obtain ⟨p_zero_one, h_p_zero_one⟩ := by apply poly_on_closed 0 1 zero_lt_one
+  use p_zero_one
+  by_contra!
+  simp [Function.ne_iff] at this
+  obtain ⟨bad_x, h_bad_x⟩ := this
+
+  -- Obtain an interval enclosing both [0, 1] and our bad point
+  let enclosing := Set.Icc (min bad_x 0) (max bad_x 1)
+  let enclosing_open := Set.Ioo (min bad_x 0) (max bad_x 1)
+  have min_lt_max: (min bad_x 0) < (max bad_x 1) := by
+    simp
+
+  obtain ⟨p_enclosing, h_p_enclosing⟩ := by apply poly_on_closed (min bad_x 0) (max bad_x 1) min_lt_max
+  -- TODO - deduplicate this
+  have intersect_infinite: (enclosing_open ∩ Set.Ioo 0 1).Infinite := by
+    rw [Set.Ioo_inter_Ioo]
+    apply Set.Ioo_infinite
+    simp
+
+  have diff_zero_all: (p_enclosing - p_zero_one) = 0 := by
+    obtain ⟨nplusone_zeros, zeros_subset, zeros_card⟩ := @Set.Infinite.exists_subset_card_eq _ (enclosing_open ∩ Set.Ioo 0 1) intersect_infinite ((p_enclosing - p_zero_one).natDegree + 1)
+    apply Polynomial.eq_zero_of_natDegree_lt_card_of_eval_eq_zero' (p_enclosing - p_zero_one) nplusone_zeros
+    intro y hy
+    simp only [Set.subset_def] at zeros_subset
+    have y_in_intersect: y ∈ enclosing_open ∩ Set.Ioo 0 1 := by
+      simp only [enclosing_open]
+      have y_in_closed := zeros_subset y hy
+      simp only [enclosing_open] at y_in_closed
+      exact y_in_closed
+
+
+    have eq_zero_intersect: ∀ z, z ∈ enclosing_open ∩ Set.Ioo 0 1 → (p_enclosing - p_zero_one).eval z = 0 := by
+      intro z ⟨hz1, hz2⟩
+      simp only [enclosing_open] at hz1
+      simp
+      rw [← h_p_enclosing z hz1]
+      rw [← h_p_zero_one z hz2]
+      simp
+
+    apply eq_zero_intersect
+    apply y_in_intersect
+    rw [zeros_card]
+    simp
+
+
+
 
   -- let p: ℝ := 0
   -- have p_in_union: p ∈ Set.sUnion { i | ∃ (a b : ℝ ), i = Set.Ioo a b ∧ RestrictsToPoly f a b } := by
