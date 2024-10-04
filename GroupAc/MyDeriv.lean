@@ -1306,36 +1306,33 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       rw [Set.mem_setOf_eq] at hxt
       apply hxt
 
-    have n_succ_deriv_zero: ∀ (x: ℝ), x ∈ cd_intersect_x → (iteratedDerivWithin (n_x_int + 1) f cd_intersect_x) x = 0 := by
+    have n_succ_deriv_zero: ∀ (x: ℝ), x ∈ cd_intersect_x → (iteratedDeriv (n_x_int + 1) f) x = 0 := by
       intro x hx
-      have unique_diff_at : UniqueDiffWithinAt ℝ (Set.Ioo c d) x := by
-        apply unique_diff x
-        assumption
-      rw [iteratedDerivWithin_succ unique_diff_at]
-      have deriv_x_zero: (iteratedDerivWithin n_x_int f (Set.Ioo c d)) x = 0 := by
+      rw [iteratedDeriv_succ]
+      have deriv_x_zero: (iteratedDeriv n_x_int f) x = 0 := by
         apply x_zero_on_cd x hx
 
-      have cont_diff_within_at: ContDiffWithinAt ℝ ⊤ (iteratedDerivWithin n_x_int f (Set.Ioo c d)) (Set.Ioo c d) c := by
+      have cont_diff_within_at: ContDiffWithinAt ℝ ⊤ (iteratedDeriv n_x_int f) (Set.Ioo c d) c := by
         --apply ContDiff.contDiffWithinAt hCInfinity
         sorry
 
-      have continuous_within_at_c: ContinuousWithinAt (iteratedDerivWithin n_x_int f (Set.Ioo c d)) (Set.Ioo c d) c := by
+      have continuous_within_at_c: ContinuousWithinAt (iteratedDeriv n_x_int f) (Set.Ioo c d) c := by
         apply ContDiffWithinAt.continuousWithinAt cont_diff_within_at
 
-      have deriv_tendsto_at_a: Filter.Tendsto (iteratedDerivWithin n_x_int f (Set.Ioo c d)) (nhdsWithin c (Set.Ioo c d)) (nhds ((iteratedDerivWithin n_x_int f (Set.Ioo c d)) c)) := by
+      have deriv_tendsto_at_a: Filter.Tendsto (iteratedDeriv n_x_int f) (nhdsWithin c (Set.Ioo c d)) (nhds ((iteratedDeriv n_x_int f) c)) := by
         apply ContinuousWithinAt.tendsto _
         apply continuous_within_at_c
 
 
-      have deriv_zero_at_c: (iteratedDerivWithin n_x_int f (Set.Ioo c d)) c = 0 := by
+      have deriv_zero_at_c: (iteratedDeriv n_x_int f) c = 0 := by
         sorry
 
 
-      have deriv_zero_at_d: (iteratedDerivWithin n_x_int f (Set.Ioo c d)) c = 0 := by
+      have deriv_zero_at_d: (iteratedDeriv n_x_int f) c = 0 := by
         sorry
 
 
-      have deriv_k_const: iteratedDerivWithin n_x_int f (Set.Ioo c d) = λ y => 0 := by
+      have deriv_k_const: iteratedDeriv n_x_int f = λ y => 0 := by
         ext y
         sorry
         -- by_cases h_mem_interval: y ∈ closure (Set.Ioo c d)
@@ -1352,10 +1349,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         --     sorry
         --   . rw [Set.eq_endpoints_or_mem_Ioo_of_mem_Icc] at y_mem_endpoints
 
-      have deriv_within: HasDerivWithinAt (iteratedDerivWithin n_x_int f (Set.Ioo c d)) 0 (Set.Ioo c d) x := by
-        --rw [hasDerivWithinAt_iff_tendsto_slope]
-        sorry
-      apply HasDerivWithinAt.derivWithin deriv_within
       sorry
 
     -- have forall_deriv_zero: ∀ (m: ℕ), m ≥ n_x_int →  ∀ (x: ℝ), x ∈ X ∩ Set.Ioo c d → (iteratedDerivWithin m f (Set.Ioo c d)) x = 0 := by
