@@ -19,6 +19,9 @@ def RestrictsToPolyOn (f: ℝ → ℝ) (s: Set ℝ) :=
 def RestrictsToPolyBundle (f: ℝ → ℝ) (a b: ℝ) (p: Polynomial ℝ) :=
   ∀ (y: ℝ), y ∈ Set.Ioo a b → f y = p.eval y
 
+def RestrictsToPolyBundleOn (f: ℝ → ℝ) (s: Set ℝ) (p: Polynomial ℝ) :=
+  ∀ (y: ℝ), y ∈ s → f y = p.eval y
+
 def image' {α : Type _} {β : Type _} (s : Set α) (f : (a : α) → a ∈ s → β) : Set β :=
   {b | ∃ a ha, f a ha = b}
 
@@ -232,6 +235,11 @@ class XData (c d: ℝ) (fin_cover: Set (Set ℝ)) (f: ℝ → ℝ) :=
   (int_in_fin: Set.Ioo a b ∈ fin_cover)
   (poly_eq: RestrictsToPolyBundle f a b poly)
 
+class IntervalData :=
+  (i: Set ℝ)
+  (poly: Polynomial ℝ)
+  (poly_eq: RestrictsToPolyBundleOn f i poly)
+
 noncomputable def x_to_data (x c d: ℝ) (fin_cover: Set (Set ℝ)) (hx: x ∈ Set.Icc c d) (h_covers_cd : Set.Icc c d ⊆ ⋃ i ∈ fin_cover, id i) (h_fin_subset : ∀ x ∈ fin_cover, ∃ a b, x = Set.Ioo a b ∧ RestrictsToPoly f a b): XData c d fin_cover f := by
   have x_in_cover: x ∈ ⋃ i ∈ fin_cover, id i := h_covers_cd hx
   rw [Set.mem_iUnion] at x_in_cover
@@ -379,13 +387,15 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
 
     let interval_to_poly := (fun i hi => by
       -- CANNOT use 'obtain' here: see https://leanprover.zulipchat.com/#narrow/stream/113489-new-members/topic/Problems.20with.20obtain/near/467580722
-      exact Classical.choose (interval_to_poly i hi)
+      exact IntervalData.mk i (Classical.choose (interval_to_poly i hi)) (Classical.choose_spec (interval_to_poly i hi))
     )
 
-    let polys_from_intervals := image' fin_cover interval_to_poly
+    let polys_from_intervals := (λ d => d.poly) '' (image' fin_cover interval_to_poly)
     have polys_from_intervals_finite: polys_from_intervals.Finite := by
       simp only [polys_from_intervals, image']
+      apply Set.Finite.image
       exact Set.Finite.dependent_image h_fin_cover_finite interval_to_poly
+
     let new_all_degrees := Polynomial.natDegree '' polys_from_intervals
     have new_all_degrees_finite: new_all_degrees.Finite := by
       exact Set.Finite.image (fun p ↦ p.natDegree) polys_from_intervals_finite
@@ -403,87 +413,86 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
       obtain ⟨i, hi⟩ := p_in_union
       simp at hi
       obtain ⟨i_in_fin, p_in_i⟩ := hi
-      let poly := interval_to_poly i i_in_fin
+      let i_data := interval_to_poly i i_in_fin
       rw [Finset.Nonempty]
-      use poly.natDegree
+      use i_data.poly.natDegree
       rw [h_new_all_degrees_finset]
       simp only [new_all_degrees]
       simp
-      use poly
+      use i_data.poly
       simp
       simp [polys_from_intervals]
       simp only [image']
       simp
+      use i_data
+      simp
       use i
       use i_in_fin
-
-
-
 
 
     let max_degree := Finset.max' new_all_degrees_finset new_all_degrees_finset_nonempty
     let large_degree := max_degree + 1
 
 
-    let all_x_data: Set (XData c d fin_cover f) := {x_data | ∃ x: ℝ, ∃ hx: x ∈ Set.Icc c d, x_data = x_to_data x c d fin_cover hx h_covers_cd h_fin_subset}
-    let all_intervals := (λ d => Set.Ioo d.a d.b) '' all_x_data
-    have intervals_in_finset: all_intervals ⊆ fin_cover := by
-      intro x hx
-      simp only [all_intervals] at hx
-      obtain ⟨x_data, x_data_in⟩ := hx
-      obtain ⟨x, hx⟩ := x_data_in
-      obtain ⟨hx1, hx2⟩ := hx
-      simp
-      apply x_data.int_in_fin
+    -- let all_x_data: Set (XData c d fin_cover f) := {x_data | ∃ x: ℝ, ∃ hx: x ∈ Set.Icc c d, x_data = x_to_data x c d fin_cover hx h_covers_cd h_fin_subset}
+    -- let all_intervals := (λ d => Set.Ioo d.a d.b) '' all_x_data
+    -- have intervals_in_finset: all_intervals ⊆ fin_cover := by
+    --   intro x hx
+    --   simp only [all_intervals] at hx
+    --   obtain ⟨x_data, x_data_in⟩ := hx
+    --   obtain ⟨x, hx⟩ := x_data_in
+    --   obtain ⟨hx1, hx2⟩ := hx
+    --   simp
+    --   apply x_data.int_in_fin
 
-    have all_intervals_finite: all_intervals.Finite := by
-      apply Set.Finite.subset h_fin_cover_finite
-      exact intervals_in_finset
+    -- have all_intervals_finite: all_intervals.Finite := by
+    --   apply Set.Finite.subset h_fin_cover_finite
+    --   exact intervals_in_finset
 
-    have all_interval_has_poly: ∀ i, i ∈ all_intervals → ∃ a b p, i = Set.Ioo a b ∧ RestrictsToPolyBundle f a b p := by
-      intro i hi
-      simp only [all_intervals] at hi
-      simp at hi
-      obtain ⟨x_data, x_data_in⟩ := hi
-      use x_data.a
-      use x_data.b
-      use x_data.poly
-      use x_data_in.2.symm
-      exact x_data.poly_eq
+    -- have all_interval_has_poly: ∀ i, i ∈ all_intervals → ∃ a b p, i = Set.Ioo a b ∧ RestrictsToPolyBundle f a b p := by
+    --   intro i hi
+    --   simp only [all_intervals] at hi
+    --   simp at hi
+    --   obtain ⟨x_data, x_data_in⟩ := hi
+    --   use x_data.a
+    --   use x_data.b
+    --   use x_data.poly
+    --   use x_data_in.2.symm
+    --   exact x_data.poly_eq
 
-    have all_x_data_finite: all_x_data.Finite := by
-      sorry
+    -- have all_x_data_finite: all_x_data.Finite := by
+    --   sorry
 
 
-    let extract_degree := fun {c d: ℝ} (data: XData c d fin_cover f) => data.poly.natDegree
-    let all_degrees := extract_degree '' all_x_data
+    -- let extract_degree := fun {c d: ℝ} (data: XData c d fin_cover f) => data.poly.natDegree
+    -- let all_degrees := extract_degree '' all_x_data
 
-    have all_degrees_finite: all_degrees.Finite := by
-      simp only [all_degrees]
-      simp only [all_x_data]
-      sorry
+    -- have all_degrees_finite: all_degrees.Finite := by
+    --   simp only [all_degrees]
+    --   simp only [all_x_data]
+    --   sorry
 
 
       --exact Set.Finite.image (fun data ↦ data.poly.natDegree) all_x_data_finite
 
-    have ⟨all_degrees_finset, h_all_degrees_finset⟩ := Set.Finite.exists_finset all_degrees_finite
-    have all_degrees_finset_nonempty: all_degrees_finset.Nonempty := by
-      sorry
-    let max_degree := Finset.max' all_degrees_finset all_degrees_finset_nonempty
-    let large_degree := max_degree + 1
+    -- have ⟨all_degrees_finset, h_all_degrees_finset⟩ := Set.Finite.exists_finset all_degrees_finite
+    -- have all_degrees_finset_nonempty: all_degrees_finset.Nonempty := by
+    --   sorry
+    -- let max_degree := Finset.max' all_degrees_finset all_degrees_finset_nonempty
+    -- let large_degree := max_degree + 1
 
     have fn_zero: ∀ (x: ℝ), x ∈ Set.Icc c d → (iteratedDeriv large_degree f) x = 0 := by
       intro x hx
-      let x_data := x_to_data x c d fin_cover hx h_covers_cd h_fin_subset
-      have x_eq_data_x: x_data.x = x := by
-        simp [x_data]
-        simp [x_to_data]
-      let a := x_data.a
-      let b := x_data.b
-      let h_ab_poly := x_data.poly_eq
-      let ab_poly := x_data.poly
-      let x_in_i := x_data.x_in_int
-      rw [x_eq_data_x] at x_in_i
+      -- let x_data := x_to_data x c d fin_cover hx h_covers_cd h_fin_subset
+      -- have x_eq_data_x: x_data.x = x := by
+      --   simp [x_data]
+      --   simp [x_to_data]
+      -- let a := x_data.a
+      -- let b := x_data.b
+      -- let h_ab_poly := x_data.poly_eq
+      -- let ab_poly := x_data.poly
+      -- let x_in_i := x_data.x_in_int
+      -- rw [x_eq_data_x] at x_in_i
 
       -- have x_in_cover: x ∈ ⋃ i ∈ fin_cover, id i := h_covers_cd hx
       -- rw [Set.mem_iUnion] at x_in_cover
@@ -494,11 +503,34 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
       -- obtain ⟨ab_poly, h_ab_poly⟩ := has_ab_poly
 
 
-      have derivwith_eq: Set.EqOn (iteratedDerivWithin large_degree f (Set.Ioo a b)) (iteratedDerivWithin large_degree ab_poly.eval (Set.Ioo a b)) (Set.Ioo a b) := by
+
+      have x_in_union: x ∈ ⋃ i ∈ fin_cover, id i := by
+        apply h_covers_cd hx
+      rw [Set.mem_iUnion] at x_in_union
+      obtain ⟨i, hi⟩ := x_in_union
+      simp at hi
+      obtain ⟨i_in_fin, p_in_i⟩ := hi
+      obtain ⟨a, b, i_eq_ab, h_ab_poly⟩ := h_fin_subset i i_in_fin
+      rw [RestrictsToPoly] at h_ab_poly
+      let i_data := interval_to_poly i i_in_fin
+      have i_data_i_eq: i_data.i = i := by
+        simp [i_data, interval_to_poly]
+
+
+      have derivwith_eq: Set.EqOn (iteratedDerivWithin large_degree f (Set.Ioo a b)) (iteratedDerivWithin large_degree i_data.poly.eval (Set.Ioo a b)) (Set.Ioo a b) := by
         apply iteratedDerivWithin_congr
         apply uniqueDiffOn_Ioo
         rw [Set.EqOn]
-        apply h_ab_poly
+        let poly_eq := i_data.poly_eq
+        simp [RestrictsToPolyBundleOn] at poly_eq
+        intro z hz
+        specialize poly_eq z
+        rw [i_data_i_eq] at poly_eq
+        rw [i_eq_ab] at poly_eq
+        apply poly_eq hz
+
+
+
       specialize derivwith_eq
       rw [Set.EqOn] at derivwith_eq
       specialize derivwith_eq x_in_i
@@ -517,18 +549,24 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
       rw [← iteratedDeriv] at derivwith_eq
       rw [← iteratedDeriv]
       rw [derivwith_eq]
-      have ab_degree_in: ab_poly.natDegree ∈ all_degrees_finset := by
-        rw [h_all_degrees_finset]
-        simp only [all_degrees, extract_degree]
+      have ab_degree_in: ab_poly.natDegree ∈ new_all_degrees_finset := by
+        rw [h_new_all_degrees_finset]
+        simp only [new_all_degrees]
+        simp [polys_from_intervals]
+        simp only [image']
+        use ab_poly
         simp
-        use x_data
-        refine ⟨?_, ?_⟩
-        simp [x_data]
-        simp only [all_x_data]
-        simp only [Set.mem_setOf_eq]
-        use x
-        use hx
-        simp [x_data]
+
+
+        -- simp
+        -- use x_data
+        -- refine ⟨?_, ?_⟩
+        -- simp [x_data]
+        -- simp only [all_x_data]
+        -- simp only [Set.mem_setOf_eq]
+        -- use x
+        -- use hx
+        -- simp [x_data]
 
 
       have ab_poly_le_max': ab_poly.natDegree ≤ max_degree := by
