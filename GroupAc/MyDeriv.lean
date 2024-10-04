@@ -642,6 +642,10 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
 
 
 
+
+  have eq_poly: p_enclosing = p_zero_one := by apply eq_of_sub_eq_zero diff_zero_all
+  rw [h_p_enclosing, eq_poly] at h_bad_x
+  simp at h_bad_x
   -- let p: ℝ := 0
   -- have p_in_union: p ∈ Set.sUnion { i | ∃ (a b : ℝ ), i = Set.Ioo a b ∧ RestrictsToPoly f a b } := by
   --   simp only [p]
