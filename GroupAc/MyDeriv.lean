@@ -1183,17 +1183,41 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         exact x_in_gh
       contradiction
 
+    let x_subspace :=  { x: ℝ // x ∈ X }
+
+    have x_subspace_enk_eq : ∀ k: ℕ, ({x : x_subspace | x.1 ∈ (e_n k)}) = X ∩ e_n k := by
+      intro k
+      ext p
+      refine ⟨?_, ?_⟩
+      intro p_in_val
+      simp at p_in_val
+      simp
+      refine ⟨p_in_val.2, p_in_val.1⟩
+
+      intro p_in_intersect
+      simp
+      simp at p_in_intersect
+      exact ⟨p_in_intersect.2, p_in_intersect.1⟩
+
     have en_closed_subtype_x: ∀ k: ℕ, IsClosed ({x : X | x.1 ∈ e_n k}) := by
       intro k
-      sorry
+      specialize x_subspace_enk_eq k
+      simp only [e_n]
+      simp
+      apply isClosed_eq
+      refine Continuous.comp' ?_ ?_
+      apply ContDiff.continuous_iteratedDeriv k hCInfinity
+      simp
+      exact continuous_subtype_val
+      exact continuous_const
 
 
-    let x_subspace :=  { x: ℝ // x ∈ X }
     have x_intersect_closed: ∀ k: ℕ , IsClosed (X := x_subspace) (Set.univ ∩ {x: X | x.1 ∈ e_n k }) := by
       intro k
       apply IsClosed.inter
       apply isClosed_univ
       apply en_closed_subtype_x k
+
 
     have x_union_en: X = Set.iUnion fun j => X ∩ (e_n j) := by
       ext p
