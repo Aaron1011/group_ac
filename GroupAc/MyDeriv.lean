@@ -509,12 +509,13 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
       rw [Set.mem_iUnion] at x_in_union
       obtain ⟨i, hi⟩ := x_in_union
       simp at hi
-      obtain ⟨i_in_fin, p_in_i⟩ := hi
+      obtain ⟨i_in_fin, x_in_i⟩ := hi
       obtain ⟨a, b, i_eq_ab, h_ab_poly⟩ := h_fin_subset i i_in_fin
       rw [RestrictsToPoly] at h_ab_poly
       let i_data := interval_to_poly i i_in_fin
       have i_data_i_eq: i_data.i = i := by
         simp [i_data, interval_to_poly]
+      rw [i_eq_ab] at x_in_i
 
 
       have derivwith_eq: Set.EqOn (iteratedDerivWithin large_degree f (Set.Ioo a b)) (iteratedDerivWithin large_degree i_data.poly.eval (Set.Ioo a b)) (Set.Ioo a b) := by
@@ -549,13 +550,16 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
       rw [← iteratedDeriv] at derivwith_eq
       rw [← iteratedDeriv]
       rw [derivwith_eq]
-      have ab_degree_in: ab_poly.natDegree ∈ new_all_degrees_finset := by
+      have ab_degree_in: i_data.poly.natDegree ∈ new_all_degrees_finset := by
         rw [h_new_all_degrees_finset]
         simp only [new_all_degrees]
         simp [polys_from_intervals]
         simp only [image']
-        use ab_poly
         simp
+        use i_data
+        simp
+        use i
+        use i_in_fin
 
 
         -- simp
@@ -569,19 +573,19 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
         -- simp [x_data]
 
 
-      have ab_poly_le_max': ab_poly.natDegree ≤ max_degree := by
-        exact Finset.le_max' all_degrees_finset ab_poly.natDegree ab_degree_in
+      have ab_poly_le_max': i_data.poly.natDegree ≤ max_degree := by
+        exact Finset.le_max' new_all_degrees_finset i_data.poly.natDegree ab_degree_in
 
-      have degree_lt: ab_poly.natDegree < large_degree := by
+      have degree_lt: i_data.poly.natDegree < large_degree := by
         simp only [large_degree]
         linarith
 
 
-      have deriv_fun_eq: deriv (fun (p : ℝ) => Polynomial.eval p ab_poly) = (fun (p: ℝ) => Polynomial.eval p (Polynomial.derivative ab_poly)) := by
+      have deriv_fun_eq: deriv (fun (p : ℝ) => Polynomial.eval p i_data.poly) = (fun (p: ℝ) => Polynomial.eval p (Polynomial.derivative i_data.poly)) := by
         ext
         simp
 
-      have iterated_deriv_fun_eq: ∀ (n: ℕ), deriv^[n] (fun (p : ℝ) => Polynomial.eval p ab_poly) = (fun (p: ℝ) => Polynomial.eval p (Polynomial.derivative^[n] ab_poly)) := by
+      have iterated_deriv_fun_eq: ∀ (n: ℕ), deriv^[n] (fun (p : ℝ) => Polynomial.eval p i_data.poly) = (fun (p: ℝ) => Polynomial.eval p (Polynomial.derivative^[n] i_data.poly)) := by
         sorry
       rw [iteratedDeriv_eq_iterate]
       rw [iterated_deriv_fun_eq]
