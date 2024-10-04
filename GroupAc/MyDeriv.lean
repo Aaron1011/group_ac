@@ -1288,7 +1288,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     have x_int_open: IsOpen (interior (@Set.univ x_subspace ∩ {x | ↑x ∈ e_n n_x_int})) := by apply isOpen_interior
     simp only [IsOpen] at x_int_open
     rw [TopologicalSpace.IsOpen] at x_int_open
-    simp at x_int_open
     simp [instTopologicalSpaceSubtype, TopologicalSpace.induced] at x_int_open
     -- An open set in the topology on R
     obtain ⟨full_set, full_set_open, full_set_preimage⟩ := x_int_open
@@ -1421,11 +1420,22 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       simp only [cd_intersect_x]
       simp only [Set.inter_nonempty]
 
+      obtain ⟨x, hx⟩ := cd_nonempty
+      have x_in_full_set: x ∈ full_set := by
+        apply cd_int
+        exact hx
+      use x
+      refine ⟨hx, ?_⟩
+
+      simp at x_int_nonempty
+      rw [← full_set_preimage] at x_int_nonempty
       rw [Set.nonempty_def] at x_int_nonempty
-      obtain ⟨x, hx⟩ := x_int_nonempty
-      rw [mem_interior] at hx
-      obtain ⟨t, ht, h_other_t, x_in_t⟩ := hx
+      obtain ⟨new_x_subspace, h_new_x_subspace⟩ := x_int_nonempty
+      simp only [Set.mem_preimage] at h_new_x_subspace
       sorry
+
+
+
 
 
 
