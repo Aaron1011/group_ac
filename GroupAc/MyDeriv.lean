@@ -300,51 +300,12 @@ lemma x_data_preserves_x (x c d fin_cover hx h_covers_cd) (h_fin_subset) : (x_to
 
 lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b} = Set.univ → ∃ p: Polynomial ℝ, f = p.eval := by
   intro omega_eq_r
-  have overlap_eq: ∀ a b c d pl pr, RestrictsToPolyBundle f a b pl ∧ RestrictsToPolyBundle f c d pr → ∀x, x ∈ Set.Ioo a b ∩ Set.Ioo c d → pl = pr := by
-    intro a b c d pa pb ⟨hpa, hpb⟩ x ⟨hx1, hx2⟩
-    have eq_zero_intersect: ∀ y, y ∈ Set.Ioo a b ∩ Set.Ioo c d → (pa - pb).eval y = 0 := by
-      intro y ⟨hy1, hy2⟩
-      simp
-      rw [← hpa y hy1]
-      rw [← hpb y hy2]
-      simp
-
-    have intersect_infinite: (Set.Ioo a b ∩ Set.Ioo c d).Infinite := by
-      rw [Set.Ioo_inter_Ioo]
-      apply Set.Ioo_infinite
-      simp at hx1
-      simp at hx2
-      rw [sup_eq_max]
-      simp
-      refine ⟨?_, ?_⟩
-      refine ⟨?_, ?_⟩
-      linarith
-      linarith
-      refine ⟨?_, ?_⟩
-      linarith
-      linarith
-
-    have diff_zero_all: (pa - pb) = 0 := by
-      obtain ⟨nplusone_zeros, zeros_subset, zeros_card⟩ := @Set.Infinite.exists_subset_card_eq _ (Set.Ioo a b ∩ Set.Ioo c d) intersect_infinite ((pa - pb).natDegree + 1)
-      apply Polynomial.eq_zero_of_natDegree_lt_card_of_eval_eq_zero' (pa - pb) nplusone_zeros
-      intro y hy
-      simp only [Set.subset_def] at zeros_subset
-      have y_in_intersect: y ∈ Set.Ioo a b ∩ Set.Ioo c d := by
-        exact zeros_subset y hy
-      apply eq_zero_intersect
-      apply y_in_intersect
-      rw [zeros_card]
-      simp
-
-    simp at diff_zero_all
-    apply eq_of_sub_eq_zero diff_zero_all
-
   let all_intervals := {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b}
   let all_union := ⋃₀ all_intervals
   have all_open: ∀ s, s ∈ all_intervals → IsOpen (id s) := by
     intro s hs
     simp [all_intervals] at hs
-    obtain ⟨a, b, hab, h⟩ := hs
+    obtain ⟨a, b, hab, _⟩ := hs
     simp
     rw [hab]
     apply isOpen_Ioo
@@ -403,7 +364,7 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
       rw [Set.mem_iUnion] at p_in_union
       obtain ⟨i, hi⟩ := p_in_union
       simp at hi
-      obtain ⟨i_in_fin, p_in_i⟩ := hi
+      obtain ⟨i_in_fin, _⟩ := hi
       let i_data := interval_to_poly i i_in_fin
       rw [Finset.Nonempty]
       use i_data.poly.natDegree
@@ -489,11 +450,6 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
         simp only [large_degree]
         linarith
 
-
-      have deriv_fun_eq: deriv (fun (p : ℝ) => Polynomial.eval p i_data.poly) = (fun (p: ℝ) => Polynomial.eval p (Polynomial.derivative i_data.poly)) := by
-        ext
-        simp
-
       have iterated_deriv_fun_eq: ∀ (n: ℕ), iteratedDeriv n (fun (p : ℝ) => Polynomial.eval p i_data.poly) = (fun (p: ℝ) => Polynomial.eval p (Polynomial.derivative^[n] i_data.poly)) := by
         intro n
         induction n with
@@ -522,8 +478,7 @@ lemma omega_r_imp_poly (hCInfinity: ContDiff ℝ ⊤ f): ⋃₀ {i | ∃ a b, i 
   simp [Function.ne_iff] at this
   obtain ⟨bad_x, h_bad_x⟩ := this
 
-  -- Obtain an interval enclosing both [0, 1] and our bad point
-  let enclosing := Set.Icc (min bad_x 0) (max bad_x 1)
+  -- Obtain an interval enclosing [0, 1] and having the bad point within (or an endpoint)
   let enclosing_open := Set.Ioo (min bad_x 0) (max bad_x 1)
   have min_lt_max: (min bad_x 0) < (max bad_x 1) := by
     simp
