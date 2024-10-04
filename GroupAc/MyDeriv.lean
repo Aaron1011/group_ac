@@ -1313,7 +1313,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       rw [eq_on]
       apply hxt
 
-    have n_succ_deriv_zero: ∀ (x: ℝ), x ∈ Set.Ioo c d → (iteratedDerivWithin (n_x_int + 1) f (Set.Ioo c d)) x = 0 := by
+    have n_succ_deriv_zero: ∀ (x: ℝ), x ∈ cd_intersect_x → (iteratedDerivWithin (n_x_int + 1) f cd_intersect_x) x = 0 := by
       intro x hx
       have unique_diff_at : UniqueDiffWithinAt ℝ (Set.Ioo c d) x := by
         apply unique_diff x
