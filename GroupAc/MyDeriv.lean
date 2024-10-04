@@ -91,6 +91,7 @@ lemma poly_iterated_derivWithin (n: ℕ) (p: Polynomial ℝ) (s: Set ℝ) (hs: U
     ext x
     have unique_at:  UniqueDiffWithinAt ℝ s x := by
       apply UniqueDiffOn.uniqueDiffWithinAt hs
+      sorry
 
     rw [iteratedDerivWithin_succ]
     rw [ih]
@@ -1092,11 +1093,33 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
               simp
             rw [← Nat.lt_add_one_iff] at le_max
             exact le_max
-            apply?
-
-
+            exact fun x_1 ↦ unique_diff x_1 g x
           | inr y_in_right =>
-            sorry
+            -- FIXME - deduplicate this with the left-hand proof
+            have y_eq_eval: f y = second_poly.eval y := by
+              apply h_second_poly
+              exact y_in_right
+            have derivwith_eq: Set.EqOn (iteratedDerivWithin (n + 1) f (Set.Ioo x h)) (iteratedDerivWithin (n + 1) second_poly.eval (Set.Ioo x h)) (Set.Ioo x h) := by
+              apply iteratedDerivWithin_congr
+              apply uniqueDiffOn_Ioo
+              apply h_second_poly
+
+
+            rw [Set.EqOn] at derivwith_eq
+            specialize derivwith_eq y_in_right
+            rw [poly_iterated_derivWithin (n + 1)] at derivwith_eq
+            rw [Polynomial.iterate_derivative_eq_zero] at derivwith_eq
+            simp at derivwith_eq
+            rw [iteratedDerivWithin] at derivwith_eq
+            rw [iteratedFDerivWithin_of_isOpen (n + 1) (isOpen_Ioo) y_in_right] at derivwith_eq
+            rw [← iteratedDeriv] at derivwith_eq
+            exact derivwith_eq
+            simp only [n]
+            have le_max: second_poly.natDegree ≤ max first_poly.natDegree second_poly.natDegree := by
+              simp
+            rw [← Nat.lt_add_one_iff] at le_max
+            exact le_max
+            exact fun x_1 ↦ unique_diff x_1 x h
 
         -- Use continuity here
         have f_deriv_at_x: (iteratedDeriv (n + 1) f) x = 0 := by
