@@ -1251,14 +1251,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     have subspace_nonempty: Nonempty x_subspace := by
       exact Set.Nonempty.to_subtype this
 
-    -- have order_topology: OrderTopology x_subspace := by
-    --   sorry
-
-
-    -- have nontrivial_x: Nontrivial x_subspace := by
-    --   rw [nontrivial_iff]
-    --   sorry
-
     rw [eq_comm] at x_union_en
     -- Apply baire category theorem again.
     -- WRONG - we need to be applying this in the subspace X, not in R
