@@ -1251,29 +1251,61 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     have subspace_nonempty: Nonempty x_subspace := by
       exact Set.Nonempty.to_subtype this
 
+    -- have order_topology: OrderTopology x_subspace := by
+    --   sorry
+
+
+    -- have nontrivial_x: Nontrivial x_subspace := by
+    --   rw [nontrivial_iff]
+    --   sorry
 
     rw [eq_comm] at x_union_en
     -- Apply baire category theorem again.
     -- WRONG - we need to be applying this in the subspace X, not in R
     obtain ⟨n_x_int, x_int_nonempty⟩ := nonempty_interior_of_iUnion_of_closed x_intersect_closed en_cov_univ_set_x.symm
-    let x_int := (interior (X ∩ e_n n_x_int))
-    have x_int_open: IsOpen x_int := by apply isOpen_interior
-    obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset x_int_open x_int_nonempty
-    have x_zero_on_cd: ∀ (x: ℝ), x ∈ Set.Ioo c d → (iteratedDerivWithin n_x_int f (Set.Ioo c d)) x = 0 := by
-      dsimp [x_int] at cd_int
-      dsimp [interior, e_n] at cd_int
+    --let x_int := (interior (Set.univ ∩ {x | ↑x ∈ e_n n_x_int}))
+    have x_int_open: IsOpen (interior (@Set.univ x_subspace ∩ {x | ↑x ∈ e_n n_x_int})) := by apply isOpen_interior
+    simp only [IsOpen] at x_int_open
+    rw [TopologicalSpace.IsOpen] at x_int_open
+    simp at x_int_open
+    simp [instTopologicalSpaceSubtype, TopologicalSpace.induced] at x_int_open
+    -- An open set in the topology on R
+    obtain ⟨full_set, full_set_open, full_set_preimage⟩ := x_int_open
+
+    have full_set_nonempty: full_set.Nonempty := by
+      rw [Set.nonempty_def]
+      rw [Set.nonempty_def] at x_int_nonempty
+      obtain ⟨x, hx⟩ := x_int_nonempty
+      use x.1
+      sorry
+
+
+    obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset full_set_open full_set_nonempty
+    let cd_intersect_x := Set.Ioo c d ∩ X
+
+    have x_zero_on_cd: ∀ (x: ℝ), x ∈ cd_intersect_x → (iteratedDerivWithin n_x_int f cd_intersect_x) x = 0 := by
+      -- dsimp [x_int] at cd_int
+      -- dsimp [interior, e_n] at cd_int
       rw [Set.subset_def] at cd_int
       intro x hx
-      specialize cd_int x hx
-      simp only [Set.mem_sUnion] at cd_int
-      obtain ⟨t, ht, hxt⟩ := cd_int
+      specialize cd_int x hx.1
+      --simp only [Set.mem_sUnion] at cd_int
+      --obtain ⟨t, ht, hxt⟩ := cd_int
+      --rw [Set.mem_setOf_eq] at ht
+
+      have x_in_interior: x ∈ interior (X ∩ {x | x ∈ e_n n_x_int}) := by
+        sorry
+      dsimp [interior, e_n] at x_in_interior
+      simp only [Set.mem_sUnion] at x_in_interior
+      obtain ⟨t, ht, hxt⟩ := x_in_interior
       rw [Set.mem_setOf_eq] at ht
+
       have t_subset: t ⊆ X ∩ {x | iteratedDeriv n_x_int f x = 0} := ht.2
       apply Set.mem_of_subset_of_mem t_subset at hxt
       apply Set.mem_of_mem_inter_right at hxt
       rw [Set.mem_setOf_eq] at hxt
-      have eq_on: Set.EqOn (iteratedFDerivWithin ℝ n_x_int f (Set.Ioo c d)) (iteratedFDeriv ℝ n_x_int f) (Set.Ioo c d) :=
-        by apply iteratedFDerivWithin_of_isOpen n_x_int isOpen_Ioo
+      have eq_on: Set.EqOn (iteratedFDerivWithin ℝ n_x_int f cd_intersect_x) (iteratedFDeriv ℝ n_x_int f) cd_intersect_x :=
+        by apply iteratedFDerivWithin_of_isOpen n_x_int sorry
       dsimp [Set.EqOn] at eq_on
       specialize eq_on hx
       dsimp [iteratedDeriv] at hxt
