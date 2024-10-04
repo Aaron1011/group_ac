@@ -1271,6 +1271,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     simp [instTopologicalSpaceSubtype, TopologicalSpace.induced] at x_int_open
     -- An open set in the topology on R
     obtain ⟨full_set, full_set_open, full_set_preimage⟩ := x_int_open
+    rw [Set.preimage_eq_iff_eq_image] at full_set_preimage
 
     have full_set_nonempty: full_set.Nonempty := by
       rw [Set.nonempty_def]
@@ -1284,27 +1285,17 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     let cd_intersect_x := Set.Ioo c d ∩ X
 
     have x_zero_on_cd: ∀ (x: ℝ), x ∈ cd_intersect_x → (iteratedDeriv n_x_int f) x = 0 := by
-      -- dsimp [x_int] at cd_int
-      -- dsimp [interior, e_n] at cd_int
       rw [Set.subset_def] at cd_int
       intro x hx
       specialize cd_int x hx.1
-      --simp only [Set.mem_sUnion] at cd_int
-      --obtain ⟨t, ht, hxt⟩ := cd_int
-      --rw [Set.mem_setOf_eq] at ht
-
-      have x_in_interior: x ∈ interior (X ∩ {x | x ∈ e_n n_x_int}) := by
-        sorry
-      dsimp [interior, e_n] at x_in_interior
-      simp only [Set.mem_sUnion] at x_in_interior
-      obtain ⟨t, ht, hxt⟩ := x_in_interior
-      rw [Set.mem_setOf_eq] at ht
-
-      have t_subset: t ⊆ X ∩ {x | iteratedDeriv n_x_int f x = 0} := ht.2
-      apply Set.mem_of_subset_of_mem t_subset at hxt
-      apply Set.mem_of_mem_inter_right at hxt
-      rw [Set.mem_setOf_eq] at hxt
-      apply hxt
+      rw [full_set_preimage, Subtype.coe_image] at cd_int
+      simp at cd_int
+      obtain ⟨x_in_subspace, h_int⟩ := cd_int
+      simp only [mem_interior] at h_int
+      obtain ⟨t, t_subset, t_open, x_in_t⟩ := h_int
+      apply Set.mem_of_subset_of_mem t_subset at x_in_t
+      dsimp [interior, e_n] at x_in_t
+      exact x_in_t
 
     have n_succ_deriv_zero: ∀ (x: ℝ), x ∈ cd_intersect_x → (iteratedDeriv (n_x_int + 1) f) x = 0 := by
       intro x hx
