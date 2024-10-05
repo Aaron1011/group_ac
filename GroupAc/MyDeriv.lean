@@ -1333,10 +1333,12 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       have deriv_x_zero: (iteratedDeriv n_x_int f) x = 0 := by
         apply x_zero_on_cd_intersect x hx
 
-      have cont_diff_within_at: ContDiffWithinAt ℝ ⊤ (iteratedDeriv n_x_int f) (Set.Ioo c d) c := by
-        have iterate_deriv_cont := by apply ContDiff.iterate_deriv n_x_int hCInfinity
+      have cont_diff_within_at: ContDiffWithinAt ℝ ⊤ (deriv (iteratedDeriv n_x_int f)) (Set.Ioo c d) x:= by
+        rw [← iteratedDeriv_succ]
+        have iterate_deriv_cont := by apply ContDiff.iterate_deriv (n_x_int + 1) hCInfinity
         simp only [← iteratedDeriv_eq_iterate] at iterate_deriv_cont
         apply ContDiff.contDiffWithinAt iterate_deriv_cont
+
 
       have slope_tendsto_zero: Filter.Tendsto (slope (iteratedDeriv n_x_int f) x) (nhdsWithin x {x}ᶜ) (nhds 0) := by
         sorry
@@ -1344,11 +1346,9 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       have deriv_at_eq: HasDerivAt (iteratedDeriv n_x_int f) 0 x := by
         rwa [← hasDerivAt_iff_tendsto_slope] at slope_tendsto_zero
 
-      apply HasDerivAt.deriv deriv_at_eq
-
-      -- have deriv_tendsto_at_c: Filter.Tendsto (iteratedDeriv n_x_int f) (nhdsWithin c (Set.Ioo c d)) (nhds ((iteratedDeriv n_x_int f) c)) := by
-      --   apply ContinuousWithinAt.tendsto _
-      --   apply continuous_within_at_c
+      have deriv_tendsto_at_c: Filter.Tendsto (deriv (iteratedDeriv n_x_int f)) (nhdsWithin x (Set.Ioo c d)) (nhds ((deriv (iteratedDeriv n_x_int f)) x)) := by
+        apply ContinuousWithinAt.tendsto _
+        apply ContDiffWithinAt.continuousWithinAt cont_diff_within_at
 
 
 
