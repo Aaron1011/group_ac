@@ -1338,49 +1338,18 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         simp only [← iteratedDeriv_eq_iterate] at iterate_deriv_cont
         apply ContDiff.contDiffWithinAt iterate_deriv_cont
 
-
-      -- have continuous_within_at_c: ContinuousWithinAt (iteratedDeriv n_x_int f) (Set.Ioo c d) c := by
-      --   apply ContDiffWithinAt.continuousWithinAt cont_diff_within_at
-
-      have deriv_tendsto_at_x: Filter.Tendsto (iteratedDeriv n_x_int f) (nhdsWithin c (Set.Ioo c d)) (nhds ((iteratedDeriv n_x_int f) c)) := by
-        apply ContinuousWithinAt.tendsto _
-        apply continuous_within_at_c
-
-
-
-
-      have deriv_zero_at_c: (iteratedDeriv n_x_int f) c = 0 := by
+      have slope_tendsto_zero: Filter.Tendsto (slope (iteratedDeriv n_x_int f) x) (nhdsWithin x {x}ᶜ) (nhds 0) := by
         sorry
 
+      have deriv_at_eq: HasDerivAt (iteratedDeriv n_x_int f) 0 x := by
+        rwa [← hasDerivAt_iff_tendsto_slope] at slope_tendsto_zero
 
-      have deriv_zero_at_d: (iteratedDeriv n_x_int f) c = 0 := by
-        sorry
+      apply HasDerivAt.deriv deriv_at_eq
 
+      -- have deriv_tendsto_at_c: Filter.Tendsto (iteratedDeriv n_x_int f) (nhdsWithin c (Set.Ioo c d)) (nhds ((iteratedDeriv n_x_int f) c)) := by
+      --   apply ContinuousWithinAt.tendsto _
+      --   apply continuous_within_at_c
 
-      have deriv_k_const: iteratedDeriv n_x_int f = λ y => 0 := by
-        ext y
-        sorry
-        -- by_cases h_mem_interval: y ∈ closure (Set.Ioo c d)
-        -- . s orry
-        -- . by_cases n_x_int_zero: n_x_int = 0
-        --   . rw [n_x_int_zero]
-        --     simp
-
-
-        --   . s orry
-
-        --   have deriv_zero: derivi derivWithin_zero_of_nmem_closure h_mem_interval
-        --   . simp
-        --     s orry
-        --   . rw [Set.eq_endpoints_or_mem_Ioo_of_mem_Icc] at y_mem_endpoints
-
-      sorry
-
-    -- have forall_deriv_zero: ∀ (m: ℕ), m ≥ n_x_int →  ∀ (x: ℝ), x ∈ X ∩ Set.Ioo c d → (iteratedDerivWithin m f (Set.Ioo c d)) x = 0 := by
-    --   intro m hm
-    --   induction m with
-    --   | zero => s orry
-    --   | succ a ha => s orry
 
 
     have cont_diff_on: ContDiffOn ℝ ⊤ f (Set.Icc c d) := ContDiff.contDiffOn hCInfinity
