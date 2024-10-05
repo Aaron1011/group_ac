@@ -1350,6 +1350,8 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         apply ContinuousWithinAt.tendsto _
         apply ContDiffWithinAt.continuousWithinAt cont_diff_within_at
 
+      apply Filter.tendsto_iff_seq_tendsto.mp at deriv_tendsto_at_c
+
 
 
     have cont_diff_on: ContDiffOn ℝ ⊤ f (Set.Icc c d) := ContDiff.contDiffOn hCInfinity
