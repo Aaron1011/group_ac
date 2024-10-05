@@ -1339,10 +1339,10 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         apply ContDiff.contDiffWithinAt iterate_deriv_cont
 
 
-      have continuous_within_at_c: ContinuousWithinAt (iteratedDeriv n_x_int f) (Set.Ioo c d) c := by
-        apply ContDiffWithinAt.continuousWithinAt cont_diff_within_at
+      -- have continuous_within_at_c: ContinuousWithinAt (iteratedDeriv n_x_int f) (Set.Ioo c d) c := by
+      --   apply ContDiffWithinAt.continuousWithinAt cont_diff_within_at
 
-      have deriv_tendsto_at_c: Filter.Tendsto (iteratedDeriv n_x_int f) (nhdsWithin c (Set.Ioo c d)) (nhds ((iteratedDeriv n_x_int f) c)) := by
+      have deriv_tendsto_at_x: Filter.Tendsto (iteratedDeriv n_x_int f) (nhdsWithin c (Set.Ioo c d)) (nhds ((iteratedDeriv n_x_int f) c)) := by
         apply ContinuousWithinAt.tendsto _
         apply continuous_within_at_c
 
