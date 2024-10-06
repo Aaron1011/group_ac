@@ -1346,11 +1346,45 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       have deriv_at_eq: HasDerivAt (iteratedDeriv n_x_int f) 0 x := by
         rwa [← hasDerivAt_iff_tendsto_slope] at slope_tendsto_zero
 
-      have deriv_tendsto_at_c: Filter.Tendsto (deriv (iteratedDeriv n_x_int f)) (nhdsWithin x (Set.Ioo c d)) (nhds ((deriv (iteratedDeriv n_x_int f)) x)) := by
+      have deriv_tendsto_at_x: Filter.Tendsto (deriv (iteratedDeriv n_x_int f)) (nhdsWithin x (Set.Ioo c d)) (nhds ((deriv (iteratedDeriv n_x_int f)) x)) := by
         apply ContinuousWithinAt.tendsto _
         apply ContDiffWithinAt.continuousWithinAt cont_diff_within_at
 
-      apply Filter.tendsto_iff_seq_tendsto.mp at deriv_tendsto_at_c
+      have x_accum_cd_inter: ∀ x, x ∈ cd_intersect_x → AccPt x (Filter.principal cd_intersect_x) := by
+        intro x hx
+        have x_acc_x: AccPt x (Filter.principal X) := x_accum x hx.2
+        rw [accPt_iff_frequently] at x_acc_x
+        rw [accPt_iff_frequently]
+        rw [Filter.frequently_iff] at x_acc_x
+        rw [Filter.frequently_iff]
+        intro u hu
+        let u_inter := u ∩ Set.Ioo c d
+        have x_in_cd: x ∈ Set.Ioo c d := by
+          apply hx.1
+        have cd_nhds: Set.Ioo c d ∈ 𝓝 x := Ioo_mem_nhds x_in_cd.1 x_in_cd.2
+        have intersect_neighbor: u ∩ Set.Ioo c d ∈ 𝓝 x := by
+          apply Filter.inter_mem hu cd_nhds
+
+        specialize x_acc_x intersect_neighbor
+        obtain ⟨x1, x1_in_inter, x1_neq_x, x1_in_x⟩ := x_acc_x
+        use x1
+        refine ⟨x1_in_inter.1, x1_neq_x, ?_⟩
+        simp only [cd_intersect_x]
+        exact ⟨x1_in_inter.2, x1_in_x⟩
+
+
+      apply Filter.tendsto_iff_seq_tendsto.mp at deriv_tendsto_at_x
+      have x_acc: AccPt x (Filter.principal X) := x_accum x (hx.2)
+      rw [accPt_iff_frequently] at x_acc
+      rw [Filter.frequently_iff_seq_forall] at x_acc
+      obtain ⟨x_seq, x_seq_tendo, x_seq_in_X⟩ := x_acc
+      have deriv_x_seq_zero: ∀ n, (iteratedDeriv n_x_int f) (x_seq n) = 0 := by
+        intro n
+        sorry
+      sorry
+
+
+
 
 
 
