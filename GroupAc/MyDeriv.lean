@@ -1462,10 +1462,25 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
     have cont_diff_on: ContDiffOn ℝ ⊤ f (Set.Icc c d) := ContDiff.contDiffOn hCInfinity
     -- "We will prove that f(n)=0 on (a,b). This will imply that (a,b)⊂Ω which is a contradiction with (3)."
-    have deriv_zero_on_cd_omega: ∀ (x : ℝ), x ∈ Set.Ioo c d → (iteratedDeriv n_x_int f) x = 0 := by
+    have deriv_zero_on_cd_int_omega: ∀ (x : ℝ), x ∈ (Set.Ioo c d) ∩ poly_omega → (iteratedDeriv n_x_int f) x = 0 := by
       intro x hx
 
       sorry
+
+    have deriv_zero_on_cd_omega: ∀ (x : ℝ), x ∈ Set.Ioo c d → (iteratedDeriv n_x_int f) x = 0 := by
+      intro x hx
+      have x_in_omega_or_x: x ∈ poly_omega ∨ x ∈ X := by
+        simp [X]
+        exact Classical.em (x ∈ poly_omega)
+      cases x_in_omega_or_x with
+      | inl x_in_omega =>
+        apply deriv_zero_on_cd_int_omega x
+        simp
+        exact ⟨hx, x_in_omega⟩
+      | inr x_in_X =>
+        apply x_zero_on_cd_intersect x
+        exact ⟨hx, x_in_X⟩
+
 
     have poly_on_cd: RestrictsToPoly f c d := by apply zero_deriv_implies_poly c d n_x_int c_lt_d hCInfinity deriv_zero_on_cd_omega
     have cd_subset_omega: Set.Ioo c d ⊆ poly_omega := by
