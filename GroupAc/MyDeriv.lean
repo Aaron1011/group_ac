@@ -1409,10 +1409,47 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
       have x_seq_tendsto_x: Tendsto x_seq atTop (𝓝[≠] x) := by
         rw [Tendsto]
+        rw [Filter.le_def]
         rw [Tendsto] at x_seq_tendsto
-        simp only [nhdsWithin, nhds]
-        simp only [nhds] at x_seq_tendsto
-        sorry
+        rw [Filter.le_def] at x_seq_tendsto
+        simp
+        simp at x_seq_tendsto
+        intro x_1 hx_1
+        let x1_with_x := x_1 ∪ {x}
+        have x1_with_x_in_nhds: x1_with_x ∈ 𝓝 x := by
+          rw [mem_nhds_iff]
+          rw [mem_nhdsWithin] at hx_1
+          obtain ⟨u, hu⟩ := hx_1
+          use u
+          refine ⟨?_, hu.1, ?_⟩
+          simp only [x1_with_x]
+          rw [Set.subset_def]
+          intro y hy
+          have y_cases: y = x ∨ y ≠ x := by
+            apply eq_or_ne y x
+          cases y_cases with
+          | inl y_eq_x =>
+            rw [y_eq_x]
+            exact Set.mem_union_right x_1 rfl
+          | inr y_neq_x =>
+            have y_in_x_c: y ∈ (@Set.compl ℝ {x}) := by
+              exact y_neq_x
+            have y_in_inter: y ∈ u ∩ {x}ᶜ := by
+              exact Set.mem_inter hy y_neq_x
+            have y_in_x1: y ∈ x_1 := by
+              apply hu.2.2 y_in_inter
+            apply Set.mem_union_left (x := y)
+            exact y_in_x1
+          exact hu.2.1
+        obtain ⟨a, ha⟩ := x_seq_tendsto x1_with_x x1_with_x_in_nhds
+        use a
+        intro b hb
+        specialize ha b hb
+        specialize x_seq_in_X b
+        simp only [x1_with_x] at ha
+        simp only [x_seq_in_X.1] at ha
+        simp [x_seq_in_X.1] at ha
+        exact ha
 
       specialize slope_zero_tendsto x_seq_tendsto_x
       rw [slope_zero_comp] at slope_zero_tendsto
