@@ -1339,13 +1339,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         simp only [← iteratedDeriv_eq_iterate] at iterate_deriv_cont
         apply ContDiff.contDiffWithinAt iterate_deriv_cont
 
-
-      have slope_tendsto_zero: Filter.Tendsto (slope (iteratedDeriv n_x_int f) x) (nhdsWithin x {x}ᶜ) (nhds 0) := by
-        simp
-
-      have deriv_at_eq: HasDerivAt (iteratedDeriv n_x_int f) 0 x := by
-        rwa [← hasDerivAt_iff_tendsto_slope] at slope_tendsto_zero
-
       have deriv_tendsto_at_x: Filter.Tendsto (deriv (iteratedDeriv n_x_int f)) (nhdsWithin x (Set.Ioo c d)) (nhds ((deriv (iteratedDeriv n_x_int f)) x)) := by
         apply ContinuousWithinAt.tendsto _
         apply ContDiffWithinAt.continuousWithinAt cont_diff_within_at
@@ -1377,18 +1370,57 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       have x_acc: AccPt x (Filter.principal cd_intersect_x) := x_accum_cd_inter x hx
       rw [accPt_iff_frequently] at x_acc
       rw [Filter.frequently_iff_seq_forall] at x_acc
-      obtain ⟨x_seq, x_seq_tendo, x_seq_in_X⟩ := x_acc
+      obtain ⟨x_seq, x_seq_tendsto, x_seq_in_X⟩ := x_acc
       have deriv_x_seq_zero: ∀ n, (iteratedDeriv n_x_int f) (x_seq n) = 0 := by
         intro n
         specialize x_seq_in_X n
         apply x_zero_on_cd_intersect (x_seq n) x_seq_in_X.2
 
-      have slope_zero_on_seq: ∀ n, ∀ a b, (x_seq n) ∈ Set.Ioo a b → (slope ((iteratedDeriv n_x_int f)) x (x_seq n)) = 0 := by
-        intro n a b h_ab
+      have cont_iterated: ContDiff ℝ ⊤ (deriv^[n_x_int] f) := ContDiff.iterate_deriv n_x_int hCInfinity
+      rw [← iteratedDeriv_eq_iterate] at cont_iterated
+
+      have has_strict_deriv_at_x: HasStrictDerivAt (iteratedDeriv n_x_int f) (deriv ((iteratedDeriv n_x_int f)) x) x := by
+        apply ContDiff.hasStrictDerivAt cont_iterated
+        simp
+      have has_deriv_at_x: HasDerivAt (iteratedDeriv n_x_int f) (deriv ((iteratedDeriv n_x_int f)) x) x := by
+        apply HasStrictDerivAt.hasDerivAt (has_strict_deriv_at_x)
+
+      have slope_tendsto: Tendsto (slope (iteratedDeriv n_x_int f) x) (𝓝[≠] x) (𝓝 (deriv (iteratedDeriv n_x_int f) x)) := by
+        rw [hasDerivAt_iff_tendsto_slope] at has_deriv_at_x
+        exact has_deriv_at_x
+
+      apply Filter.tendsto_iff_seq_tendsto.mp at slope_tendsto
+
+      have slope_zero_on_seq: ∀ n, (slope ((iteratedDeriv n_x_int f)) x (x_seq n)) = 0 := by
+        intro n
         rw [slope]
         rw [deriv_x_seq_zero n]
         rw [x_zero_on_cd_intersect x hx]
         simp
+
+      have slope_zero_comp: slope (iteratedDeriv n_x_int f) x ∘ x_seq = 0 := by
+        ext n
+        simp
+        apply slope_zero_on_seq n
+
+      have slope_zero_tendsto: Tendsto x_seq atTop (𝓝[≠] x) →
+          Tendsto (slope (iteratedDeriv n_x_int f) x ∘ x_seq) atTop (𝓝 (deriv (iteratedDeriv n_x_int f) x)) := by
+        exact fun a ↦ slope_tendsto x_seq a
+
+      have x_seq_tendsto_x: Tendsto x_seq atTop (𝓝[≠] x) := by
+        rw [Tendsto]
+        rw [Tendsto] at x_seq_tendsto
+        simp only [nhdsWithin, nhds]
+        simp only [nhds] at x_seq_tendsto
+        sorry
+
+      specialize slope_zero_tendsto x_seq_tendsto_x
+      rw [slope_zero_comp] at slope_zero_tendsto
+
+      -- TODO - figure out how this actually works - not sure why this compiles.
+      have tendsto_zero := by apply tendsto_nhds_unique (slope_zero_tendsto) tendsto_const_nhds
+      apply tendsto_zero
+
 
 
     have cont_diff_on: ContDiffOn ℝ ⊤ f (Set.Icc c d) := ContDiff.contDiffOn hCInfinity
