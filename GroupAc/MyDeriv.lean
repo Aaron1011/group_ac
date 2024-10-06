@@ -1328,7 +1328,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     --   simp only [val_x]
     --   apply IsOpen.isOpenMap_subtype_val
 
-    -- have val_x_eq: val_x = X ∩ e_n n_x_int := by sorry
+    -- have val_x_eq: val_x = X ∩ e_n n_x_int := by s orry
 
 
     simp only [IsOpen] at x_int_open
@@ -1374,9 +1374,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     -- obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset full_set_open full_set_nonempty
 
     let cd_intersect_x := Set.Ioo c d ∩ X
-    have cd_intersect_x_subset: cd_intersect_x ⊆ X ∩ (e_n n_x_int) := by
-      sorry
-
     have cd_intersect_x_nonempty: cd_intersect_x.Nonempty := by
       sorry
 
@@ -1554,8 +1551,10 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           rw [this] at pq_subset
           simp at pq_subset
           obtain ⟨z, hz⟩ := Set.nonempty_def.mp cd_intersect_x_nonempty
-
-          sorry
+          have z_in_omega := pq_subset hz.1
+          have z_in_x: z ∈ X := hz.2
+          simp only [X] at z_in_x
+          contradiction
 
         have p_or_q_in: p ∈ Set.Ioo c d ∨ q ∈ Set.Ioo c d := by
           by_contra!
