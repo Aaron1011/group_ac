@@ -1464,8 +1464,19 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     -- "We will prove that f(n)=0 on (a,b). This will imply that (a,b)⊂Ω which is a contradiction with (3)."
     have deriv_zero_on_cd_int_omega: ∀ (x : ℝ), x ∈ (Set.Ioo c d) ∩ poly_omega → (iteratedDeriv n_x_int f) x = 0 := by
       intro x hx
-
-      sorry
+      have int_open: IsOpen ((Set.Ioo c d) ∩ poly_omega) := by
+        apply IsOpen.inter
+        apply isOpen_Ioo
+        apply poly_open
+      have is_empty_or_nonempty: (Set.Ioo c d ∩ poly_omega).Nonempty ∨ (Set.Ioo c d ∩ poly_omega) = ∅ := by
+        exact Or.symm (Set.eq_empty_or_nonempty (Set.Ioo c d ∩ poly_omega))
+      cases is_empty_or_nonempty with
+      | inl nonempty =>
+        sorry
+      | inr empty =>
+        rw [empty] at hx
+        simp at hx
+        contradiction
 
     have deriv_zero_on_cd_omega: ∀ (x : ℝ), x ∈ Set.Ioo c d → (iteratedDeriv n_x_int f) x = 0 := by
       intro x hx
