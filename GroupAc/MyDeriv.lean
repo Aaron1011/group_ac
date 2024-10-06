@@ -26,6 +26,38 @@ def RestrictsToPolyBundleOn (f: ℝ → ℝ) (s: Set ℝ) (p: Polynomial ℝ) :=
 def image' {α : Type _} {β : Type _} (s : Set α) (f : (a : α) → a ∈ s → β) : Set β :=
   {b | ∃ a ha, f a ha = b}
 
+lemma iter_deriv_degree_zero (n: ℕ) (p: Polynomial ℝ) (hp: p.degree = n): ((⇑Polynomial.derivative)^[n] p).degree = 0 := by
+  induction n generalizing p with
+  | zero =>
+    exact hp
+  | succ k ih =>
+    simp only [Function.iterate_succ]
+    have deriv_degree_k: (Polynomial.derivative p).degree = k := by
+      rw [Polynomial.degree_eq_iff_natDegree_eq_of_pos] at hp
+      have natdegree_gt_zero: 0 < p.natDegree := by
+        linarith
+      rw [Polynomial.degree_derivative_eq p natdegree_gt_zero]
+      simp
+      apply Nat.sub_eq_of_eq_add
+      exact hp
+      simp
+    apply ih (Polynomial.derivative p) deriv_degree_k
+
+
+
+
+    -- have iterate_lt := Polynomial.natDegree_iterate_derivative (Polynomial.derivative p) k
+    -- simp only [deriv_degree_k] at iterate_lt
+    -- have degree_le_natdegree: (Polynomial.derivative p).degree ≤ (Polynomial.derivative p).natDegree := by
+    --   simp
+    -- rw [deriv_degree_k] at degree_le_natdegree
+
+
+
+
+
+
+
 lemma iterated_deriv_eq_f_poly (n: ℕ) (p: Polynomial ℝ) (s: Set ℝ) (hs: UniqueDiffOn ℝ s) (ho: IsOpen s) (hp: RestrictsToPolyBundleOn f s p): Set.EqOn (iteratedDeriv n f) (iteratedDeriv n p.eval) s := by
   rw [Set.EqOn]
   intro x hx
@@ -1534,9 +1566,16 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
             apply (Set.subset_inter_iff.mp pq_subset).2
           have pq_poly_on_dup := pq_poly_on
           obtain ⟨pq_poly, h_pq_poly⟩ := pq_poly_on
-          let pq_deriv := (⇑Polynomial.derivative)^[pq_poly.natDegree] pq_poly
-          have pq_deriv_degree_zero: pq_deriv.degree = 0 := by
-            sorry
+          let k := pq_poly.natDegree
+          let pq_deriv := (⇑Polynomial.derivative)^[k] pq_poly
+          have pq_deriv_degree_zero: ((⇑Polynomial.derivative)^[k] pq_poly).degree = 0 := by
+            induction k with
+            | zero =>
+              simp
+
+            | succ k ih =>
+
+              sorry
           have pq_deriv_const: pq_deriv = Polynomial.C (pq_deriv.coeff 0) := by
             apply Polynomial.eq_C_of_degree_eq_zero pq_deriv_degree_zero
           have coeff_nonzero: pq_deriv.coeff 0 ≠ 0 := by
