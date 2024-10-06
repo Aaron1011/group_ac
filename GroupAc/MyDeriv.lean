@@ -1579,6 +1579,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           rwa [← iterated_deriv_eq_f_poly (f := f) _ pq_poly (Set.Ioo p q) (uniqueDiffOn_Ioo p q) isOpen_Ioo] at iterated_poly_zeriv_zero
           rw [RestrictsToPolyOn] at pq_poly_on_dup
           rwa [RestrictsToPolyBundleOn]
+          -- FIXME - we want to prove this where x ∈ (p, q)
           sorry
           sorry
           rwa [RestrictsToPolyBundleOn]
