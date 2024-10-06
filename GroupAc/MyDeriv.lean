@@ -1322,43 +1322,64 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     obtain ⟨n_x_int, x_int_nonempty⟩ := nonempty_interior_of_iUnion_of_closed x_intersect_closed en_cov_univ_set_x.symm
     --let x_int := (interior (Set.univ ∩ {x | ↑x ∈ e_n n_x_int}))
     have x_int_open: IsOpen (interior (@Set.univ x_subspace ∩ {x | ↑x ∈ e_n n_x_int})) := by apply isOpen_interior
+
+    -- let val_x := Subtype.val '' interior (@Set.univ x_subspace ∩ {x | ↑x ∈ e_n n_x_int})
+    -- have is_open_val: IsOpen val_x := by
+    --   simp only [val_x]
+    --   apply IsOpen.isOpenMap_subtype_val
+
+    -- have val_x_eq: val_x = X ∩ e_n n_x_int := by sorry
+
+
     simp only [IsOpen] at x_int_open
     rw [TopologicalSpace.IsOpen] at x_int_open
     simp [instTopologicalSpaceSubtype, TopologicalSpace.induced] at x_int_open
     -- An open set in the topology on R
     obtain ⟨full_set, full_set_open, full_set_preimage⟩ := x_int_open
+    rw [Set.preimage] at full_set_preimage
+    have val_equals_intersect: Subtype.val '' {x: x_subspace | ↑x ∈ full_set} = X ∩ full_set := by
+      rw [← Set.preimage]
+      simp
+
+    have intersect_nonempty: (X ∩ full_set).Nonempty := by
+      sorry
+
+    have c: ℝ := sorry
+    have d: ℝ := sorry
+    have c_lt_d: c < d := sorry
+    have cd_int: Set.Ioo c d ⊆ X ∩ (e_n n_x_int) := by sorry
+
+    --have subtype_image_intersect: Subtype.val '' (Subtype.val ⁻¹' full_set) = X ∩ full_set := by
+    --  rw [Subtype.image_preimage_val]
+    --rw [full_set_preimage] at subtype_image_intersect
+
     have full_set_preimage_reverse: interior {x: x_subspace | ↑x ∈ e_n n_x_int} = (Subtype.val ⁻¹' full_set) := full_set_preimage.symm
     rw [Set.eq_preimage_subtype_val_iff] at full_set_preimage_reverse
     --rw [Set.preimage_eq_iff_eq_image] at full_set_preimage
 
-    have full_set_nonempty: full_set.Nonempty := by
-      rw [Set.nonempty_def]
-      rw [Set.nonempty_def] at x_int_nonempty
-      obtain ⟨x, hx⟩ := x_int_nonempty
-      use x.1
+    -- have full_set_nonempty: full_set.Nonempty := by
+    --   rw [Set.nonempty_def]
+    --   rw [Set.nonempty_def] at x_int_nonempty
+    --   obtain ⟨x, hx⟩ := x_int_nonempty
+    --   use x.1
 
-      have x_in_subspace_int: x ∈ interior {x: x_subspace | ↑x ∈ e_n n_x_int} := by
-        simp at hx
-        exact hx
+    --   have x_in_subspace_int: x ∈ interior {x: x_subspace | ↑x ∈ e_n n_x_int} := by
+    --     simp at hx
+    --     exact hx
 
-      specialize full_set_preimage_reverse x.1 x.2
-      exact full_set_preimage_reverse.mp x_in_subspace_int
+    --   specialize full_set_preimage_reverse x.1 x.2
+    --   exact full_set_preimage_reverse.mp x_in_subspace_int
 
 
-    obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset full_set_open full_set_nonempty
+    -- obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset full_set_open full_set_nonempty
+
     let cd_intersect_x := Set.Ioo c d ∩ X
-    have cd_intersect_x_in: cd_intersect_x ⊆ X ∩ (e_n n_x_int) := by
-      rw [Set.subset_def]
-      intro x hx
-      refine ⟨?_, ?_⟩
-      exact hx.2
-      specialize cd_int hx.1
-      specialize full_set_preimage_reverse x hx.2
-      have x_in_int := full_set_preimage_reverse.mpr cd_int
-      apply interior_subset at x_in_int
-      rw [Set.mem_setOf_eq] at x_in_int
-      simp at x_in_int
-      exact x_in_int
+    have cd_intersect_x_subset: cd_intersect_x ⊆ X ∩ (e_n n_x_int) := by
+      sorry
+
+    have cd_intersect_x_nonempty: cd_intersect_x.Nonempty := by
+      sorry
+
 
 
 
@@ -1366,19 +1387,8 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       rw [Set.subset_def] at cd_int
       intro x hx
       specialize cd_int x hx.1
-      --rw [full_set_preimage, Subtype.coe_image] at cd_int
-      specialize full_set_preimage_reverse x hx.2
-      have x_in_interior := by
-        apply full_set_preimage_reverse.mpr cd_int
-
-      simp only [mem_interior] at x_in_interior
-      obtain ⟨t, t_subset, t_open, x_in_t⟩ := x_in_interior
-      apply Set.mem_of_subset_of_mem t_subset at x_in_t
-      dsimp [interior, e_n] at x_in_t
-      exact x_in_t
-
-      -- have deriv_x_zero: (iteratedDeriv n_x_int f) x = 0 := by
-      --   apply x_zero_on_cd_intersect x hx
+      simp only [e_n] at cd_int
+      apply cd_int.2
 
     have n_succ_deriv_zero: ∀ (x: ℝ) (k: ℕ), x ∈ cd_intersect_x → (∀ y, y ∈ cd_intersect_x → (iteratedDeriv (k) f) y = 0) → (iteratedDeriv (k + 1) f) x = 0 := by
       intro x k hx deriv_x_zero
@@ -1543,8 +1553,8 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           by_contra!
           rw [this] at pq_subset
           simp at pq_subset
-          obtain ⟨z, hz⟩ := Set.nonempty_Ioo.mpr c_lt_d
-          -- TODO - fix definition of (c, d) interval
+          obtain ⟨z, hz⟩ := Set.nonempty_def.mp cd_intersect_x_nonempty
+
           sorry
 
         have p_or_q_in: p ∈ Set.Ioo c d ∨ q ∈ Set.Ioo c d := by
@@ -1714,23 +1724,24 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       simp
       exact c_lt_d
 
-    have cd_intersect_x_nonempty: cd_intersect_x.Nonempty := by
-      simp only [cd_intersect_x]
-      simp only [Set.inter_nonempty]
+    -- have cd_intersect_x_nonempty: cd_intersect_x.Nonempty := by
+    --   simp only [cd_intersect_x]
+    --   simp only [Set.inter_nonempty]
 
-      obtain ⟨x, hx⟩ := cd_nonempty
-      have x_in_full_set: x ∈ full_set := by
-        apply cd_int
-        exact hx
-      use x
-      refine ⟨hx, ?_⟩
 
-      simp at x_int_nonempty
-      rw [← full_set_preimage] at x_int_nonempty
-      rw [Set.nonempty_def] at x_int_nonempty
-      obtain ⟨new_x_subspace, h_new_x_subspace⟩ := x_int_nonempty
-      simp only [Set.mem_preimage] at h_new_x_subspace
-      sorry
+    --   obtain ⟨x, hx⟩ := cd_nonempty
+    --   have x_in_full_set: x ∈ full_set := by
+    --     apply cd_int
+    --     exact hx
+    --   use x
+    --   refine ⟨hx, ?_⟩
+
+    --   simp at x_int_nonempty
+    --   rw [← full_set_preimage] at x_int_nonempty
+    --   rw [Set.nonempty_def] at x_int_nonempty
+    --   obtain ⟨new_x_subspace, h_new_x_subspace⟩ := x_int_nonempty
+    --   simp only [Set.mem_preimage] at h_new_x_subspace
+    --   sorry
 
 
 
