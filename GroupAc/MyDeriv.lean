@@ -1532,6 +1532,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
             exact hCInfinity
             simp only [poly_omega] at pq_subset
             apply (Set.subset_inter_iff.mp pq_subset).2
+          have pq_poly_on_dup := pq_poly_on
           obtain ⟨pq_poly, h_pq_poly⟩ := pq_poly_on
           let pq_deriv := (⇑Polynomial.derivative)^[pq_poly.natDegree] pq_poly
           have pq_deriv_degree_zero: pq_deriv.degree = 0 := by
@@ -1558,8 +1559,29 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
             rw [← pq_deriv_eval_eq_deriv]
             exact coeff_nonzero
 
+          have poly_degree_lt: pq_poly.natDegree < n_x_int := by
+            by_contra!
+            have zero_forall_gt := zero_forall_m pq_poly.natDegree p this p_in_inter
+            contradiction
 
+          have poly_deriv_n_zero: (⇑Polynomial.derivative)^[n_x_int] pq_poly = 0 := by
+            apply Polynomial.iterate_derivative_eq_zero poly_degree_lt
 
+          have deriv_eval_eq_zero: ((⇑Polynomial.derivative)^[n_x_int] pq_poly).eval x = 0 := by
+            rw [poly_deriv_n_zero]
+            simp
+
+          have iterated_poly_zeriv_zero: (iteratedDeriv n_x_int pq_poly.eval) x = 0 := by
+            rw [poly_iterated_deriv]
+            rw [Polynomial.iterate_derivative_eq_zero poly_degree_lt]
+            simp
+
+          rwa [← iterated_deriv_eq_f_poly (f := f) _ pq_poly (Set.Ioo p q) (uniqueDiffOn_Ioo p q) isOpen_Ioo] at iterated_poly_zeriv_zero
+          rw [RestrictsToPolyOn] at pq_poly_on_dup
+          rwa [RestrictsToPolyBundleOn]
+          sorry
+          sorry
+          rwa [RestrictsToPolyBundleOn]
           sorry
         | inr q_in_cd =>
           sorry
