@@ -26,6 +26,23 @@ def RestrictsToPolyBundleOn (f: ℝ → ℝ) (s: Set ℝ) (p: Polynomial ℝ) :=
 def image' {α : Type _} {β : Type _} (s : Set α) (f : (a : α) → a ∈ s → β) : Set β :=
   {b | ∃ a ha, f a ha = b}
 
+lemma iterated_deriv_eq_f_poly (n: ℕ) (p: Polynomial ℝ) (s: Set ℝ) (hs: UniqueDiffOn ℝ s) (ho: IsOpen s) (hp: RestrictsToPolyBundleOn f s p): Set.EqOn (iteratedDeriv n f) (iteratedDeriv n p.eval) s := by
+  rw [Set.EqOn]
+  intro x hx
+  rw [iteratedDeriv]
+  rw [iteratedDeriv]
+  rw [←iteratedFDerivWithin_of_isOpen n ho]
+  rw [←iteratedFDerivWithin_of_isOpen n ho]
+  simp only [iteratedDerivWithin_eq_iterate hs hx]
+  apply iteratedDerivWithin_congr hs
+  rw [Set.EqOn]
+  simp [RestrictsToPolyBundleOn] at hp
+  intro z hz
+  specialize hp z
+  exact hp hz
+  exact hx
+  exact hx
+  exact hx
 
 lemma const_ioo_implies_endpoint_left (a b k: ℝ) (hlt: a < b) (hc: ContinuousOn f (Set.Icc a b)) (hConst: ∀ x, x ∈ (Set.Ioo a b) → f x = k) : f a = k := by
   have tendsto_left: Tendsto f (𝓝[Set.Icc a b] a) (𝓝 (f a)) := by
@@ -1501,6 +1518,34 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           have deriv_zero: (iteratedDeriv n_x_int f) p = 0 := by
             apply x_zero_on_cd_intersect
             exact p_in_inter
+
+          have pq_poly_on: RestrictsToPolyOn f (Set.Ioo p q) := by
+            apply omega_r_imp_poly p q (Set.nonempty_Ioo.mpr p_lt_q)
+            exact hCInfinity
+            simp only [poly_omega] at pq_subset
+            apply (Set.subset_inter_iff.mp pq_subset).2
+          obtain ⟨pq_poly, h_pq_poly⟩ := pq_poly_on
+          let pq_deriv := (⇑Polynomial.derivative)^[pq_poly.natDegree] pq_poly
+          have pq_deriv_degree_zero: pq_deriv.degree = 0 := by
+            sorry
+          have pq_deriv_const: pq_deriv = Polynomial.C (pq_deriv.coeff 0) := by
+            apply Polynomial.eq_C_of_degree_eq_zero pq_deriv_degree_zero
+          have coeff_nonzero: pq_deriv.coeff 0 ≠ 0 := by
+            apply Polynomial.coeff_ne_zero_of_eq_degree pq_deriv_degree_zero
+
+          have pq_deriv_const: ∀ y, y ∈ Set.Ioo p q → pq_deriv.eval y = pq_deriv.coeff 0 := by
+            rw [pq_deriv_const]
+            simp only [Polynomial.eval_C]
+            simp
+
+          have f_deriv_const: ∀ y, y ∈ Set.Ioo p q → (iteratedDeriv pq_poly.natDegree f) y = pq_deriv.coeff 0 := by
+            sorry
+
+          have pq_deriv_eval_eq_deriv: pq_deriv.eval p = (iteratedDeriv (pq_poly.natDegree) pq_poly.eval) p := by
+            rw [poly_iterated_deriv]
+
+
+
           sorry
         | inr q_in_cd =>
           sorry
