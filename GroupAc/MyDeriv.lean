@@ -1477,6 +1477,14 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       apply tendsto_zero
 
 
+    have zero_forall_m: ∀ m, ∀ x, m ≥ n_x_int →  x ∈ cd_intersect_x → (iteratedDeriv m f) x = 0 := by
+      intro m x hm hx
+      induction m, hm using Nat.le_induction generalizing x with
+      | base => exact x_zero_on_cd_intersect x hx
+      | succ k ik hx_new =>
+        apply n_succ_deriv_zero x k hx
+        exact hx_new
+
 
     have cont_diff_on: ContDiffOn ℝ ⊤ f (Set.Icc c d) := ContDiff.contDiffOn hCInfinity
     -- "We will prove that f(n)=0 on (a,b). This will imply that (a,b)⊂Ω which is a contradiction with (3)."
@@ -1543,6 +1551,12 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
           have pq_deriv_eval_eq_deriv: pq_deriv.eval p = (iteratedDeriv (pq_poly.natDegree) pq_poly.eval) p := by
             rw [poly_iterated_deriv]
+
+          rw [← iterated_deriv_eq_f_poly (f := f) pq_poly.natDegree pq_poly (Set.Ioo p q) (uniqueDiffOn_Ioo p q) isOpen_Ioo] at pq_deriv_eval_eq_deriv
+          rw [pq_deriv_const] at pq_deriv_eval_eq_deriv
+          have deriv_nonzero: iteratedDeriv pq_poly.natDegree f p ≠ 0 := by
+            rw [← pq_deriv_eval_eq_deriv]
+            exact coeff_nonzero
 
 
 
