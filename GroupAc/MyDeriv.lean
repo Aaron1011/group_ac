@@ -1341,7 +1341,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
 
       have slope_tendsto_zero: Filter.Tendsto (slope (iteratedDeriv n_x_int f) x) (nhdsWithin x {x}ᶜ) (nhds 0) := by
-        sorry
+        simp
 
       have deriv_at_eq: HasDerivAt (iteratedDeriv n_x_int f) 0 x := by
         rwa [← hasDerivAt_iff_tendsto_slope] at slope_tendsto_zero
@@ -1382,11 +1382,13 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         intro n
         specialize x_seq_in_X n
         apply x_zero_on_cd_intersect (x_seq n) x_seq_in_X.2
-      sorry
 
-
-
-
+      have slope_zero_on_seq: ∀ n, ∀ a b, (x_seq n) ∈ Set.Ioo a b → (slope ((iteratedDeriv n_x_int f)) x (x_seq n)) = 0 := by
+        intro n a b h_ab
+        rw [slope]
+        rw [deriv_x_seq_zero n]
+        rw [x_zero_on_cd_intersect x hx]
+        simp
 
 
     have cont_diff_on: ContDiffOn ℝ ⊤ f (Set.Icc c d) := ContDiff.contDiffOn hCInfinity
