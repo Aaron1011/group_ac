@@ -1604,7 +1604,10 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
                 by_contra!
                 have zero_forall_gt := zero_forall_m pq_poly.natDegree p this p_in_inter
                 contradiction
-            apply Polynomial.iterate_derivative_eq_zero poly_degree_lt
+              apply Polynomial.iterate_derivative_eq_zero poly_degree_lt
+              sorry
+              rwa [RestrictsToPolyBundleOn]
+              sorry
 
           have deriv_eval_eq_zero: ((⇑Polynomial.derivative)^[n_x_int] pq_poly).eval x = 0 := by
             rw [poly_deriv_n_zero]
@@ -1612,16 +1615,13 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
           have iterated_poly_zeriv_zero: (iteratedDeriv n_x_int pq_poly.eval) x = 0 := by
             rw [poly_iterated_deriv]
-            rw [Polynomial.iterate_derivative_eq_zero poly_degree_lt]
             simp
+            exact deriv_eval_eq_zero
 
           rwa [← iterated_deriv_eq_f_poly (f := f) _ pq_poly (Set.Ioo p q) (uniqueDiffOn_Ioo p q) isOpen_Ioo] at iterated_poly_zeriv_zero
           rw [RestrictsToPolyOn] at pq_poly_on_dup
           rwa [RestrictsToPolyBundleOn]
           -- FIXME - we want to prove this where x ∈ (p, q)
-          sorry
-          sorry
-          rwa [RestrictsToPolyBundleOn]
           sorry
         | inr q_in_cd =>
           sorry
