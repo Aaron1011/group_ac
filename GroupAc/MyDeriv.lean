@@ -1374,13 +1374,14 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
 
       apply Filter.tendsto_iff_seq_tendsto.mp at deriv_tendsto_at_x
-      have x_acc: AccPt x (Filter.principal X) := x_accum x (hx.2)
+      have x_acc: AccPt x (Filter.principal cd_intersect_x) := x_accum_cd_inter x hx
       rw [accPt_iff_frequently] at x_acc
       rw [Filter.frequently_iff_seq_forall] at x_acc
       obtain ⟨x_seq, x_seq_tendo, x_seq_in_X⟩ := x_acc
       have deriv_x_seq_zero: ∀ n, (iteratedDeriv n_x_int f) (x_seq n) = 0 := by
         intro n
-        sorry
+        specialize x_seq_in_X n
+        apply x_zero_on_cd_intersect (x_seq n) x_seq_in_X.2
       sorry
 
 
