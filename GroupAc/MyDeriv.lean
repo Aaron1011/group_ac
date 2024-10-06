@@ -1319,7 +1319,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
     rw [eq_comm] at x_union_en
     -- Apply baire category theorem again.
-    -- WRONG - we need to be applying this in the subspace X, not in R
     obtain ⟨n_x_int, x_int_nonempty⟩ := nonempty_interior_of_iUnion_of_closed x_intersect_closed en_cov_univ_set_x.symm
     --let x_int := (interior (Set.univ ∩ {x | ↑x ∈ e_n n_x_int}))
     have x_int_open: IsOpen (interior (@Set.univ x_subspace ∩ {x | ↑x ∈ e_n n_x_int})) := by apply isOpen_interior
@@ -1348,6 +1347,20 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
     obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset full_set_open full_set_nonempty
     let cd_intersect_x := Set.Ioo c d ∩ X
+    have cd_intersect_x_in: cd_intersect_x ⊆ X ∩ (e_n n_x_int) := by
+      rw [Set.subset_def]
+      intro x hx
+      refine ⟨?_, ?_⟩
+      exact hx.2
+      specialize cd_int hx.1
+      specialize full_set_preimage_reverse x hx.2
+      have x_in_int := full_set_preimage_reverse.mpr cd_int
+      apply interior_subset at x_in_int
+      rw [Set.mem_setOf_eq] at x_in_int
+      simp at x_in_int
+      exact x_in_int
+
+
 
     have x_zero_on_cd_intersect: ∀ (x: ℝ), x ∈ cd_intersect_x → (iteratedDeriv n_x_int f) x = 0 := by
       rw [Set.subset_def] at cd_int
@@ -1542,6 +1555,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         | inl p_in_cd =>
           have p_in_inter: p ∈ cd_intersect_x := by
             simp only [cd_intersect_x]
+
             exact ⟨p_in_cd, sorry⟩
           have deriv_zero: (iteratedDeriv n_x_int f) p = 0 := by
             apply x_zero_on_cd_intersect
