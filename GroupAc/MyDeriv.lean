@@ -46,18 +46,6 @@ lemma iter_deriv_degree_zero (n: ℕ) (p: Polynomial ℝ) (hp: p.degree = n): ((
 
 
 
-    -- have iterate_lt := Polynomial.natDegree_iterate_derivative (Polynomial.derivative p) k
-    -- simp only [deriv_degree_k] at iterate_lt
-    -- have degree_le_natdegree: (Polynomial.derivative p).degree ≤ (Polynomial.derivative p).natDegree := by
-    --   simp
-    -- rw [deriv_degree_k] at degree_le_natdegree
-
-
-
-
-
-
-
 lemma iterated_deriv_eq_f_poly (n: ℕ) (p: Polynomial ℝ) (s: Set ℝ) (hs: UniqueDiffOn ℝ s) (ho: IsOpen s) (hp: RestrictsToPolyBundleOn f s p): Set.EqOn (iteratedDeriv n f) (iteratedDeriv n p.eval) s := by
   rw [Set.EqOn]
   intro x hx
