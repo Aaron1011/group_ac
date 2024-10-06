@@ -1471,12 +1471,45 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       have is_empty_or_nonempty: (Set.Ioo c d ∩ poly_omega).Nonempty ∨ (Set.Ioo c d ∩ poly_omega) = ∅ := by
         exact Or.symm (Set.eq_empty_or_nonempty (Set.Ioo c d ∩ poly_omega))
       cases is_empty_or_nonempty with
-      | inl nonempty =>
-        sorry
+      | inl inter_nonempty =>
+        obtain ⟨p, q, p_lt_q, pq_subset⟩ := IsOpen.exists_Ioo_subset int_open inter_nonempty
+        have pq_inter_cd_nonempty: (Set.Ioo p q ∩ Set.Ioo c d).Nonempty := by
+          rw [Set.inter_nonempty]
+          obtain ⟨x, hx⟩ := Set.nonempty_Ioo.mpr p_lt_q
+          use x
+          use hx
+          apply (pq_subset hx).1
+
+        have pq_neq_cd: Set.Ioo p q ≠ Set.Ioo c d := by
+          by_contra!
+          rw [this] at pq_subset
+          simp at pq_subset
+          obtain ⟨z, hz⟩ := Set.nonempty_Ioo.mpr c_lt_d
+          -- TODO - fix definition of (c, d) interval
+          sorry
+
+        have p_or_q_in: p ∈ Set.Ioo c d ∨ q ∈ Set.Ioo c d := by
+          by_contra!
+          sorry
+
+        cases p_or_q_in with
+        | inl p_in_cd =>
+          have p_in_inter: p ∈ cd_intersect_x := by
+            simp only [cd_intersect_x]
+            exact ⟨p_in_cd, sorry⟩
+          have deriv_zero: (iteratedDeriv n_x_int f) p = 0 := by
+            apply x_zero_on_cd_intersect
+            exact p_in_inter
+        | inr q_in_cd =>
+          sorry
+
+
+
+
       | inr empty =>
         rw [empty] at hx
         simp at hx
-        contradiction
+
 
     have deriv_zero_on_cd_omega: ∀ (x : ℝ), x ∈ Set.Ioo c d → (iteratedDeriv n_x_int f) x = 0 := by
       intro x hx
