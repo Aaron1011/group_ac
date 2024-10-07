@@ -1560,6 +1560,17 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           rw [Set.nonempty_def]
           refine ⟨x, x_in_t⟩
 
+        have maximal_is_connected: IsConnected maximal_set := by
+          refine ⟨maximal_nonempty, ?_⟩
+          apply isPreconnected_sUnion x
+          simp
+          intro s hs
+          simp only [Set.mem_setOf_eq] at hs
+          obtain ⟨a, b, h_s, h_ab, x_in_s⟩ := hs
+          rw [h_s]
+          apply isPreconnected_Ioo
+
+
         have maximal_is_interval: ∃ p q, maximal_set = Set.Ioo p q := by
           sorry
         obtain ⟨p, q, maximal_set_eq⟩ := maximal_is_interval
