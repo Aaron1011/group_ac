@@ -1577,6 +1577,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           rw [h_s]
           apply isPreconnected_Ioo
 
+        -- TODO - factor this out and maybe pr to mathlib
         have icc_not_open: ∀ a b: ℝ, a ≤ b → ¬ IsOpen (Set.Icc a b) := by
           intro a b a_le_b
           have is_closed: IsClosed (Set.Icc a b) := isClosed_Icc
@@ -1594,6 +1595,25 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
             apply (not_imp_not.mpr isClopen_iff.mp)
             simp
             refine ⟨Set.Nonempty.ne_empty nonempty, icc_not_univ⟩
+
+          simp [IsClopen] at not_clopen
+          apply not_clopen is_closed
+
+        have ici_not_open: ∀ a: ℝ, ¬ IsOpen (Set.Ici a) := by
+          intro a
+          have is_closed: IsClosed (Set.Ici a) := isClosed_Ici
+          have nonempty: (Set.Ici a).Nonempty := by simp
+          have ici_missing: (a - 1) ∉ Set.Ici a := by
+            simp
+
+          have ici_not_univ: Set.Ici a ≠ Set.univ := by
+            rw [Set.ne_univ_iff_exists_not_mem]
+            refine ⟨a - 1, ici_missing⟩
+
+          have not_clopen: ¬IsClopen (Set.Ici a) := by
+            apply (not_imp_not.mpr isClopen_iff.mp)
+            simp
+            refine ⟨Set.Nonempty.ne_empty nonempty, ici_not_univ⟩
 
           simp [IsClopen] at not_clopen
           apply not_clopen is_closed
