@@ -1553,8 +1553,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           obtain ⟨a, b, t_eq, _⟩ := ht
           rw [t_eq]
           apply isOpen_Ioo
-        have maximal_nonempty: maximal_set.Nonempty := by
-          rw [Set.nonempty_sUnion]
+        have x_in_maximal: x ∈ maximal_set := by
           have x_in_poly: x ∈ poly_omega := hx.2
           rw [Set.mem_sUnion] at x_in_poly
           obtain ⟨t, ht, x_in_t⟩ := x_in_poly
@@ -1564,8 +1563,9 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           simp only [Set.mem_setOf_eq] at ht
           obtain ⟨a, b, h_t, h_ab⟩ := ht
           refine ⟨a, b, h_t, h_ab, x_in_t⟩
-          rw [Set.nonempty_def]
-          refine ⟨x, x_in_t⟩
+          exact x_in_t
+        have maximal_nonempty: maximal_set.Nonempty := by
+          exact Set.nonempty_of_mem x_in_maximal
 
         have maximal_is_connected: IsConnected maximal_set := by
           refine ⟨maximal_nonempty, ?_⟩
@@ -1635,7 +1635,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
             refine ⟨a, intersect_frontier⟩
 
           have not_eq_empty: ¬((Set.Ico a b) ∩ frontier (Set.Ico a b) = ∅) := by
-            apply?
+            exact Set.nonempty_iff_ne_empty.mp frontier_intersect_nonempty
 
           apply frontier_imp_not_open not_eq_empty
 
@@ -1652,10 +1652,10 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         obtain ⟨p, q, maximal_set_eq⟩ := maximal_is_interval
         have x_in_pq: x ∈ Set.Ioo p q := by
           rw [← maximal_set_eq]
-          simp only [maximal_set]
-
-          sorry
-        have p_lt_q: p < q := sorry
+          exact x_in_maximal
+        have p_lt_q: p < q := by
+          rw [maximal_set_eq] at maximal_nonempty
+          exact Set.nonempty_Ioo.mp maximal_nonempty
         have maximal_is_poly_on: RestrictsToPolyOn f (Set.Ioo p q) := by
           sorry
 
