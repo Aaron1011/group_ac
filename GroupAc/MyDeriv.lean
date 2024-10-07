@@ -1538,34 +1538,30 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         exact Or.symm (Set.eq_empty_or_nonempty (Set.Ioo c d ∩ poly_omega))
       cases is_empty_or_nonempty with
       | inl inter_nonempty =>
-        obtain ⟨p, q, p_lt_q, pq_subset⟩ := IsOpen.exists_Ioo_subset int_open inter_nonempty
-        have pq_inter_cd_nonempty: (Set.Ioo p q ∩ Set.Ioo c d).Nonempty := by
-          rw [Set.inter_nonempty]
-          obtain ⟨x, hx⟩ := Set.nonempty_Ioo.mpr p_lt_q
-          use x
-          use hx
-          apply (pq_subset hx).1
 
-        have pq_neq_cd: Set.Ioo p q ≠ Set.Ioo c d := by
-          by_contra!
-          rw [this] at pq_subset
-          simp at pq_subset
-          obtain ⟨z, hz⟩ := Set.nonempty_def.mp cd_intersect_x_nonempty
-          have z_in_omega := pq_subset hz.1
-          have z_in_x: z ∈ X := hz.2
-          simp only [X] at z_in_x
-          contradiction
+        -- have maximal_interval: ∃ p q, Set.Ioo p q ⊆ (Set.Ioo c d) ∩ poly_omega ∧ (p ∈ X ∨ q ∈ X) := by
+        --   by_contra!
 
-        have p_or_q_in: p ∈ Set.Ioo c d ∨ q ∈ Set.Ioo c d := by
-          by_contra!
+          --obtain ⟨p, q, p_lt_q, pq_subset⟩ := IsOpen.exists_Ioo_subset int_open inter_nonempty
+          --specialize this p q pq_subset
+
+        let maximal_set := ⋃₀ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b ∧ x ∈ i}
+        have maximal_is_interval: ∃ p q, maximal_set = Set.Ioo p q := by
+          sorry
+        obtain ⟨p, q, maximal_set_eq⟩ := maximal_is_interval
+        have x_in_pq: x ∈ Set.Ioo p q := by
+          rw [← maximal_set_eq]
+          simp only [maximal_set]
+          sorry
+        have p_lt_q: p < q := sorry
+        have maximal_is_poly_on: RestrictsToPolyOn f (Set.Ioo p q) := by
+          sorry
+
+        have p_or_q_in: p ∈ cd_intersect_x ∨ q ∈ cd_intersect_x := by
           sorry
 
         cases p_or_q_in with
-        | inl p_in_cd =>
-          have p_in_inter: p ∈ cd_intersect_x := by
-            simp only [cd_intersect_x]
-
-            exact ⟨p_in_cd, sorry⟩
+        | inl p_in_inter =>
           have deriv_zero: (iteratedDeriv n_x_int f) p = 0 := by
             apply x_zero_on_cd_intersect
             exact p_in_inter
@@ -1573,8 +1569,22 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           have pq_poly_on: RestrictsToPolyOn f (Set.Ioo p q) := by
             apply omega_r_imp_poly p q (Set.nonempty_Ioo.mpr p_lt_q)
             exact hCInfinity
-            simp only [poly_omega] at pq_subset
-            apply (Set.subset_inter_iff.mp pq_subset).2
+            simp only [← maximal_set_eq, maximal_set]
+            rw [Set.subset_def]
+            intro x1 hx1
+            simp only [Set.mem_sUnion] at hx1
+            simp only [Set.mem_sUnion]
+            obtain ⟨t, ht, x_in_t⟩ := hx1
+            use t
+            refine ⟨?_, x_in_t⟩
+            have sets_subset: {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b ∧ x ∈ i} ⊆ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b} := by
+              simp
+              intro a x_2 x_3 h_a_eq h_poly h_x_in_a
+              use x_2
+              use x_3
+            apply sets_subset ht
+
+
           have pq_poly_on_dup := pq_poly_on
           obtain ⟨pq_poly, h_pq_poly⟩ := pq_poly_on
           let k := pq_poly.natDegree
@@ -1670,11 +1680,11 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
             simp
             exact deriv_eval_eq_zero
 
+
           rwa [← iterated_deriv_eq_f_poly (f := f) _ pq_poly (Set.Ioo p q) (uniqueDiffOn_Ioo p q) isOpen_Ioo] at iterated_poly_zeriv_zero
           rw [RestrictsToPolyOn] at pq_poly_on_dup
           rwa [RestrictsToPolyBundleOn]
-          -- FIXME - we want to prove this where x ∈ (p, q)
-          sorry
+          exact x_in_pq
         | inr q_in_cd =>
           sorry
       | inr empty =>
@@ -1740,7 +1750,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     --   rw [Set.nonempty_def] at x_int_nonempty
     --   obtain ⟨new_x_subspace, h_new_x_subspace⟩ := x_int_nonempty
     --   simp only [Set.mem_preimage] at h_new_x_subspace
-    --   sorry
+    --   s orry
 
 
 
