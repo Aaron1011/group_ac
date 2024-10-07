@@ -1546,6 +1546,13 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           --specialize this p q pq_subset
 
         let maximal_set := ⋃₀ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b ∧ x ∈ i}
+        have maximal_open: IsOpen maximal_set := by
+          refine isOpen_sUnion ?_
+          intro t ht
+          simp only [Set.mem_setOf_eq] at ht
+          obtain ⟨a, b, t_eq, _⟩ := ht
+          rw [t_eq]
+          apply isOpen_Ioo
         have maximal_nonempty: maximal_set.Nonempty := by
           rw [Set.nonempty_sUnion]
           have x_in_poly: x ∈ poly_omega := hx.2
@@ -1570,9 +1577,13 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           rw [h_s]
           apply isPreconnected_Ioo
 
+        have maximal_mem_intervals := IsPreconnected.mem_intervals maximal_is_connected.2
+
+
 
         have maximal_is_interval: ∃ p q, maximal_set = Set.Ioo p q := by
           sorry
+
         obtain ⟨p, q, maximal_set_eq⟩ := maximal_is_interval
         have x_in_pq: x ∈ Set.Ioo p q := by
           rw [← maximal_set_eq]
