@@ -1546,12 +1546,27 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           --specialize this p q pq_subset
 
         let maximal_set := ⋃₀ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b ∧ x ∈ i}
+        have maximal_nonempty: maximal_set.Nonempty := by
+          rw [Set.nonempty_sUnion]
+          have x_in_poly: x ∈ poly_omega := hx.2
+          rw [Set.mem_sUnion] at x_in_poly
+          obtain ⟨t, ht, x_in_t⟩ := x_in_poly
+          use t
+          refine ⟨?_, ?_⟩
+          simp only [Set.mem_setOf_eq]
+          simp only [Set.mem_setOf_eq] at ht
+          obtain ⟨a, b, h_t, h_ab⟩ := ht
+          refine ⟨a, b, h_t, h_ab, x_in_t⟩
+          rw [Set.nonempty_def]
+          refine ⟨x, x_in_t⟩
+
         have maximal_is_interval: ∃ p q, maximal_set = Set.Ioo p q := by
           sorry
         obtain ⟨p, q, maximal_set_eq⟩ := maximal_is_interval
         have x_in_pq: x ∈ Set.Ioo p q := by
           rw [← maximal_set_eq]
           simp only [maximal_set]
+
           sorry
         have p_lt_q: p < q := sorry
         have maximal_is_poly_on: RestrictsToPolyOn f (Set.Ioo p q) := by
