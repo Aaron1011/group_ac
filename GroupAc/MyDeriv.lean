@@ -1577,6 +1577,28 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           rw [h_s]
           apply isPreconnected_Ioo
 
+        have icc_not_open: ∀ a b: ℝ, a ≤ b → ¬ IsOpen (Set.Icc a b) := by
+          intro a b a_le_b
+          have is_closed: IsClosed (Set.Icc a b) := isClosed_Icc
+          have nonempty: (Set.Icc a b).Nonempty := by
+            refine Set.nonempty_Icc.mpr a_le_b
+
+          have icc_missing: (b + 1) ∉ Set.Icc a b := by
+            simp
+
+          have icc_not_univ: Set.Icc a b ≠ Set.univ := by
+            rw [Set.ne_univ_iff_exists_not_mem]
+            refine ⟨b + 1, icc_missing⟩
+
+          have not_clopen: ¬IsClopen (Set.Icc a b) := by
+            apply (not_imp_not.mpr isClopen_iff.mp)
+            simp
+            refine ⟨Set.Nonempty.ne_empty nonempty, icc_not_univ⟩
+
+          simp [IsClopen] at not_clopen
+          apply not_clopen is_closed
+
+
         have maximal_mem_intervals := IsPreconnected.mem_intervals maximal_is_connected.2
 
 
