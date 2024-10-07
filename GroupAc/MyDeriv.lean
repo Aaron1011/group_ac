@@ -1619,6 +1619,29 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           apply not_clopen is_closed
 
 
+        have ico_not_open: ∀ a b: ℝ, a < b → ¬ IsOpen (Set.Ico a b) := by
+          intro a b a_lt_b
+          have frontier_eq: frontier (Set.Ico a b) = {a, b} := by apply frontier_Ico a_lt_b
+          have frontier_imp_not_open: ¬((Set.Ico a b) ∩ frontier (Set.Ico a b) = ∅) → ¬ IsOpen (Set.Ico a b) := not_imp_not.mpr IsOpen.inter_frontier_eq
+          have a_in_ico: a ∈ Set.Ico a b := by
+            rw [Set.mem_Ico]
+            refine ⟨?_, a_lt_b⟩
+            simp
+          have intersect_frontier: a ∈ (Set.Ico a b) ∩ frontier (Set.Ico a b) := by
+            rw [frontier_eq]
+            simp [a_in_ico]
+
+          have frontier_intersect_nonempty: Set.Nonempty ((Set.Ico a b) ∩ frontier (Set.Ico a b)):= by
+            refine ⟨a, intersect_frontier⟩
+
+          have not_eq_empty: ¬((Set.Ico a b) ∩ frontier (Set.Ico a b) = ∅) := by
+            apply?
+
+          apply frontier_imp_not_open not_eq_empty
+
+
+
+
         have maximal_mem_intervals := IsPreconnected.mem_intervals maximal_is_connected.2
 
 
