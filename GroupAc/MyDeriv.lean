@@ -8,6 +8,8 @@ import Mathlib.Order.Filter.Basic
 open Topology
 open Filter
 
+set_option maxHeartbeats 1000000
+
 
 variable {f: ℝ → ℝ}
 
