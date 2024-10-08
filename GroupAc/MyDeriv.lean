@@ -27,6 +27,112 @@ def RestrictsToPolyBundleOn (f: ℝ → ℝ) (s: Set ℝ) (p: Polynomial ℝ) :=
 def image' {α : Type _} {β : Type _} (s : Set α) (f : (a : α) → a ∈ s → β) : Set β :=
   {b | ∃ a ha, f a ha = b}
 
+
+-- TODO - factor this out and maybe pr to mathlib
+lemma icc_not_open: ∀ a b: ℝ, a ≤ b → ¬ IsOpen (Set.Icc a b) := by
+  intro a b a_le_b
+  have is_closed: IsClosed (Set.Icc a b) := isClosed_Icc
+  have nonempty: (Set.Icc a b).Nonempty := by
+    refine Set.nonempty_Icc.mpr a_le_b
+
+  have icc_missing: (b + 1) ∉ Set.Icc a b := by
+    simp
+
+  have icc_not_univ: Set.Icc a b ≠ Set.univ := by
+    rw [Set.ne_univ_iff_exists_not_mem]
+    refine ⟨b + 1, icc_missing⟩
+
+  have not_clopen: ¬IsClopen (Set.Icc a b) := by
+    apply (not_imp_not.mpr isClopen_iff.mp)
+    simp
+    refine ⟨Set.Nonempty.ne_empty nonempty, icc_not_univ⟩
+
+  simp [IsClopen] at not_clopen
+  apply not_clopen is_closed
+
+lemma ici_not_open: ∀ a: ℝ, ¬ IsOpen (Set.Ici a) := by
+  intro a
+  have is_closed: IsClosed (Set.Ici a) := isClosed_Ici
+  have nonempty: (Set.Ici a).Nonempty := by simp
+  have ici_missing: (a - 1) ∉ Set.Ici a := by
+    simp
+
+  have ici_not_univ: Set.Ici a ≠ Set.univ := by
+    rw [Set.ne_univ_iff_exists_not_mem]
+    refine ⟨a - 1, ici_missing⟩
+
+  have not_clopen: ¬IsClopen (Set.Ici a) := by
+    apply (not_imp_not.mpr isClopen_iff.mp)
+    simp
+    refine ⟨Set.Nonempty.ne_empty nonempty, ici_not_univ⟩
+
+  simp [IsClopen] at not_clopen
+  apply not_clopen is_closed
+
+-- TODO - deduplicate with ici
+lemma iic_not_open: ∀ a: ℝ, ¬ IsOpen (Set.Iic a) := by
+  intro a
+  have is_closed: IsClosed (Set.Iic a) := isClosed_Iic
+  have nonempty: (Set.Iic a).Nonempty := by simp
+  have iic_missing: (a + 1) ∉ Set.Iic a := by
+    simp
+
+  have ici_not_univ: Set.Iic a ≠ Set.univ := by
+    rw [Set.ne_univ_iff_exists_not_mem]
+    refine ⟨a + 1, iic_missing⟩
+
+  have not_clopen: ¬IsClopen (Set.Iic a) := by
+    apply (not_imp_not.mpr isClopen_iff.mp)
+    simp
+    refine ⟨Set.Nonempty.ne_empty nonempty, ici_not_univ⟩
+
+  simp [IsClopen] at not_clopen
+  apply not_clopen is_closed
+
+lemma ico_not_open: ∀ a b: ℝ, a < b → ¬ IsOpen (Set.Ico a b) := by
+  intro a b a_lt_b
+  have frontier_eq: frontier (Set.Ico a b) = {a, b} := by apply frontier_Ico a_lt_b
+  have frontier_imp_not_open: ¬((Set.Ico a b) ∩ frontier (Set.Ico a b) = ∅) → ¬ IsOpen (Set.Ico a b) := not_imp_not.mpr IsOpen.inter_frontier_eq
+  have a_in_ico: a ∈ Set.Ico a b := by
+    rw [Set.mem_Ico]
+    refine ⟨?_, a_lt_b⟩
+    simp
+  have intersect_frontier: a ∈ (Set.Ico a b) ∩ frontier (Set.Ico a b) := by
+    rw [frontier_eq]
+    simp [a_in_ico]
+
+  have frontier_intersect_nonempty: Set.Nonempty ((Set.Ico a b) ∩ frontier (Set.Ico a b)):= by
+    refine ⟨a, intersect_frontier⟩
+
+  have not_eq_empty: ¬((Set.Ico a b) ∩ frontier (Set.Ico a b) = ∅) := by
+    exact Set.nonempty_iff_ne_empty.mp frontier_intersect_nonempty
+
+  apply frontier_imp_not_open not_eq_empty
+
+-- TODO: deduplicate with ico
+lemma ioc_not_open: ∀ a b: ℝ, a < b → ¬ IsOpen (Set.Ioc a b) := by
+  intro a b a_lt_b
+  have frontier_eq: frontier (Set.Ioc a b) = {a, b} := by apply frontier_Ioc a_lt_b
+  have frontier_imp_not_open: ¬((Set.Ioc a b) ∩ frontier (Set.Ioc a b) = ∅) → ¬ IsOpen (Set.Ioc a b) := not_imp_not.mpr IsOpen.inter_frontier_eq
+  have b_in_ioc: b ∈ Set.Ioc a b := by
+    rw [Set.mem_Ioc]
+    refine ⟨a_lt_b, ?_⟩
+    simp
+  have intersect_frontier: b ∈ (Set.Ioc a b) ∩ frontier (Set.Ioc a b) := by
+    rw [frontier_eq]
+    simp [b_in_ioc]
+
+  have frontier_intersect_nonempty: Set.Nonempty ((Set.Ioc a b) ∩ frontier (Set.Ioc a b)):= by
+    refine ⟨b, intersect_frontier⟩
+
+  have not_eq_empty: ¬((Set.Ioc a b) ∩ frontier (Set.Ioc a b) = ∅) := by
+    exact Set.nonempty_iff_ne_empty.mp frontier_intersect_nonempty
+
+  apply frontier_imp_not_open not_eq_empty
+
+
+
+
 lemma iter_deriv_degree_zero (n: ℕ) (p: Polynomial ℝ) (hp: p.degree = n): ((⇑Polynomial.derivative)^[n] p).degree = 0 := by
   induction n generalizing p with
   | zero =>
@@ -1637,71 +1743,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           rw [h_s]
           apply isPreconnected_Ioo
 
-        -- TODO - factor this out and maybe pr to mathlib
-        have icc_not_open: ∀ a b: ℝ, a ≤ b → ¬ IsOpen (Set.Icc a b) := by
-          intro a b a_le_b
-          have is_closed: IsClosed (Set.Icc a b) := isClosed_Icc
-          have nonempty: (Set.Icc a b).Nonempty := by
-            refine Set.nonempty_Icc.mpr a_le_b
-
-          have icc_missing: (b + 1) ∉ Set.Icc a b := by
-            simp
-
-          have icc_not_univ: Set.Icc a b ≠ Set.univ := by
-            rw [Set.ne_univ_iff_exists_not_mem]
-            refine ⟨b + 1, icc_missing⟩
-
-          have not_clopen: ¬IsClopen (Set.Icc a b) := by
-            apply (not_imp_not.mpr isClopen_iff.mp)
-            simp
-            refine ⟨Set.Nonempty.ne_empty nonempty, icc_not_univ⟩
-
-          simp [IsClopen] at not_clopen
-          apply not_clopen is_closed
-
-        have ici_not_open: ∀ a: ℝ, ¬ IsOpen (Set.Ici a) := by
-          intro a
-          have is_closed: IsClosed (Set.Ici a) := isClosed_Ici
-          have nonempty: (Set.Ici a).Nonempty := by simp
-          have ici_missing: (a - 1) ∉ Set.Ici a := by
-            simp
-
-          have ici_not_univ: Set.Ici a ≠ Set.univ := by
-            rw [Set.ne_univ_iff_exists_not_mem]
-            refine ⟨a - 1, ici_missing⟩
-
-          have not_clopen: ¬IsClopen (Set.Ici a) := by
-            apply (not_imp_not.mpr isClopen_iff.mp)
-            simp
-            refine ⟨Set.Nonempty.ne_empty nonempty, ici_not_univ⟩
-
-          simp [IsClopen] at not_clopen
-          apply not_clopen is_closed
-
-
-        have ico_not_open: ∀ a b: ℝ, a < b → ¬ IsOpen (Set.Ico a b) := by
-          intro a b a_lt_b
-          have frontier_eq: frontier (Set.Ico a b) = {a, b} := by apply frontier_Ico a_lt_b
-          have frontier_imp_not_open: ¬((Set.Ico a b) ∩ frontier (Set.Ico a b) = ∅) → ¬ IsOpen (Set.Ico a b) := not_imp_not.mpr IsOpen.inter_frontier_eq
-          have a_in_ico: a ∈ Set.Ico a b := by
-            rw [Set.mem_Ico]
-            refine ⟨?_, a_lt_b⟩
-            simp
-          have intersect_frontier: a ∈ (Set.Ico a b) ∩ frontier (Set.Ico a b) := by
-            rw [frontier_eq]
-            simp [a_in_ico]
-
-          have frontier_intersect_nonempty: Set.Nonempty ((Set.Ico a b) ∩ frontier (Set.Ico a b)):= by
-            refine ⟨a, intersect_frontier⟩
-
-          have not_eq_empty: ¬((Set.Ico a b) ∩ frontier (Set.Ico a b) = ∅) := by
-            exact Set.nonempty_iff_ne_empty.mp frontier_intersect_nonempty
-
-          apply frontier_imp_not_open not_eq_empty
-
-
-
-
         have maximal_mem_intervals := IsPreconnected.mem_intervals maximal_is_connected.2
         have sets_subset: {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b ∧ x ∈ i ∧ i ⊆ Set.Ioo c d} ⊆ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b} := by
           simp
@@ -1756,9 +1797,11 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         have maximal_is_interval: ∃ p q, maximal_set = Set.Ioo p q := by
           have neq_icc := maximal_neq_not_open (Set.Icc (sInf maximal_set) (sSup maximal_set)) (icc_not_open _ _ inf_le_sup)
           have neq_ici := maximal_neq_not_open (Set.Ici (sInf maximal_set)) (ici_not_open _)
+          have neq_iic := maximal_neq_not_open (Set.Iic (sSup maximal_set)) (iic_not_open _)
           have neq_ico := maximal_neq_not_open (Set.Ico (sInf maximal_set) (sSup maximal_set)) (ico_not_open _ _ inf_lt_sup)
+          have neq_ioc := maximal_neq_not_open (Set.Ioc (sInf maximal_set) (sSup maximal_set)) (ioc_not_open _ _ inf_lt_sup)
           simp [Set.mem_insert_iff] at maximal_mem_intervals
-          simp only [neq_icc, neq_ici, neq_ico, Set.Nonempty.ne_empty maximal_nonempty] at maximal_mem_intervals
+          simp only [neq_icc, neq_ici, neq_iic, neq_ico, neq_ioc, Set.Nonempty.ne_empty maximal_nonempty] at maximal_mem_intervals
           simp at maximal_mem_intervals
           sorry
 
