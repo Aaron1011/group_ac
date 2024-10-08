@@ -1458,7 +1458,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
     -- have val_x_eq: val_x = X ∩ e_n n_x_int := by s orry
 
-
+    have x_int_open_copy := x_int_open
     simp only [IsOpen] at x_int_open
     rw [TopologicalSpace.IsOpen] at x_int_open
     simp [instTopologicalSpaceSubtype, TopologicalSpace.induced] at x_int_open
@@ -1472,54 +1472,90 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     have full_set_preimage_reverse: interior {x: x_subspace | ↑x ∈ e_n n_x_int} = (Subtype.val ⁻¹' full_set) := full_set_preimage.symm
     rw [Set.eq_preimage_subtype_val_iff] at full_set_preimage_reverse
 
-    have intersect_nonempty: (X ∩ full_set).Nonempty := by
-      sorry
+    have x_int_nonempty_copy := x_int_nonempty
+    obtain ⟨some_x, h_some_x⟩ := x_int_nonempty_copy
+    have some_x_in_full: some_x.1 ∈ full_set := by
+      simp at h_some_x
+      apply (full_set_preimage_reverse some_x.1 some_x.2).mp h_some_x
 
-
-    have full_set_nonempty: full_set.Nonempty := by
-      rw [Set.nonempty_def]
-      rw [Set.nonempty_def] at x_int_nonempty
-      obtain ⟨x, hx⟩ := x_int_nonempty
-      use x.1
-
-      have x_in_subspace_int: x ∈ interior {x: x_subspace | ↑x ∈ e_n n_x_int} := by
-        simp at hx
-        exact hx
-
-      specialize full_set_preimage_reverse x.1 x.2
-      exact full_set_preimage_reverse.mp x_in_subspace_int
-
-    obtain ⟨c, d, c_lt_d, cd_int_first⟩ := IsOpen.exists_Ioo_subset full_set_open full_set_nonempty
-
-    --have c: ℝ := sorry
-    --have d: ℝ := sorry
-    --have c_lt_d: c < d := sorry
+    have full_set_is_neighborhood := IsOpen.mem_nhds full_set_open some_x_in_full
+    obtain ⟨c, d, some_in_cd, cd_subset_full_temp⟩ := mem_nhds_iff_exists_Ioo_subset.mp full_set_is_neighborhood
 
     have cd_int: Set.Ioo c d ∩ X ⊆ X ∩ (e_n n_x_int) := by
       rw [Set.subset_def]
       intro x hx
       specialize full_set_preimage_reverse x hx.2
-      have x_in_full: x ∈ full_set := cd_int_first hx.1
+      have x_in_full: x ∈ full_set := cd_subset_full_temp hx.1
       have x_in_interior := full_set_preimage_reverse.mpr x_in_full
       have x_in_en := Set.mem_of_mem_of_subset x_in_interior interior_subset
       simp at x_in_en
       apply Set.mem_inter hx.2 x_in_en
 
-
-    --have subtype_image_intersect: Subtype.val '' (Subtype.val ⁻¹' full_set) = X ∩ full_set := by
-    --  rw [Subtype.image_preimage_val]
-    --rw [full_set_preimage] at subtype_image_intersect
-
-
-    --rw [Set.preimage_eq_iff_eq_image] at full_set_preimage
-
-
-
-    -- obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset full_set_open full_set_nonempty
-
     let cd_intersect_x := Set.Ioo c d ∩ X
+
     have cd_intersect_x_nonempty: cd_intersect_x.Nonempty := by
-      sorry
+      simp only [cd_intersect_x]
+      rw [Set.nonempty_def]
+      use some_x.1
+      refine ⟨some_in_cd, some_x.2⟩
+
+    have cd_nonempty: (Set.Ioo c d).Nonempty := Set.Nonempty.left cd_intersect_x_nonempty
+    have c_lt_d: c < d := Set.nonempty_Ioo.mp cd_nonempty
+
+
+
+
+
+    -- have intersect_nonempty: (X ∩ full_set).Nonempty := by
+    --   sorry
+
+
+    -- have full_set_nonempty: full_set.Nonempty := by
+    --   rw [Set.nonempty_def]
+    --   rw [Set.nonempty_def] at x_int_nonempty
+    --   obtain ⟨x, hx⟩ := x_int_nonempty
+    --   use x.1
+
+    --   have x_in_subspace_int: x ∈ interior {x: x_subspace | ↑x ∈ e_n n_x_int} := by
+    --     simp at hx
+    --     exact hx
+
+    --   specialize full_set_preimage_reverse x.1 x.2
+    --   exact full_set_preimage_reverse.mp x_in_subspace_int
+
+    -- obtain ⟨c, d, c_lt_d, cd_int_first⟩ := IsOpen.exists_Ioo_subset full_set_open full_set_nonempty
+
+
+
+    -- --have c: ℝ := sorry
+    -- --have d: ℝ := sorry
+    -- --have c_lt_d: c < d := sorry
+
+    -- have cd_int: Set.Ioo c d ∩ X ⊆ X ∩ (e_n n_x_int) := by
+    --   rw [Set.subset_def]
+    --   intro x hx
+    --   specialize full_set_preimage_reverse x hx.2
+    --   have x_in_full: x ∈ full_set := cd_int_first hx.1
+    --   have x_in_interior := full_set_preimage_reverse.mpr x_in_full
+    --   have x_in_en := Set.mem_of_mem_of_subset x_in_interior interior_subset
+    --   simp at x_in_en
+    --   apply Set.mem_inter hx.2 x_in_en
+
+
+    -- --have subtype_image_intersect: Subtype.val '' (Subtype.val ⁻¹' full_set) = X ∩ full_set := by
+    -- --  rw [Subtype.image_preimage_val]
+    -- --rw [full_set_preimage] at subtype_image_intersect
+
+
+    -- --rw [Set.preimage_eq_iff_eq_image] at full_set_preimage
+
+
+
+    -- -- obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset full_set_open full_set_nonempty
+
+
+    -- have cd_intersect_x_nonempty: cd_intersect_x.Nonempty := by
+    --   sorry
 
 
 
