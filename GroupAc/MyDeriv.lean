@@ -1743,40 +1743,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           apply sets_subset ht
 
 
-        -- have maximal_is_poly_on: RestrictsToPolyOn f (Set.Ioo p q) := by
-        --   simp only [maximal_set] at x_in_maximal
-        --   rw [Set.mem_sUnion] at x_in_maximal
-        --   obtain ⟨t, ht⟩ := x_in_maximal
-        --   simp only [Set.mem_setOf_eq] at ht
-        --   obtain ⟨a, b, t_eq, t_restricts, x_in_t, t_subset⟩ := ht.1
-        --   have t_restricts_copy := t_restricts
-        --   obtain ⟨t_poly, h_t_poly⟩ := t_restricts
-        --   rw [RestrictsToPolyOn]
-        --   use t_poly
-
-        --   intro y hy
-
-        --   let containing_interval := Set.Ioo
-
-        --   rw [← maximal_set_eq] at hy
-        --   rw [Set.mem_sUnion] at hy
-        --   obtain ⟨r, hr⟩ := hy
-        --   obtain ⟨r_a, r_b, r_eq, r_restricts, x_in_r, r_subset_cd⟩ := hr.1
-        --   have r_restricts_copy := r_restricts
-        --   obtain ⟨r_poly, h_r_poly⟩ := r_restricts
-
-
-        --   have intersect_infinite: (t ∩ r).Infinite := by
-        --     rw [t_eq, r_eq, Set.Ioo_inter_Ioo]
-        --     apply Set.Ioo_infinite
-        --     simp
-        --     sorry
-
-        --   have poly_eq := poly_overlap_implies_eq f t r t_poly r_poly sorry sorry intersect_infinite
-
-
-
-
 
         have pq_not_cd: p ≠ c ∨ q ≠ d := by
           by_contra!
