@@ -1688,7 +1688,13 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           sorry
 
         have maximal_subset_cd: maximal_set ⊆ Set.Ioo c d := by
-          sorry
+          simp only [maximal_set]
+          rw [Set.sUnion_subset_iff]
+          intro t ht
+          simp only [Set.mem_setOf_eq] at ht
+          obtain ⟨_, _, _, _, _, t_subset⟩ := ht
+          exact t_subset
+
 
         obtain ⟨p, q, maximal_set_eq⟩ := maximal_is_interval
         have x_in_pq: x ∈ Set.Ioo p q := by
@@ -1712,7 +1718,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           --   sorry
           -- simp only [X] at p_and_q_not_in_x
           -- simp at p_and_q_not_in_x
-        sorry
+          sorry
 
 
 
