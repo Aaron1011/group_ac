@@ -1743,9 +1743,9 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
             obtain ⟨t, ht, x_in_t⟩ := hx1
             use t
             refine ⟨?_, x_in_t⟩
-            have sets_subset: {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b ∧ x ∈ i} ⊆ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b} := by
+            have sets_subset: {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b ∧ x ∈ i ∧ i ⊆ Set.Ioo c d} ⊆ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b} := by
               simp
-              intro a x_2 x_3 h_a_eq h_poly h_x_in_a
+              intro a x_2 x_3 h_a_eq h_poly h_x_in_a a_subset_cd
               use x_2
               use x_3
             apply sets_subset ht
