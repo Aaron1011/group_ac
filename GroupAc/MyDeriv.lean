@@ -645,7 +645,7 @@ lemma omega_r_imp_poly (q r: ℝ) (hNonempty: (Set.Ioo q r).Nonempty) (hCInfinit
 
 
 
-lemma poly_overlap_implies_eq (s_p s_q: Set ℝ) (p q: Polynomial ℝ) (hp: RestrictsToPolyBundleOn f s_p p) (hq: RestrictsToPolyBundleOn f s_q q) (hInteresct: (s_p ∩ s_q).Infinite) : p = q := by
+lemma poly_overlap_implies_eq (f: ℝ → ℝ) (s_p s_q: Set ℝ) (p q: Polynomial ℝ) (hp: RestrictsToPolyBundleOn f s_p p) (hq: RestrictsToPolyBundleOn f s_q q) (hInteresct: (s_p ∩ s_q).Infinite) : p = q := by
   have diff_zero_all: (p - q) = 0 := by
     obtain ⟨nplusone_zeros, zeros_subset, zeros_card⟩ := @Set.Infinite.exists_subset_card_eq _ (s_p ∩ s_q) hInteresct ((p - q).natDegree + 1)
     apply Polynomial.eq_zero_of_natDegree_lt_card_of_eval_eq_zero' (p - q) nplusone_zeros
@@ -1728,15 +1728,55 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         have p_lt_q: p < q := by
           rw [maximal_set_eq] at maximal_nonempty
           exact Set.nonempty_Ioo.mp maximal_nonempty
-        have maximal_is_poly_on: RestrictsToPolyOn f (Set.Ioo p q) := by
-          simp only [maximal_set] at x_in_maximal
-          rw [Set.mem_sUnion] at x_in_maximal
-          obtain ⟨t, ht⟩ := x_in_maximal
-          simp only [Set.mem_setOf_eq] at ht
-          obtain ⟨a, b, t_eq, t_restricts, x_in_t, t_subset⟩ := ht.1
-          obtain ⟨t_poly, h_t_poly⟩ := t_restricts
 
-          sorry
+        have pq_poly_on: RestrictsToPolyOn f (Set.Ioo p q) := by
+          apply omega_r_imp_poly p q (Set.nonempty_Ioo.mpr p_lt_q)
+          exact hCInfinity
+          simp only [← maximal_set_eq, maximal_set]
+          rw [Set.subset_def]
+          intro x1 hx1
+          simp only [Set.mem_sUnion] at hx1
+          simp only [Set.mem_sUnion]
+          obtain ⟨t, ht, x_in_t⟩ := hx1
+          use t
+          refine ⟨?_, x_in_t⟩
+          apply sets_subset ht
+
+
+        -- have maximal_is_poly_on: RestrictsToPolyOn f (Set.Ioo p q) := by
+        --   simp only [maximal_set] at x_in_maximal
+        --   rw [Set.mem_sUnion] at x_in_maximal
+        --   obtain ⟨t, ht⟩ := x_in_maximal
+        --   simp only [Set.mem_setOf_eq] at ht
+        --   obtain ⟨a, b, t_eq, t_restricts, x_in_t, t_subset⟩ := ht.1
+        --   have t_restricts_copy := t_restricts
+        --   obtain ⟨t_poly, h_t_poly⟩ := t_restricts
+        --   rw [RestrictsToPolyOn]
+        --   use t_poly
+
+        --   intro y hy
+
+        --   let containing_interval := Set.Ioo
+
+        --   rw [← maximal_set_eq] at hy
+        --   rw [Set.mem_sUnion] at hy
+        --   obtain ⟨r, hr⟩ := hy
+        --   obtain ⟨r_a, r_b, r_eq, r_restricts, x_in_r, r_subset_cd⟩ := hr.1
+        --   have r_restricts_copy := r_restricts
+        --   obtain ⟨r_poly, h_r_poly⟩ := r_restricts
+
+
+        --   have intersect_infinite: (t ∩ r).Infinite := by
+        --     rw [t_eq, r_eq, Set.Ioo_inter_Ioo]
+        --     apply Set.Ioo_infinite
+        --     simp
+        --     sorry
+
+        --   have poly_eq := poly_overlap_implies_eq f t r t_poly r_poly sorry sorry intersect_infinite
+
+
+
+
 
         have pq_not_cd: p ≠ c ∨ q ≠ d := by
           by_contra!
@@ -1783,27 +1823,12 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
 
 
-
-
-
         cases p_or_q_in with
         | inl p_in_inter =>
           have deriv_zero: (iteratedDeriv n_x_int f) p = 0 := by
             apply x_zero_on_cd_intersect
             exact p_in_inter
 
-          have pq_poly_on: RestrictsToPolyOn f (Set.Ioo p q) := by
-            apply omega_r_imp_poly p q (Set.nonempty_Ioo.mpr p_lt_q)
-            exact hCInfinity
-            simp only [← maximal_set_eq, maximal_set]
-            rw [Set.subset_def]
-            intro x1 hx1
-            simp only [Set.mem_sUnion] at hx1
-            simp only [Set.mem_sUnion]
-            obtain ⟨t, ht, x_in_t⟩ := hx1
-            use t
-            refine ⟨?_, x_in_t⟩
-            apply sets_subset ht
 
 
           have pq_poly_on_dup := pq_poly_on
