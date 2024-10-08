@@ -1819,6 +1819,29 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
 
 
+        have p_or_q_in_cd: p ∈ Set.Ioo c d ∨ q ∈ Set.Ioo c d := by
+          by_contra!
+          have p_lt_or_gt: p < c ∨ p > d := by
+            simp at this
+            sorry
+          have q_lt_or_gt: q < c ∨ q > d := by
+            simp at this
+            sorry
+
+          cases p_lt_or_gt with
+          | inl p_lt_c =>
+              rw [Set.Ioo_subset_Ioo_iff p_lt_q] at pq_subset_cd
+              have c_le_p: c ≤ p := pq_subset_cd.1
+              apply LT.lt.not_le p_lt_c
+              exact c_le_p
+          | inr p_gt_d =>
+              rw [Set.Ioo_subset_Ioo_iff p_lt_q] at pq_subset_cd
+              have q_lt_d: d < q := by
+                simp at p_gt_d
+                apply lt_trans p_gt_d p_lt_q
+              have q_le_d: q ≤ d := pq_subset_cd.2
+              sorry
+
 
 
         have p_or_q_in_x: p ∈ X ∨ q ∈ X := by
