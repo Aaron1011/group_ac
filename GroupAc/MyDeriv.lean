@@ -2168,16 +2168,16 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
               simp only [new_set]
               rw [Set.Ioo_subset_Ioo_iff]
               refine ⟨?_, ?_⟩
-              simp
               rw [Set.Ioo_subset_Ioo_iff] at pq_subset_cd
               linarith
               linarith
+              simp
               simp
               refine ⟨?_, ?_⟩
               linarith
               linarith
               simp [new_set]
-              refine ⟨⟨?_, ?_⟩, ?_⟩
+              refine ⟨?_, ?_, ?_⟩
               linarith
               linarith
               linarith
