@@ -1,8 +1,11 @@
+
 import Mathlib
 import Mathlib.Data.Set.Defs
 import Mathlib.Data.Set.Basic
 import Mathlib.Topology.Defs.Filter
 import Mathlib.Order.Filter.Basic
+
+set_option profiler true
 
 open Topology
 open Filter
@@ -1817,31 +1820,28 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           obtain ⟨a, b, t_eq, _, _, t_subset⟩ := t_in
           apply t_subset y_in_t
 
-
-
         have p_or_q_in_cd: p ∈ Set.Ioo c d ∨ q ∈ Set.Ioo c d := by
-          by_contra!
-          have p_lt_or_gt: p < c ∨ p > d := by
-            simp at this
-            sorry
-          have q_lt_or_gt: q < c ∨ q > d := by
-            simp at this
-            sorry
-
-          cases p_lt_or_gt with
-          | inl p_lt_c =>
-              rw [Set.Ioo_subset_Ioo_iff p_lt_q] at pq_subset_cd
-              have c_le_p: c ≤ p := pq_subset_cd.1
-              apply LT.lt.not_le p_lt_c
-              exact c_le_p
-          | inr p_gt_d =>
-              rw [Set.Ioo_subset_Ioo_iff p_lt_q] at pq_subset_cd
-              have q_lt_d: d < q := by
-                simp at p_gt_d
-                apply lt_trans p_gt_d p_lt_q
-              have q_le_d: q ≤ d := pq_subset_cd.2
-              sorry
-
+          rw [Set.Ioo_subset_Ioo_iff p_lt_q] at pq_subset_cd
+          cases pq_not_cd with
+          | inl p_not_c =>
+            rw [le_iff_eq_or_lt] at pq_subset_cd
+            have p_not_c := p_not_c.symm
+            simp at p_not_c
+            simp [p_not_c] at pq_subset_cd
+            left
+            simp
+            refine ⟨?_, ?_⟩
+            linarith
+            linarith
+          | inr q_not_d =>
+            nth_rewrite 2 [le_iff_eq_or_lt] at pq_subset_cd
+            simp at q_not_d
+            simp [q_not_d] at pq_subset_cd
+            right
+            simp
+            refine ⟨?_, ?_⟩
+            linarith
+            linarith
 
 
         have p_or_q_in_x: p ∈ X ∨ q ∈ X := by
