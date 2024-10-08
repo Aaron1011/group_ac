@@ -1504,62 +1504,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
 
 
-
-
-    -- have intersect_nonempty: (X ∩ full_set).Nonempty := by
-    --   sorry
-
-
-    -- have full_set_nonempty: full_set.Nonempty := by
-    --   rw [Set.nonempty_def]
-    --   rw [Set.nonempty_def] at x_int_nonempty
-    --   obtain ⟨x, hx⟩ := x_int_nonempty
-    --   use x.1
-
-    --   have x_in_subspace_int: x ∈ interior {x: x_subspace | ↑x ∈ e_n n_x_int} := by
-    --     simp at hx
-    --     exact hx
-
-    --   specialize full_set_preimage_reverse x.1 x.2
-    --   exact full_set_preimage_reverse.mp x_in_subspace_int
-
-    -- obtain ⟨c, d, c_lt_d, cd_int_first⟩ := IsOpen.exists_Ioo_subset full_set_open full_set_nonempty
-
-
-
-    -- --have c: ℝ := sorry
-    -- --have d: ℝ := sorry
-    -- --have c_lt_d: c < d := sorry
-
-    -- have cd_int: Set.Ioo c d ∩ X ⊆ X ∩ (e_n n_x_int) := by
-    --   rw [Set.subset_def]
-    --   intro x hx
-    --   specialize full_set_preimage_reverse x hx.2
-    --   have x_in_full: x ∈ full_set := cd_int_first hx.1
-    --   have x_in_interior := full_set_preimage_reverse.mpr x_in_full
-    --   have x_in_en := Set.mem_of_mem_of_subset x_in_interior interior_subset
-    --   simp at x_in_en
-    --   apply Set.mem_inter hx.2 x_in_en
-
-
-    -- --have subtype_image_intersect: Subtype.val '' (Subtype.val ⁻¹' full_set) = X ∩ full_set := by
-    -- --  rw [Subtype.image_preimage_val]
-    -- --rw [full_set_preimage] at subtype_image_intersect
-
-
-    -- --rw [Set.preimage_eq_iff_eq_image] at full_set_preimage
-
-
-
-    -- -- obtain ⟨c, d, c_lt_d, cd_int⟩ := IsOpen.exists_Ioo_subset full_set_open full_set_nonempty
-
-
-    -- have cd_intersect_x_nonempty: cd_intersect_x.Nonempty := by
-    --   sorry
-
-
-
-
     have x_zero_on_cd_intersect: ∀ (x: ℝ), x ∈ cd_intersect_x → (iteratedDeriv n_x_int f) x = 0 := by
       rw [Set.subset_def] at cd_int
       intro x hx
