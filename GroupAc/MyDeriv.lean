@@ -1807,6 +1807,18 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           simp only [X] at z_in_x
           contradiction
 
+        have pq_subset_cd: Set.Ioo p q ⊆ Set.Ioo c d := by
+          rw [Set.subset_def]
+          intro y hy
+          rw [← maximal_set_eq] at hy
+          simp only [maximal_set, Set.mem_sUnion] at hy
+          obtain ⟨t, t_in, y_in_t⟩ := hy
+          simp only [Set.mem_setOf_eq] at t_in
+          obtain ⟨a, b, t_eq, _, _, t_subset⟩ := t_in
+          apply t_subset y_in_t
+
+
+
 
 
         have p_or_q_in_x: p ∈ X ∨ q ∈ X := by
@@ -1815,6 +1827,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           simp at this
           obtain ⟨p_set, a_p, b_p, p_set_eq, p_restricts, p_in_Ioo⟩ := this.1
           obtain ⟨q_set, a_q, b_q, q_set_eq, q_restricts, q_in_Ioo⟩ := this.2
+
           sorry
 
 
