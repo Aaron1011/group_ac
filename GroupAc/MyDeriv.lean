@@ -1708,10 +1708,10 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           use x_2
           use x_3
 
-        have maximal_neq_closed: ∀s, ¬ IsOpen s → s ≠ maximal_set := by
+        have maximal_neq_closed: ∀s, ¬ IsOpen s → ¬(maximal_set = s) := by
           intro s hs
           by_contra!
-          rw [← this] at maximal_open
+          rw [this] at maximal_open
           contradiction
 
         have maximal_subset_cd: maximal_set ⊆ Set.Ioo c d := by
@@ -1743,6 +1743,11 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
         have maximal_is_interval: ∃ p q, maximal_set = Set.Ioo p q := by
           have neq_icc := maximal_neq_closed (Set.Icc (sInf maximal_set) (sSup maximal_set)) (icc_not_open _ _ inf_le_sup)
+          have neq_ici := maximal_neq_closed (Set.Ici (sInf maximal_set)) (ici_not_open _)
+          simp only [Set.mem_insert_iff] at maximal_mem_intervals
+          simp only [neq_icc, neq_ici] at maximal_mem_intervals
+          simp at maximal_mem_intervals
+
 
 
 
