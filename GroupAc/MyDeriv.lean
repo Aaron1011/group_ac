@@ -2052,7 +2052,145 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
             rw [maximal_set_eq] at p_in_maximal
             simp at p_in_maximal
-          | inr q_in_cd => sorry
+          | inr q_in_cd =>
+          -- BEGIN HORRIBLE COPY-PASTE --
+            have q_not_inter: ¬ (q ∈ _) := this.2
+            simp only [Set.mem_inter_iff] at q_not_inter
+            rw [not_and_or] at q_not_inter
+            simp only [q_in_cd] at q_not_inter
+            simp at q_not_inter
+            obtain ⟨q_set, a_q, b_q, q_set_eq, q_restricts, q_in_Ioo⟩ := q_not_inter
+            simp [q_set_eq] at q_in_Ioo
+            let new_right := min b_q d
+            let new_set := Set.Ioo p (min b_q d)
+
+            have x_in_new: x ∈ new_set := by
+              refine ⟨?_, ?_⟩
+              simp at x_in_pq
+              linarith
+              simp
+              refine ⟨?_, ?_⟩
+              simp at q_in_cd
+              simp at x_in_pq
+              linarith
+              simp at x_in_pq
+              simp at q_in_cd
+              linarith
+
+            rw [RestrictsToPolyOn] at pq_poly_on
+            obtain ⟨full_poly, h_full_poly⟩ := pq_poly_on
+
+            obtain ⟨q_poly, hq_poly⟩ := q_restricts
+
+            have new_restricts: RestrictsToPolyBundleOn f (Set.Ioo (max a_q c) (min b_q d)) q_poly := by
+              simp only [RestrictsToPolyBundleOn]
+              intro y hy
+              have y_in_set: y ∈ Set.Ioo a_q b_q := by
+                rw [Set.mem_Ioo]
+                simp at hy
+                refine ⟨?_, ?_⟩
+                linarith
+                linarith
+
+
+              specialize hq_poly y y_in_set
+              exact hq_poly
+
+            have c_lt_q: c < q := by
+              simp at q_in_cd
+              linarith
+
+            have q_lt_d: q < d := by
+              simp at q_in_cd
+              linarith
+
+            have intersect_infinite: ((Set.Ioo (max a_q c) (min b_q d)) ∩ Set.Ioo p q).Infinite := by
+              rw [Set.Ioo_inter_Ioo]
+              apply Set.Ioo_infinite
+              simp
+              refine ⟨?_, ?_⟩
+              refine ⟨⟨?_, ?_⟩, ⟨?_, ?_⟩, ?_⟩
+              refine ⟨?_, ?_⟩
+              linarith
+              linarith
+              linarith
+              linarith
+              linarith
+              linarith
+              refine ⟨⟨?_, ?_⟩, ?_⟩
+              linarith
+              linarith
+              linarith
+
+
+
+
+
+
+            have polys_eq := poly_overlap_implies_eq f (Set.Ioo (max a_q c) (min b_q d)) (Set.Ioo p q) q_poly full_poly new_restricts h_full_poly intersect_infinite
+            have q_in_maximal: q ∈ maximal_set := by
+              simp only [maximal_set]
+              rw [Set.mem_sUnion]
+              use new_set
+              refine ⟨?_, ?_⟩
+              simp only [Set.mem_setOf_eq]
+              use p
+              use (min b_q d)
+              refine ⟨rfl, ?_, ?_⟩
+              rw [RestrictsToPolyBundleOn] at new_restricts
+              rw [RestrictsToPoly]
+              use full_poly
+              intro y hy
+              simp at hy
+              have y_cases_a_q: y ≤ a_q ∨ y > a_q := le_or_gt _ _
+
+
+              cases y_cases_a_q with
+              | inl y_le_a_q =>
+                have y_in_set: y ∈ Set.Ioo p q := by
+                  rw [Set.mem_Ioo]
+                  refine ⟨?_, ?_⟩
+                  linarith
+                  linarith
+                specialize h_full_poly y y_in_set
+                exact h_full_poly
+              | inr y_gt_a_q =>
+                have y_in_set: y ∈ Set.Ioo a_q b_q := by
+                  rw [Set.mem_Ioo]
+                  refine ⟨?_, ?_⟩
+                  linarith
+                  linarith
+                specialize hq_poly y y_in_set
+                rw [polys_eq] at hq_poly
+                exact hq_poly
+
+              refine ⟨x_in_new, ?_⟩
+              simp only [new_set]
+              rw [Set.Ioo_subset_Ioo_iff]
+              refine ⟨?_, ?_⟩
+              simp
+              rw [Set.Ioo_subset_Ioo_iff] at pq_subset_cd
+              linarith
+              linarith
+              simp
+              refine ⟨?_, ?_⟩
+              linarith
+              linarith
+              simp [new_set]
+              refine ⟨⟨?_, ?_⟩, ?_⟩
+              linarith
+              linarith
+              linarith
+
+
+
+
+
+
+
+            rw [maximal_set_eq] at q_in_maximal
+            simp at q_in_maximal
+            -- END HORRIBLE COPY-PASTE --
 
 
         cases p_or_q_in with
