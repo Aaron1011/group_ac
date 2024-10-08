@@ -1795,19 +1795,31 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           rw [this] at maximal_bounded_above
           contradiction
 
+        obtain ⟨a, b, a_lt_b, ab_subset⟩ := IsOpen.exists_Ioo_subset maximal_open maximal_nonempty
+        have sup_ioo : sSup (Set.Ioo a b) = b := by apply csSup_Ioo a_lt_b
+        have inf_ioo : sInf (Set.Ioo a b) = a := by apply csInf_Ioo a_lt_b
+
+        have glb_ab: IsGLB (Set.Ioo a b) a := isGLB_Ioo a_lt_b
+        have lub_ab: IsLUB (Set.Ioo a b) b := isLUB_Ioo a_lt_b
+
         have inf_le_sup: (sInf maximal_set) ≤  (sSup maximal_set) := by
           apply Real.sInf_le_sSup maximal_set maximal_bounded_below maximal_bounded_above
 
-        have inf_lt_sup: (sInf maximal_set) < (sSup maximal_set) := by
-          obtain ⟨a, b, a_lt_b, ab_subset⟩ := IsOpen.exists_Ioo_subset maximal_open maximal_nonempty
-          have sup_ioo : sSup (Set.Ioo a b) = b := by apply csSup_Ioo a_lt_b
-          have inf_ioo : sInf (Set.Ioo a b) = a := by apply csInf_Ioo a_lt_b
 
+        have inf_glb: IsGLB maximal_set (sInf maximal_set) := Real.is_glb_sInf maximal_set maximal_nonempty maximal_bounded_below
+        have sup_lub: IsLUB maximal_set (sSup maximal_set) := Real.isLUB_sSup maximal_set maximal_nonempty maximal_bounded_above
+
+        have glb_subset: (sInf maximal_set) ≤ a := by
+          apply IsGLB.mono glb_ab inf_glb ab_subset
+
+        have lub_subset: b ≤ (sSup maximal_set) := by
+          apply IsLUB.mono lub_ab sup_lub ab_subset
+
+        have inf_lt_sup: (sInf maximal_set) < (sSup maximal_set) := by
           calc
-            sInf maximal_set ≤ sInf (Set.Ioo a b) := by sorry
-            _ < b := by rw [inf_ioo]; apply a_lt_b
-            _ ≤ sSup (Set.Ioo a b) := by rw [csSup_Ioo a_lt_b]
-            _ ≤ sSup maximal_set := by sorry
+            sInf maximal_set ≤ a := glb_subset
+            _ < b := a_lt_b
+            _ ≤ sSup (maximal_set) := lub_subset
 
 
         have maximal_is_interval: ∃ p q, maximal_set = Set.Ioo p q := by
