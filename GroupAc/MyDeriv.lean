@@ -1740,8 +1740,16 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           simp at maximal_subset_cd
           exact le_of_lt maximal_subset_cd.2
 
-        have inf_lt_sup: (sInf maximal_set) <  (sSup maximal_set) := by
-          sorry
+        have inf_lt_sup: (sInf maximal_set) < (sSup maximal_set) := by
+          obtain ⟨a, b, a_lt_b, ab_subset⟩ := IsOpen.exists_Ioo_subset maximal_open maximal_nonempty
+          have sup_ioo : sSup (Set.Ioo a b) = b := by apply csSup_Ioo a_lt_b
+          have inf_ioo : sInf (Set.Ioo a b) = a := by apply csInf_Ioo a_lt_b
+
+          calc
+            sInf maximal_set ≤ sInf (Set.Ioo a b) := by sorry
+            _ < b := by rw [inf_ioo]; apply a_lt_b
+            _ ≤ sSup (Set.Ioo a b) := by rw [csSup_Ioo a_lt_b]
+            _ ≤ sSup maximal_set := by sorry
 
 
         have maximal_is_interval: ∃ p q, maximal_set = Set.Ioo p q := by
