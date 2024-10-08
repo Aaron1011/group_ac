@@ -1681,7 +1681,11 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
 
         have maximal_mem_intervals := IsPreconnected.mem_intervals maximal_is_connected.2
-
+        have sets_subset: {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b ∧ x ∈ i ∧ i ⊆ Set.Ioo c d} ⊆ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b} := by
+          simp
+          intro a x_2 x_3 h_a_eq h_poly h_x_in_a a_subset_cd
+          use x_2
+          use x_3
 
 
         have maximal_is_interval: ∃ p q, maximal_set = Set.Ioo p q := by
@@ -1706,9 +1710,37 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         have maximal_is_poly_on: RestrictsToPolyOn f (Set.Ioo p q) := by
           sorry
 
+        have pq_not_cd: p ≠ c ∨ q ≠ d := by
+          by_contra!
+          obtain ⟨z, hz⟩ := cd_intersect_x_nonempty
+          have z_in_x: z ∈ X := by
+            exact hz.2
+          have z_in_maximal: z ∈ maximal_set := by
+            rw [maximal_set_eq]
+            simp only [cd_intersect_x] at hz
+            rw [this.1, this.2]
+            exact hz.1
+          have z_in_poly_omega: z ∈ poly_omega := by
+            simp only [poly_omega]
+            rw [Set.mem_sUnion]
+            obtain ⟨t, ht, z_in_t⟩ := z_in_maximal
+            use t
+            refine ⟨sets_subset ht, z_in_t⟩
+
+          simp only [X] at z_in_x
+          contradiction
+
+
+
         have p_or_q_in_x: p ∈ X ∨ q ∈ X := by
           by_contra!
+          simp only [X, poly_omega] at this
+          simp at this
+          obtain ⟨p_set, a_p, b_p, p_set_eq, p_restricts, p_in_Ioo⟩ := this.1
+          obtain ⟨q_set, a_q, b_q, q_set_eq, q_restricts, q_in_Ioo⟩ := this.2
           sorry
+
+
 
 
         have p_or_q_in: p ∈ cd_intersect_x ∨ q ∈ cd_intersect_x := by
@@ -1743,11 +1775,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
             obtain ⟨t, ht, x_in_t⟩ := hx1
             use t
             refine ⟨?_, x_in_t⟩
-            have sets_subset: {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b ∧ x ∈ i ∧ i ⊆ Set.Ioo c d} ⊆ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b} := by
-              simp
-              intro a x_2 x_3 h_a_eq h_poly h_x_in_a a_subset_cd
-              use x_2
-              use x_3
             apply sets_subset ht
 
 
