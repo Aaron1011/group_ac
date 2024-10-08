@@ -1764,8 +1764,17 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           obtain ⟨_, _, _, _, _, t_subset⟩ := ht
           exact t_subset
 
-        have inf_le_sup: (sInf maximal_set) ≤  (sSup maximal_set) := by
-          apply Real.sInf_le_sSup
+        have ioo_unbounded_above: ¬BddAbove (Set.Ioi (sInf maximal_set)) := not_bddAbove_Ioi _
+        have maximal_bounded_above: BddAbove maximal_set := by
+          rw [bddAbove_def]
+          use d
+          simp at maximal_subset_cd
+          intro y hy
+          specialize maximal_subset_cd hy
+          simp at maximal_subset_cd
+          exact le_of_lt maximal_subset_cd.2
+
+        have maximal_bounded_below: BddBelow maximal_set := by
           rw [bddBelow_def]
           use c
           simp at maximal_subset_cd
@@ -1774,13 +1783,20 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           simp at maximal_subset_cd
           exact le_of_lt maximal_subset_cd.1
 
-          rw [bddAbove_def]
-          use d
-          simp at maximal_subset_cd
-          intro y hy
-          specialize maximal_subset_cd hy
-          simp at maximal_subset_cd
-          exact le_of_lt maximal_subset_cd.2
+        have maximal_neq_unbounded_below: ∀s, ¬ BddBelow s → ¬(maximal_set = s) := by
+          intro s hs
+          by_contra!
+          rw [this] at maximal_bounded_below
+          contradiction
+
+        have maximal_neq_unbounded_above: ∀s, ¬ BddAbove s → ¬(maximal_set = s) := by
+          intro s hs
+          by_contra!
+          rw [this] at maximal_bounded_above
+          contradiction
+
+        have inf_le_sup: (sInf maximal_set) ≤  (sSup maximal_set) := by
+          apply Real.sInf_le_sSup maximal_set maximal_bounded_below maximal_bounded_above
 
         have inf_lt_sup: (sInf maximal_set) < (sSup maximal_set) := by
           obtain ⟨a, b, a_lt_b, ab_subset⟩ := IsOpen.exists_Ioo_subset maximal_open maximal_nonempty
@@ -1800,8 +1816,10 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           have neq_iic := maximal_neq_not_open (Set.Iic (sSup maximal_set)) (iic_not_open _)
           have neq_ico := maximal_neq_not_open (Set.Ico (sInf maximal_set) (sSup maximal_set)) (ico_not_open _ _ inf_lt_sup)
           have neq_ioc := maximal_neq_not_open (Set.Ioc (sInf maximal_set) (sSup maximal_set)) (ioc_not_open _ _ inf_lt_sup)
+          have neq_ioi := maximal_neq_unbounded_above (Set.Ioi (sInf maximal_set)) (not_bddAbove_Ioi _)
+          have neq_iio := maximal_neq_unbounded_below (Set.Iio (sSup maximal_set)) (not_bddBelow_Iio _)
           simp [Set.mem_insert_iff] at maximal_mem_intervals
-          simp only [neq_icc, neq_ici, neq_iic, neq_ico, neq_ioc, Set.Nonempty.ne_empty maximal_nonempty] at maximal_mem_intervals
+          simp only [neq_icc, neq_ici, neq_iic, neq_ico, neq_ioc, neq_ioi, neq_iio, Set.Nonempty.ne_empty maximal_nonempty] at maximal_mem_intervals
           simp at maximal_mem_intervals
           sorry
 
