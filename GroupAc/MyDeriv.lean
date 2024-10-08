@@ -1,4 +1,5 @@
 
+
 import Mathlib
 import Mathlib.Data.Set.Defs
 import Mathlib.Data.Set.Basic
@@ -8,6 +9,7 @@ import Mathlib.Order.Filter.Basic
 open Topology
 open Filter
 
+-- set_option profiler true
 set_option maxHeartbeats 1000000
 
 
@@ -426,35 +428,10 @@ lemma zero_deriv_implies_poly (a b : ℝ) (n: ℕ) (a_lt_b: a < b) (hd: ContDiff
 
     exact ⟨poly_integral, f_eq_deriv_integral⟩
 
-class XData (c d: ℝ) (fin_cover: Set (Set ℝ)) (f: ℝ → ℝ) :=
-  (x: ℝ)
-  (a: ℝ)
-  (b: ℝ)
-  (poly: Polynomial ℝ)
-  (x_in_int : x ∈ Set.Ioo a b)
-  (int_in_fin: Set.Ioo a b ∈ fin_cover)
-  (poly_eq: RestrictsToPolyBundle f a b poly)
-
 class IntervalData :=
   (i: Set ℝ)
   (poly: Polynomial ℝ)
   (poly_eq: RestrictsToPolyBundleOn f i poly)
-
-noncomputable def x_to_data (x c d: ℝ) (fin_cover: Set (Set ℝ)) (hx: x ∈ Set.Icc c d) (h_covers_cd : Set.Icc c d ⊆ ⋃ i ∈ fin_cover, id i) (h_fin_subset : ∀ x ∈ fin_cover, ∃ a b, x = Set.Ioo a b ∧ RestrictsToPoly f a b): XData c d fin_cover f := by
-  have x_in_cover: x ∈ ⋃ i ∈ fin_cover, id i := h_covers_cd hx
-  rw [Set.mem_iUnion] at x_in_cover
-  simp at x_in_cover
-  choose i i_in_fin x_in_i using x_in_cover
-  specialize h_fin_subset i i_in_fin
-  choose a b hab has_ab_poly using h_fin_subset
-  choose ab_poly h_ab_poly using has_ab_poly
-  have i_in_fin: Set.Ioo a b ∈ fin_cover := by rwa [← hab]
-  rw [hab] at x_in_i
-  let x_data := XData.mk (c := c) (d := d) x a b ab_poly x_in_i i_in_fin h_ab_poly
-  exact x_data
-
-lemma x_data_preserves_x (x c d fin_cover hx h_covers_cd) (h_fin_subset) : (x_to_data (f := f) x c d fin_cover hx h_covers_cd h_fin_subset).x = x := by
-  simp [x_to_data]
 
 lemma omega_r_imp_poly (q r: ℝ) (hNonempty: (Set.Ioo q r).Nonempty) (hCInfinity: ContDiff ℝ ⊤ f): Set.Ioo q r ⊆ ⋃₀ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b} → RestrictsToPolyOn f (Set.Ioo q r) := by
   intro s_subset_omega
@@ -2119,3 +2096,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
   obtain ⟨the_final_poly, h_the_final_poly⟩ := omega_r_imp_poly (f := f) 0 1 zero_one_nonemoty hCInfinity zero_one_subset_poly
   simp only [RestrictsToPoly]
   use the_final_poly
+
+
+#print axioms infinite_zero_is_poly
