@@ -1818,11 +1818,11 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           have neq_ioc := maximal_neq_not_open (Set.Ioc (sInf maximal_set) (sSup maximal_set)) (ioc_not_open _ _ inf_lt_sup)
           have neq_ioi := maximal_neq_unbounded_above (Set.Ioi (sInf maximal_set)) (not_bddAbove_Ioi _)
           have neq_iio := maximal_neq_unbounded_below (Set.Iio (sSup maximal_set)) (not_bddBelow_Iio _)
+          have neq_univ := maximal_neq_unbounded_above Set.univ (not_bddAbove_univ)
           simp [Set.mem_insert_iff] at maximal_mem_intervals
-          simp only [neq_icc, neq_ici, neq_iic, neq_ico, neq_ioc, neq_ioi, neq_iio, Set.Nonempty.ne_empty maximal_nonempty] at maximal_mem_intervals
+          simp only [neq_icc, neq_ici, neq_iic, neq_ico, neq_ioc, neq_ioi, neq_iio, Set.Nonempty.ne_empty maximal_nonempty, neq_univ] at maximal_mem_intervals
           simp at maximal_mem_intervals
-          sorry
-
+          refine ⟨(sInf maximal_set), (sSup maximal_set), maximal_mem_intervals⟩
 
 
 
