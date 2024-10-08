@@ -5,8 +5,6 @@ import Mathlib.Data.Set.Basic
 import Mathlib.Topology.Defs.Filter
 import Mathlib.Order.Filter.Basic
 
-set_option profiler true
-
 open Topology
 open Filter
 
@@ -1844,28 +1842,97 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
             linarith
 
 
-        have p_or_q_in_x: p ∈ X ∨ q ∈ X := by
-          by_contra!
-          simp only [X, poly_omega] at this
-          simp at this
-          obtain ⟨p_set, a_p, b_p, p_set_eq, p_restricts, p_in_Ioo⟩ := this.1
-          obtain ⟨q_set, a_q, b_q, q_set_eq, q_restricts, q_in_Ioo⟩ := this.2
-
-          sorry
-
-
-
-
         have p_or_q_in: p ∈ cd_intersect_x ∨ q ∈ cd_intersect_x := by
           by_contra!
-          simp only [cd_intersect_x] at this
-          -- have p_and_q_not_in_x: p ∉ X ∧ q ∉ X := by
-          --   sorry
-          -- simp only [X] at p_and_q_not_in_x
-          -- simp at p_and_q_not_in_x
-          sorry
+          simp only [cd_intersect_x, X, poly_omega] at this
+
+          cases p_or_q_in_cd with
+          | inl p_in_cd =>
+            have p_not_inter: ¬ (p ∈ _) := this.1
+            simp only [Set.mem_inter_iff] at p_not_inter
+            rw [not_and_or] at p_not_inter
+            simp only [p_in_cd] at p_not_inter
+            simp at p_not_inter
+            obtain ⟨p_set, a_p, b_p, p_set_eq, p_restricts, p_in_Ioo⟩ := p_not_inter
+            simp [p_set_eq] at p_in_Ioo
+            let new_left := max a_p c
+            let new_set := Set.Ioo (max a_p c) (min b_p d)
+
+            have x_in_new: x ∈ new_set := by
+              refine ⟨?_, ?_⟩
+              linarith
+              linarith
+
+            rw [RestrictsToPolyOn] at pq_poly_on
+            obtain ⟨full_poly, h_full_poly⟩ := pq_poly_on
+
+            obtain ⟨p_poly, hp_poly⟩ := p_restricts
+
+            have new_restricts: RestrictsToPolyBundleOn f (Set.Ioo (max a_p c) (min b_p d)) p_poly := by
+              simp only [RestrictsToPolyBundleOn]
+              intro y hy
+              have y_in_set: y ∈ Set.Ioo a_p b_p := by
+                rw [Set.mem_Ioo]
+                simp at hy
+                refine ⟨?_, ?_⟩
+                linarith
+                linarith
 
 
+              specialize hp_poly y y_in_set
+              exact hp_poly
+
+            have c_lt_p: c < p := by
+              simp at p_in_cd
+              linarith
+
+            have p_lt_d: p < d := by
+              simp at p_in_cd
+              linarith
+
+            have intersect_infinite: ((Set.Ioo (max a_p c) (min b_p d)) ∩ Set.Ioo p q).Infinite := by
+              rw [Set.Ioo_inter_Ioo]
+              apply Set.Ioo_infinite
+              simp
+              refine ⟨?_, ?_⟩
+              refine ⟨⟨?_, ?_⟩, ⟨?_, ?_⟩, ?_⟩
+              refine ⟨?_, ?_⟩
+              linarith
+              linarith
+              linarith
+              linarith
+              linarith
+              linarith
+              refine ⟨⟨?_, ?_⟩, ?_⟩
+              linarith
+              linarith
+              linarith
+
+
+
+
+
+
+            have polys_eq := poly_overlap_implies_eq f (Set.Ioo (max a_p c) (min b_p d)) (Set.Ioo p q) p_poly full_poly new_restricts h_full_poly intersect_infinite
+            have p_in_maximal: p ∈ maximal_set := by
+              simp only [maximal_set]
+              rw [Set.mem_sUnion]
+              use new_set
+              refine ⟨?_, ?_⟩
+              simp only [Set.mem_setOf_eq]
+              use (max a_p c)
+              use (min b_p d)
+              refine ⟨rfl, ?_, ?_⟩
+              rw [RestrictsToPolyBundleOn] at new_restricts
+              rw [RestrictsToPoly]
+              use p_poly
+              refine ⟨x_in_new, ?_⟩
+
+
+
+
+            sorry
+          | inr q_in_cd => sorry
 
 
         cases p_or_q_in with
