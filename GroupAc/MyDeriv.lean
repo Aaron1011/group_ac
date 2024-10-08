@@ -1740,14 +1740,18 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           simp at maximal_subset_cd
           exact le_of_lt maximal_subset_cd.2
 
+        have inf_lt_sup: (sInf maximal_set) <  (sSup maximal_set) := by
+          sorry
+
 
         have maximal_is_interval: ∃ p q, maximal_set = Set.Ioo p q := by
           have neq_icc := maximal_neq_not_open (Set.Icc (sInf maximal_set) (sSup maximal_set)) (icc_not_open _ _ inf_le_sup)
           have neq_ici := maximal_neq_not_open (Set.Ici (sInf maximal_set)) (ici_not_open _)
-          have neq_ico := maximal_neq_not_open (Set.Ico (sInf maximal_set) (sSup maximal_set)) (ico_not_open _ _ inf_le_sup)
+          have neq_ico := maximal_neq_not_open (Set.Ico (sInf maximal_set) (sSup maximal_set)) (ico_not_open _ _ inf_lt_sup)
           simp [Set.mem_insert_iff] at maximal_mem_intervals
           simp only [neq_icc, neq_ici, neq_ico, Set.Nonempty.ne_empty maximal_nonempty] at maximal_mem_intervals
           simp at maximal_mem_intervals
+          sorry
 
 
 
