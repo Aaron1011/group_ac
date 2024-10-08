@@ -1475,7 +1475,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     have c: ℝ := sorry
     have d: ℝ := sorry
     have c_lt_d: c < d := sorry
-    have cd_int: Set.Ioo c d ⊆ X ∩ (e_n n_x_int) := by sorry
+    have cd_int: Set.Ioo c d ∩ X ⊆ X ∩ (e_n n_x_int) := by sorry
 
     --have subtype_image_intersect: Subtype.val '' (Subtype.val ⁻¹' full_set) = X ∩ full_set := by
     --  rw [Subtype.image_preimage_val]
@@ -1511,7 +1511,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     have x_zero_on_cd_intersect: ∀ (x: ℝ), x ∈ cd_intersect_x → (iteratedDeriv n_x_int f) x = 0 := by
       rw [Set.subset_def] at cd_int
       intro x hx
-      specialize cd_int x hx.1
+      specialize cd_int x hx
       simp only [e_n] at cd_int
       apply cd_int.2
 
