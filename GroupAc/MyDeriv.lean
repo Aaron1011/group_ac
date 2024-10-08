@@ -2303,8 +2303,115 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           rw [RestrictsToPolyOn] at pq_poly_on_dup
           rwa [RestrictsToPolyBundleOn]
           exact x_in_pq
-        | inr q_in_cd =>
-          sorry
+        | inr q_in_inter =>
+          -- BEGIN HORRIBLE COPY-PASTE --
+          have deriv_zero: (iteratedDeriv n_x_int f) q = 0 := by
+            apply x_zero_on_cd_intersect
+            exact q_in_inter
+
+
+
+          have pq_poly_on_dup := pq_poly_on
+          obtain ⟨pq_poly, h_pq_poly⟩ := pq_poly_on
+          let k := pq_poly.natDegree
+          let pq_deriv := (⇑Polynomial.derivative)^[k] pq_poly
+
+          have degree_bot_or_other: pq_poly.degree = ⊥ ∨ pq_poly.degree ≠ ⊥ := by
+            exact Classical.em (pq_poly.degree = ⊥)
+
+
+          -- "If f is a polynomial of degree k on (ai,bi), then f(k) is a nonzero constant on (ai,bi)"
+          -- but this requires that f not be the zero polynomial.
+          -- However, we're trying to show that f^(n) = 0 on (a_i, b_i) = (p, q), which is still true
+          -- in the case where f is the zero polynomial
+          have poly_deriv_n_zero: (⇑Polynomial.derivative)^[n_x_int] pq_poly = 0 := by
+            cases degree_bot_or_other with
+            | inl degree_bot =>
+              have pq_poly_eq_zero: pq_poly = 0 := Polynomial.degree_eq_bot.mp degree_bot
+              rw [pq_poly_eq_zero]
+              rw [Polynomial.iterate_derivative_zero]
+            | inr degree_not_bot =>
+              have pq_deriv_degree_zero: ((⇑Polynomial.derivative)^[k] pq_poly).degree = 0 := by
+                apply iter_deriv_degree_zero
+                simp only [k]
+                apply Polynomial.degree_eq_natDegree
+                apply Polynomial.degree_ne_bot.mp degree_not_bot
+
+              have pq_deriv_const: pq_deriv = Polynomial.C (pq_deriv.coeff 0) := by
+                apply Polynomial.eq_C_of_degree_eq_zero pq_deriv_degree_zero
+              have coeff_nonzero: pq_deriv.coeff 0 ≠ 0 := by
+                apply Polynomial.coeff_ne_zero_of_eq_degree pq_deriv_degree_zero
+
+              have pq_deriv_const: ∀ y, pq_deriv.eval y = pq_deriv.coeff 0 := by
+                rw [pq_deriv_const]
+                simp only [Polynomial.eval_C]
+                simp
+              have pq_deriv_eval_eq_deriv: ∀ y, y ∈ Set.Ioo p q → pq_deriv.eval y = (iteratedDeriv (pq_poly.natDegree) pq_poly.eval) y := by
+                rw [poly_iterated_deriv]
+                simp only [pq_deriv]
+                simp
+
+              have pq_deriv_eq_f_deriv: ∀ y, y ∈ Set.Ioo p q → pq_deriv.eval y = (iteratedDeriv (pq_poly.natDegree) f) y := by
+                intro y hy
+                specialize pq_deriv_eval_eq_deriv y hy
+                rwa [← iterated_deriv_eq_f_poly (f := f) pq_poly.natDegree pq_poly (Set.Ioo p q) (uniqueDiffOn_Ioo p q) isOpen_Ioo] at pq_deriv_eval_eq_deriv
+                rwa [RestrictsToPolyBundleOn]
+                exact hy
+
+              have f_deriv_const: ∀ y, y ∈ Set.Ioo p q → (iteratedDeriv pq_poly.natDegree f) y = pq_deriv.coeff 0 := by
+                intro y hy
+                specialize pq_deriv_eq_f_deriv y hy
+                rw [pq_deriv_const] at pq_deriv_eq_f_deriv
+                rw [← pq_deriv_eq_f_deriv]
+
+              have f_deriv_eq_at_q: (iteratedDeriv pq_poly.natDegree f) q = pq_deriv.coeff 0 := by
+                apply const_ioo_implies_endpoint_right p q (pq_deriv.coeff 0) p_lt_q
+                have continuous_deriv := by
+                  apply ContDiff.continuous_iteratedDeriv k hCInfinity
+                  simp
+                apply Continuous.continuousOn continuous_deriv
+                apply f_deriv_const
+
+
+
+              have deriv_nonzero: ∀ y, y ∈ Set.Ioo p q → iteratedDeriv pq_poly.natDegree f y ≠ 0 := by
+                intro y hy
+                specialize pq_deriv_eq_f_deriv y hy
+                rw [pq_deriv_const] at pq_deriv_eq_f_deriv
+                rw [← pq_deriv_eq_f_deriv]
+                exact coeff_nonzero
+
+              have poly_degree_lt: pq_poly.natDegree < n_x_int := by
+                by_contra!
+                have zero_forall_gt := zero_forall_m pq_poly.natDegree q this q_in_inter
+                specialize pq_deriv_const q
+                have eval_nonzero: Polynomial.eval q pq_deriv  ≠ 0 := by
+                  rw [pq_deriv_const]
+                  exact coeff_nonzero
+
+                have coeff_eq_zero: pq_deriv.coeff 0 = 0 := by
+                  rw [zero_forall_gt] at f_deriv_eq_at_q
+                  exact f_deriv_eq_at_q.symm
+
+                contradiction
+              apply Polynomial.iterate_derivative_eq_zero poly_degree_lt
+
+
+          have deriv_eval_eq_zero: ((⇑Polynomial.derivative)^[n_x_int] pq_poly).eval x = 0 := by
+            rw [poly_deriv_n_zero]
+            simp
+
+          have iterated_poly_zeriv_zero: (iteratedDeriv n_x_int pq_poly.eval) x = 0 := by
+            rw [poly_iterated_deriv]
+            simp
+            exact deriv_eval_eq_zero
+
+
+          rwa [← iterated_deriv_eq_f_poly (f := f) _ pq_poly (Set.Ioo p q) (uniqueDiffOn_Ioo p q) isOpen_Ioo] at iterated_poly_zeriv_zero
+          rw [RestrictsToPolyOn] at pq_poly_on_dup
+          rwa [RestrictsToPolyBundleOn]
+          exact x_in_pq
+          -- END HORRIBLE COPY-PASTE--
       | inr empty =>
         rw [empty] at hx
         simp at hx
