@@ -645,6 +645,27 @@ lemma omega_r_imp_poly (q r: ℝ) (hNonempty: (Set.Ioo q r).Nonempty) (hCInfinit
 
 
 
+lemma poly_overlap_implies_eq (s_p s_q: Set ℝ) (p q: Polynomial ℝ) (hp: RestrictsToPolyBundleOn f s_p p) (hq: RestrictsToPolyBundleOn f s_q q) (hInteresct: (s_p ∩ s_q).Infinite) : p = q := by
+  have diff_zero_all: (p - q) = 0 := by
+    obtain ⟨nplusone_zeros, zeros_subset, zeros_card⟩ := @Set.Infinite.exists_subset_card_eq _ (s_p ∩ s_q) hInteresct ((p - q).natDegree + 1)
+    apply Polynomial.eq_zero_of_natDegree_lt_card_of_eval_eq_zero' (p - q) nplusone_zeros
+    intro y hy
+    simp only [Set.subset_def] at zeros_subset
+    have y_in_intersect: y ∈ (s_p ∩ s_q) := zeros_subset y hy
+    have eq_zero_intersect: ∀ z, z ∈ (s_p ∩ s_q) → (p - q).eval z = 0 := by
+      intro z ⟨hz1, hz2⟩
+      simp
+      rw [← hp z hz1]
+      rw [← hq z hz2]
+      simp
+
+    apply eq_zero_intersect
+    apply y_in_intersect
+    rw [zeros_card]
+    simp
+
+  apply eq_of_sub_eq_zero diff_zero_all
+
 -- https://mathoverflow.net/questions/34059/if-f-is-infinitely-differentiable-then-f-coincides-with-a-polynomial
 theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n f) x = 0) (hCInfinity: ContDiff ℝ ⊤ f): RestrictsToPoly f 0 1 := by
   -- let real_powset := 𝒫 { z: ℝ | True }
@@ -1708,6 +1729,13 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           rw [maximal_set_eq] at maximal_nonempty
           exact Set.nonempty_Ioo.mp maximal_nonempty
         have maximal_is_poly_on: RestrictsToPolyOn f (Set.Ioo p q) := by
+          simp only [maximal_set] at x_in_maximal
+          rw [Set.mem_sUnion] at x_in_maximal
+          obtain ⟨t, ht⟩ := x_in_maximal
+          simp only [Set.mem_setOf_eq] at ht
+          obtain ⟨a, b, t_eq, t_restricts, x_in_t, t_subset⟩ := ht.1
+          obtain ⟨t_poly, h_t_poly⟩ := t_restricts
+
           sorry
 
         have pq_not_cd: p ≠ c ∨ q ≠ d := by
