@@ -1744,8 +1744,8 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         have maximal_is_interval: ∃ p q, maximal_set = Set.Ioo p q := by
           have neq_icc := maximal_neq_closed (Set.Icc (sInf maximal_set) (sSup maximal_set)) (icc_not_open _ _ inf_le_sup)
           have neq_ici := maximal_neq_closed (Set.Ici (sInf maximal_set)) (ici_not_open _)
-          simp only [Set.mem_insert_iff] at maximal_mem_intervals
-          simp only [neq_icc, neq_ici] at maximal_mem_intervals
+          simp [Set.mem_insert_iff] at maximal_mem_intervals
+          simp only [neq_icc, neq_ici, Set.Nonempty.ne_empty maximal_nonempty] at maximal_mem_intervals
           simp at maximal_mem_intervals
 
 
