@@ -1545,7 +1545,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           --obtain ⟨p, q, p_lt_q, pq_subset⟩ := IsOpen.exists_Ioo_subset int_open inter_nonempty
           --specialize this p q pq_subset
 
-        let maximal_set := ⋃₀ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b ∧ x ∈ i}
+        let maximal_set := ⋃₀ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b ∧ x ∈ i ∧ i ⊆ Set.Ioo c d }
         have maximal_open: IsOpen maximal_set := by
           refine isOpen_sUnion ?_
           intro t ht
@@ -1557,23 +1557,61 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           have x_in_poly: x ∈ poly_omega := hx.2
           rw [Set.mem_sUnion] at x_in_poly
           obtain ⟨t, ht, x_in_t⟩ := x_in_poly
-          use t
-          refine ⟨?_, ?_⟩
-          simp only [Set.mem_setOf_eq]
           simp only [Set.mem_setOf_eq] at ht
           obtain ⟨a, b, h_t, h_ab⟩ := ht
-          refine ⟨a, b, h_t, h_ab, x_in_t⟩
-          exact x_in_t
+          let new_set := Set.Ioo (max a c) (min b d)
+          have restricts_new: RestrictsToPoly f (max a c) (min b d) := by
+            rw [RestrictsToPoly]
+            obtain ⟨p, hp⟩ := h_ab
+            use p
+            intro y hy
+            have y_in_ab: y ∈ Set.Ioo a b := by
+              simp
+              simp at hy
+              refine ⟨?_, ?_⟩
+              linarith
+              linarith
+            apply hp y y_in_ab
+          have x_in_new: x ∈ Set.Ioo (max a c) (min b d) := by
+            refine ⟨?_, ?_⟩
+            rw [h_t] at x_in_t
+            simp at x_in_t
+            simp at hx
+            simp
+            refine ⟨x_in_t.1, hx.1.1⟩
+            rw [h_t] at x_in_t
+            simp at x_in_t
+            simp
+            refine ⟨x_in_t.2, ?_⟩
+            apply hx.1.2
+
+          have new_nonempty: Set.Nonempty (Set.Ioo (max a c) (min b d)) := by
+            exact Set.nonempty_of_mem x_in_new
+
+          have new_subset:  Set.Ioo (max a c) (min b d) ⊆ Set.Ioo c d := by
+            rw [Set.Ioo_subset_Ioo_iff]
+            refine ⟨?_, ?_⟩
+            simp
+            simp
+            apply Set.nonempty_Ioo.mp new_nonempty
+
+
+          use Set.Ioo (max a c) (min b d)
+          simp only [Set.mem_setOf_eq]
+          refine ⟨?_, x_in_new⟩
+          refine ⟨(max a c), (min b d), rfl, restricts_new, x_in_new, new_subset⟩
         have maximal_nonempty: maximal_set.Nonempty := by
           exact Set.nonempty_of_mem x_in_maximal
 
         have maximal_is_connected: IsConnected maximal_set := by
           refine ⟨maximal_nonempty, ?_⟩
           apply isPreconnected_sUnion x
-          simp
           intro s hs
           simp only [Set.mem_setOf_eq] at hs
-          obtain ⟨a, b, h_s, h_ab, x_in_s⟩ := hs
+          obtain ⟨a, b, h_s, h_ab, x_in_s, s_subset⟩ := hs
+          exact x_in_s
+          intro s hs
+          obtain ⟨a, b, h_s, h_ab, x_in_s, s_subset⟩ := hs
           rw [h_s]
           apply isPreconnected_Ioo
 
@@ -1649,6 +1687,9 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         have maximal_is_interval: ∃ p q, maximal_set = Set.Ioo p q := by
           sorry
 
+        have maximal_subset_cd: maximal_set ⊆ Set.Ioo c d := by
+          sorry
+
         obtain ⟨p, q, maximal_set_eq⟩ := maximal_is_interval
         have x_in_pq: x ∈ Set.Ioo p q := by
           rw [← maximal_set_eq]
@@ -1659,8 +1700,25 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         have maximal_is_poly_on: RestrictsToPolyOn f (Set.Ioo p q) := by
           sorry
 
-        have p_or_q_in: p ∈ cd_intersect_x ∨ q ∈ cd_intersect_x := by
+        have p_or_q_in_x: p ∈ X ∨ q ∈ X := by
+          by_contra!
           sorry
+
+
+        have p_or_q_in: p ∈ cd_intersect_x ∨ q ∈ cd_intersect_x := by
+          by_contra!
+          simp only [cd_intersect_x] at this
+          -- have p_and_q_not_in_x: p ∉ X ∧ q ∉ X := by
+          --   sorry
+          -- simp only [X] at p_and_q_not_in_x
+          -- simp at p_and_q_not_in_x
+        sorry
+
+
+
+
+
+
 
         cases p_or_q_in with
         | inl p_in_inter =>
