@@ -1708,9 +1708,11 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           use x_2
           use x_3
 
-
-        have maximal_is_interval: ∃ p q, maximal_set = Set.Ioo p q := by
-          sorry
+        have maximal_neq_closed: ∀s, ¬ IsOpen s → s ≠ maximal_set := by
+          intro s hs
+          by_contra!
+          rw [← this] at maximal_open
+          contradiction
 
         have maximal_subset_cd: maximal_set ⊆ Set.Ioo c d := by
           simp only [maximal_set]
@@ -1719,6 +1721,29 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           simp only [Set.mem_setOf_eq] at ht
           obtain ⟨_, _, _, _, _, t_subset⟩ := ht
           exact t_subset
+
+        have inf_le_sup: (sInf maximal_set) ≤  (sSup maximal_set) := by
+          apply Real.sInf_le_sSup
+          rw [bddBelow_def]
+          use c
+          simp at maximal_subset_cd
+          intro y hy
+          specialize maximal_subset_cd hy
+          simp at maximal_subset_cd
+          exact le_of_lt maximal_subset_cd.1
+
+          rw [bddAbove_def]
+          use d
+          simp at maximal_subset_cd
+          intro y hy
+          specialize maximal_subset_cd hy
+          simp at maximal_subset_cd
+          exact le_of_lt maximal_subset_cd.2
+
+
+        have maximal_is_interval: ∃ p q, maximal_set = Set.Ioo p q := by
+          have neq_icc := maximal_neq_closed (Set.Icc (sInf maximal_set) (sSup maximal_set)) (icc_not_open _ _ inf_le_sup)
+
 
 
         obtain ⟨p, q, maximal_set_eq⟩ := maximal_is_interval
