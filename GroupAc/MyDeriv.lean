@@ -783,17 +783,12 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     apply isOpen_sUnion
     intro t ht
     simp at ht
-    obtain ⟨a, b, h, h'⟩ := ht
+    obtain ⟨a, b, h, _⟩ := ht
     rw [h]
     apply isOpen_Ioo
 
 
   let e_n := fun k => { x: ℝ | (iteratedDeriv k f) x = 0 }
-
-  obtain ⟨poly_intervals, hIntervals⟩ := TopologicalSpace.IsTopologicalBasis.open_eq_sUnion Real.isTopologicalBasis_Ioo_rat poly_open
-  have unique_diff: ∀ (x c d: ℝ), x ∈ Set.Ioo c d → UniqueDiffWithinAt ℝ (Set.Ioo c d) x := by
-    exact fun x c d a ↦ uniqueDiffWithinAt_Ioo a
-
 
   -- LEAN BUG - try moving this into a 'have' block that already contains errors
   have r_closed: OrderClosedTopology ℝ := by
@@ -907,58 +902,18 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         have orig_first_degree_zero: ((⇑Polynomial.derivative)^[n] first_poly).natDegree ≤ first_poly.natDegree - n := by
           apply Polynomial.natDegree_iterate_derivative first_poly n
         simp at orig_first_degree_zero
-        have first_le_n : first_poly.natDegree ≤ n := by exact Nat.le_max_left first_poly.natDegree second_poly.natDegree
-        have first_degree_zero': ((⇑Polynomial.derivative)^[n] first_poly).natDegree - (first_poly.natDegree - n) = 0 := by
-          apply tsub_eq_zero_of_le orig_first_degree_zero
-        have first_degree_zero: ((⇑Polynomial.derivative)^[n] first_poly).natDegree = 0 := by
-          simp [n] at first_degree_zero'
-          linarith
+
 
         -- FIXME - remove copy-paste with 'orig_first_degree_zero' code above
         have orig_second_degree_zero: ((⇑Polynomial.derivative)^[n] second_poly).natDegree ≤ second_poly.natDegree - n := by
           apply Polynomial.natDegree_iterate_derivative second_poly n
         simp at orig_second_degree_zero
-        have second_le_n : second_poly.natDegree ≤ n := by exact Nat.le_max_right first_poly.natDegree second_poly.natDegree
-        have second_degree_zero': ((⇑Polynomial.derivative)^[n] second_poly).natDegree - (second_poly.natDegree - n) = 0 := by
-          apply tsub_eq_zero_of_le orig_second_degree_zero
-        have second_degree_zero: ((⇑Polynomial.derivative)^[n] second_poly).natDegree = 0 := by
-          simp [n] at second_degree_zero'
-          linarith
-
-        have first_zero: (Polynomial.derivative ((⇑Polynomial.derivative)^[n] first_poly)) = 0 := by
-          apply Polynomial.derivative_of_natDegree_zero first_degree_zero
-
-        have first_zero_within: ∀y, y ∈ Set.Ioo g x → (Polynomial.derivative ((⇑Polynomial.derivative)^[n] first_poly)).eval y = 0 := by
-          intro y hy
-          simp [first_zero]
-
-        have second_zero: (Polynomial.derivative ((⇑Polynomial.derivative)^[n] second_poly)) = 0 := by
-          apply Polynomial.derivative_of_natDegree_zero second_degree_zero
-
-        have second_zero_within: ∀y, y ∈ Set.Ioo g x → (Polynomial.derivative ((⇑Polynomial.derivative)^[n] second_poly)).eval y = 0 := by
-          intro y hy
-          simp [second_zero]
-
-        --have zero_at_x: Polynomial.eval x (Polynomial.derivative ((⇑Polynomial.derivative)^[n] first_poly)) = 0 := by
-        --  apply @const_ioo_implies_endpoint_right (λ y => Polynomial.eval y (Polynomial.derivative ((⇑Polynomial.derivative)^[n] first_poly))) g x 0
-        --   apply g_lt_x
-        --   apply Polynomial.continuousOn
-        --   apply first_zero_within
-
-        -- have zero_at_x: Polynomial.eval x (Polynomial.derivative ((⇑Polynomial.derivative)^[n] first_poly)) = 0 := by
-        --   apply @const_ioo_implies_endpoint_right (λ y => Polynomial.eval y (Polynomial.derivative ((⇑Polynomial.derivative)^[n] first_poly))) g x 0
-        --   apply g_lt_x
-        --   apply Polynomial.continuousOn
-        --   apply first_zero_within
 
         have f_deriv_zero: ∀ (y: ℝ), y ∈ (Set.Ioo g x ∪ Set.Ioo x h) → (iteratedDeriv (n + 1) f) y = 0 := by
           intro y hy
           rw [Set.mem_union] at hy
           cases hy with
           | inl y_in_left =>
-            have y_eq_eval: f y = first_poly.eval y := by
-              apply h_first_poly
-              exact y_in_left
             have derivwith_eq: Set.EqOn (iteratedDerivWithin (n + 1) f (Set.Ioo g x)) (iteratedDerivWithin (n + 1) first_poly.eval (Set.Ioo g x)) (Set.Ioo g x) := by
               apply iteratedDerivWithin_congr
               apply uniqueDiffOn_Ioo
@@ -984,9 +939,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
             exact le_max
           | inr y_in_right =>
             -- FIXME - deduplicate this with the left-hand proof
-            have y_eq_eval: f y = second_poly.eval y := by
-              apply h_second_poly
-              exact y_in_right
             have derivwith_eq: Set.EqOn (iteratedDerivWithin (n + 1) f (Set.Ioo x h)) (iteratedDerivWithin (n + 1) second_poly.eval (Set.Ioo x h)) (Set.Ioo x h) := by
               apply iteratedDerivWithin_congr
               apply uniqueDiffOn_Ioo
@@ -1185,15 +1137,8 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     rw [eq_comm] at x_union_en
     -- Apply baire category theorem again.
     obtain ⟨n_x_int, x_int_nonempty⟩ := nonempty_interior_of_iUnion_of_closed x_intersect_closed en_cov_univ_set_x.symm
-    --let x_int := (interior (Set.univ ∩ {x | ↑x ∈ e_n n_x_int}))
     have x_int_open: IsOpen (interior (@Set.univ x_subspace ∩ {x | ↑x ∈ e_n n_x_int})) := by apply isOpen_interior
 
-    -- let val_x := Subtype.val '' interior (@Set.univ x_subspace ∩ {x | ↑x ∈ e_n n_x_int})
-    -- have is_open_val: IsOpen val_x := by
-    --   simp only [val_x]
-    --   apply IsOpen.isOpenMap_subtype_val
-
-    -- have val_x_eq: val_x = X ∩ e_n n_x_int := by s orry
 
     have x_int_open_copy := x_int_open
     simp only [IsOpen] at x_int_open
@@ -1202,9 +1147,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     -- An open set in the topology on R
     obtain ⟨full_set, full_set_open, full_set_preimage⟩ := x_int_open
     rw [Set.preimage] at full_set_preimage
-    have val_equals_intersect: Subtype.val '' {x: x_subspace | ↑x ∈ full_set} = X ∩ full_set := by
-      rw [← Set.preimage]
-      simp
 
     have full_set_preimage_reverse: interior {x: x_subspace | ↑x ∈ e_n n_x_int} = (Subtype.val ⁻¹' full_set) := full_set_preimage.symm
     rw [Set.eq_preimage_subtype_val_iff] at full_set_preimage_reverse
@@ -1270,7 +1212,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         rw [Filter.frequently_iff] at x_acc_x
         rw [Filter.frequently_iff]
         intro u hu
-        let u_inter := u ∩ Set.Ioo c d
         have x_in_cd: x ∈ Set.Ioo c d := by
           apply hx.1
         have cd_nhds: Set.Ioo c d ∈ 𝓝 x := Ioo_mem_nhds x_in_cd.1 x_in_cd.2
@@ -1351,8 +1292,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
             rw [y_eq_x]
             exact Set.mem_union_right x_1 rfl
           | inr y_neq_x =>
-            have y_in_x_c: y ∈ (@Set.compl ℝ {x}) := by
-              exact y_neq_x
             have y_in_inter: y ∈ u ∩ {x}ᶜ := by
               exact Set.mem_inter hy y_neq_x
             have y_in_x1: y ∈ x_1 := by
@@ -1382,12 +1321,11 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       intro m x hm hx
       induction m, hm using Nat.le_induction generalizing x with
       | base => exact x_zero_on_cd_intersect x hx
-      | succ k ik hx_new =>
+      | succ k _ hx_new =>
         apply n_succ_deriv_zero x k hx
         exact hx_new
 
 
-    have cont_diff_on: ContDiffOn ℝ ⊤ f (Set.Icc c d) := ContDiff.contDiffOn hCInfinity
     -- "We will prove that f(n)=0 on (a,b). This will imply that (a,b)⊂Ω which is a contradiction with (3)."
     have deriv_zero_on_cd_int_omega: ∀ (x : ℝ), x ∈ (Set.Ioo c d) ∩ poly_omega → (iteratedDeriv n_x_int f) x = 0 := by
       intro x hx
@@ -1399,12 +1337,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         exact Or.symm (Set.eq_empty_or_nonempty (Set.Ioo c d ∩ poly_omega))
       cases is_empty_or_nonempty with
       | inl inter_nonempty =>
-
-        -- have maximal_interval: ∃ p q, Set.Ioo p q ⊆ (Set.Ioo c d) ∩ poly_omega ∧ (p ∈ X ∨ q ∈ X) := by
-        --   by_contra!
-
-          --obtain ⟨p, q, p_lt_q, pq_subset⟩ := IsOpen.exists_Ioo_subset int_open inter_nonempty
-          --specialize this p q pq_subset
 
         let maximal_set := ⋃₀ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b ∧ x ∈ i ∧ i ⊆ Set.Ioo c d }
         have maximal_open: IsOpen maximal_set := by
@@ -1420,7 +1352,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           obtain ⟨t, ht, x_in_t⟩ := x_in_poly
           simp only [Set.mem_setOf_eq] at ht
           obtain ⟨a, b, h_t, h_ab⟩ := ht
-          let new_set := Set.Ioo (max a c) (min b d)
           have restricts_new: RestrictsToPoly f (max a c) (min b d) := by
             rw [RestrictsToPoly]
             obtain ⟨p, hp⟩ := h_ab
@@ -1469,17 +1400,17 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           apply isPreconnected_sUnion x
           intro s hs
           simp only [Set.mem_setOf_eq] at hs
-          obtain ⟨a, b, h_s, h_ab, x_in_s, s_subset⟩ := hs
+          obtain ⟨a, b, _, _, x_in_s, _⟩ := hs
           exact x_in_s
           intro s hs
-          obtain ⟨a, b, h_s, h_ab, x_in_s, s_subset⟩ := hs
+          obtain ⟨a, b, h_s, _⟩ := hs
           rw [h_s]
           apply isPreconnected_Ioo
 
         have maximal_mem_intervals := IsPreconnected.mem_intervals maximal_is_connected.2
         have sets_subset: {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b ∧ x ∈ i ∧ i ⊆ Set.Ioo c d} ⊆ {i | ∃ a b, i = Set.Ioo a b ∧ RestrictsToPoly f a b} := by
           simp
-          intro a x_2 x_3 h_a_eq h_poly h_x_in_a a_subset_cd
+          intro a x_2 x_3 h_a_eq h_poly _ _
           use x_2
           use x_3
 
@@ -1497,7 +1428,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           obtain ⟨_, _, _, _, _, t_subset⟩ := ht
           exact t_subset
 
-        have ioo_unbounded_above: ¬BddAbove (Set.Ioi (sInf maximal_set)) := not_bddAbove_Ioi _
         have maximal_bounded_above: BddAbove maximal_set := by
           rw [bddAbove_def]
           use d
@@ -1529,8 +1459,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           contradiction
 
         obtain ⟨a, b, a_lt_b, ab_subset⟩ := IsOpen.exists_Ioo_subset maximal_open maximal_nonempty
-        have sup_ioo : sSup (Set.Ioo a b) = b := by apply csSup_Ioo a_lt_b
-        have inf_ioo : sInf (Set.Ioo a b) = a := by apply csInf_Ioo a_lt_b
 
         have glb_ab: IsGLB (Set.Ioo a b) a := isGLB_Ioo a_lt_b
         have lub_ab: IsLUB (Set.Ioo a b) b := isLUB_Ioo a_lt_b
@@ -1621,7 +1549,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           simp only [maximal_set, Set.mem_sUnion] at hy
           obtain ⟨t, t_in, y_in_t⟩ := hy
           simp only [Set.mem_setOf_eq] at t_in
-          obtain ⟨a, b, t_eq, _, _, t_subset⟩ := t_in
+          obtain ⟨a, b, _, _, _, t_subset⟩ := t_in
           apply t_subset y_in_t
 
         have p_or_q_in_cd: p ∈ Set.Ioo c d ∨ q ∈ Set.Ioo c d := by
@@ -1661,7 +1589,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
             simp at p_not_inter
             obtain ⟨p_set, a_p, b_p, p_set_eq, p_restricts, p_in_Ioo⟩ := p_not_inter
             simp [p_set_eq] at p_in_Ioo
-            let new_left := max a_p c
             let new_set := Set.Ioo (max a_p c) q
 
             have x_in_new: x ∈ new_set := by
@@ -1798,7 +1725,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
             simp at q_not_inter
             obtain ⟨q_set, a_q, b_q, q_set_eq, q_restricts, q_in_Ioo⟩ := q_not_inter
             simp [q_set_eq] at q_in_Ioo
-            let new_right := min b_q d
             let new_set := Set.Ioo p (min b_q d)
 
             have x_in_new: x ∈ new_set := by
@@ -1932,12 +1858,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
 
         cases p_or_q_in with
         | inl p_in_inter =>
-          have deriv_zero: (iteratedDeriv n_x_int f) p = 0 := by
-            apply x_zero_on_cd_intersect
-            exact p_in_inter
-
-
-
           have pq_poly_on_dup := pq_poly_on
           obtain ⟨pq_poly, h_pq_poly⟩ := pq_poly_on
           let k := pq_poly.natDegree
@@ -2040,11 +1960,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           exact x_in_pq
         | inr q_in_inter =>
           -- BEGIN HORRIBLE COPY-PASTE --
-          have deriv_zero: (iteratedDeriv n_x_int f) q = 0 := by
-            apply x_zero_on_cd_intersect
-            exact q_in_inter
-
-
 
           have pq_poly_on_dup := pq_poly_on
           obtain ⟨pq_poly, h_pq_poly⟩ := pq_poly_on
@@ -2180,43 +2095,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
       . exact hx
 
 
-    -- have int_subset_x_int: x_int ⊆ X ∩ e_n n_x_int := interior_subset
-    -- have int_subset_x: x_int ⊆ X := by
-    --   simp [Set.subset_inter_iff] at int_subset_x_int
-    --   exact int_subset_x_int.1
-
-    --have cd_subset_x: Set.Ioo c d ⊆ X := by
-    --  apply subset_trans cd_int s orry -- int_subset_x
-    --simp [X] at cd_subset_x
-
-    have cd_nonempty: (Set.Ioo c d).Nonempty := by
-      simp
-      exact c_lt_d
-
-    -- have cd_intersect_x_nonempty: cd_intersect_x.Nonempty := by
-    --   simp only [cd_intersect_x]
-    --   simp only [Set.inter_nonempty]
-
-
-    --   obtain ⟨x, hx⟩ := cd_nonempty
-    --   have x_in_full_set: x ∈ full_set := by
-    --     apply cd_int
-    --     exact hx
-    --   use x
-    --   refine ⟨hx, ?_⟩
-
-    --   simp at x_int_nonempty
-    --   rw [← full_set_preimage] at x_int_nonempty
-    --   rw [Set.nonempty_def] at x_int_nonempty
-    --   obtain ⟨new_x_subspace, h_new_x_subspace⟩ := x_int_nonempty
-    --   simp only [Set.mem_preimage] at h_new_x_subspace
-    --   s orry
-
-
-
-
-
-
 
     obtain ⟨q, hq⟩ := Set.nonempty_def.mp cd_intersect_x_nonempty
     have _: q ∈ X := by
@@ -2228,8 +2106,6 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
     contradiction
 
 
-  have poly_comp_empty: poly_omegaᶜ = ∅ := by
-    apply X_empty
   have poly_full: poly_omega = (Set.univ) := by
     exact Set.compl_empty_iff.mp X_empty
 
