@@ -1444,8 +1444,8 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           apply Real.sInf_le_sSup maximal_set maximal_bounded_below maximal_bounded_above
 
 
-        have inf_glb: IsGLB maximal_set (sInf maximal_set) := Real.is_glb_sInf maximal_set maximal_nonempty maximal_bounded_below
-        have sup_lub: IsLUB maximal_set (sSup maximal_set) := Real.isLUB_sSup maximal_set maximal_nonempty maximal_bounded_above
+        have inf_glb: IsGLB maximal_set (sInf maximal_set) := Real.isGLB_sInf maximal_nonempty maximal_bounded_below
+        have sup_lub: IsLUB maximal_set (sSup maximal_set) := Real.isLUB_sSup maximal_nonempty maximal_bounded_above
 
         have glb_subset: (sInf maximal_set) ≤ a := by
           apply IsGLB.mono glb_ab inf_glb ab_subset
