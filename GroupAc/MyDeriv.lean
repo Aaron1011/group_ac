@@ -1,5 +1,5 @@
 
-
+import Paperproof
 import Mathlib
 import Mathlib.Data.Set.Defs
 import Mathlib.Data.Set.Basic
@@ -10,7 +10,7 @@ open Topology
 open Filter
 
 -- set_option profiler true
-set_option maxHeartbeats 1000000
+-- set_option maxHeartbeats 1000000
 
 
 variable {f: ℝ → ℝ}
