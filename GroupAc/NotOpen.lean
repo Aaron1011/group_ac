@@ -105,8 +105,6 @@ lemma dual_general_ico_not_open {α: Type*}
   [AddGroup α]
   [ht: TopologicalSpace α]
   [h_linear: LinearOrder α] [hd: DenselyOrdered α] [h_mo_min: NoMinOrder α] [NoMaxOrder α] [OrderTopology α] [PreconnectedSpace α]
-  [CovariantClass α α (fun x1 x2 ↦ x1 + x2) fun x1 x2 ↦ x1 < x2]
-  [CovariantClass α α (Function.swap fun x1 x2 ↦ x1 + x2) fun x1 x2 ↦ x1 < x2]
   (a b: α) (hab: a < b): ¬ IsOpen (Set.Ico a b) := by
 
     have something := general_ioc_not_open (α := αᵒᵈ) b a hab
