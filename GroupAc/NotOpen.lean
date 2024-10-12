@@ -13,12 +13,8 @@ lemma general_iic_not_open  {α : Type u} [TopologicalSpace α] [LinearOrder α]
   have nonempty: (Set.Iic a).Nonempty := by simp
 
   have ici_not_univ: Set.Iic a ≠ Set.univ := by
-    rw [Set.ne_univ_iff_exists_not_mem]
-    obtain ⟨b, hb⟩ := not_isMax_iff.mp ha
-    use b
-    simp
-    exact hb
-
+    simp only [Set.ne_univ_iff_exists_not_mem, Set.mem_Iic, not_le]
+    apply not_isMax_iff.mp ha
 
   have not_clopen: ¬IsClopen (Set.Iic a) := by
     apply (not_imp_not.mpr isClopen_iff.mp)
