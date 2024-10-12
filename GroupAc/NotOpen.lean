@@ -118,7 +118,5 @@ lemma dual_general_ico_not_open {α: Type*}
     have something := general_ioc_not_open (α := αᵒᵈ) b a dual_a_lt_b
     rw [Set.Ioc] at something
     rw [Set.Ico]
-    simp only [← OrderDual.ofDual_lt_ofDual] at something
-    simp at something
     simp only [and_comm] at something
     apply something
