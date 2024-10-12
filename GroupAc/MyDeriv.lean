@@ -1746,24 +1746,8 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
             have intersect_infinite: ((Set.Ioo (max a_q c) (min b_q d)) ∩ Set.Ioo p q).Infinite := by
               rw [Set.Ioo_inter_Ioo]
               apply Set.Ioo_infinite
-              simp
-              refine ⟨?_, ?_⟩
-              refine ⟨⟨?_, ?_⟩, ⟨?_, ?_⟩, ?_⟩
-              refine ⟨?_, ?_⟩
-              linarith
-              linarith
-              linarith
-              linarith
-              linarith
-              linarith
-              refine ⟨⟨?_, ?_⟩, ?_⟩
-              linarith
-              linarith
-              linarith
-
-
-
-
+              simp only [lt_inf_iff, lt_min_iff, sup_lt_iff, max_lt_iff]
+              constructorm* _ ∧ _ <;> linarith
 
 
             have polys_eq := poly_overlap_implies_eq f (Set.Ioo (max a_q c) (min b_q d)) (Set.Ioo p q) q_poly full_poly new_restricts h_full_poly intersect_infinite
