@@ -18,8 +18,8 @@ lemma general_iic_not_open  {α : Type u} [TopologicalSpace α] [LinearOrder α]
 
   have not_clopen: ¬IsClopen (Set.Iic a) := by
     apply (not_imp_not.mpr isClopen_iff.mp)
-    simp
-    refine ⟨Set.Nonempty.ne_empty nonempty, ici_not_univ⟩
+    rw [not_or]
+    exact ⟨Set.Nonempty.ne_empty nonempty, ici_not_univ⟩
 
-  simp [IsClopen] at not_clopen
+  rw [IsClopen, not_and] at not_clopen
   apply not_clopen is_closed
