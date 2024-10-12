@@ -42,11 +42,13 @@ lemma general_iic_not_open  {α : Type u} [TopologicalSpace α] [LinearOrder α]
 
 instance instPreconnected (α : Type*) [TopologicalSpace α] [hq: PreconnectedSpace α] : PreconnectedSpace αᵒᵈ := ‹_›
 
+
 lemma general_ici_not_open  {α : Type u} [TopologicalSpace α] [LinearOrder α] [OrderClosedTopology α] [PreconnectedSpace α] (a: α) (ha: ¬ IsMin a) : ¬ IsOpen (Set.Ici a) := by
   -- have is_dual: PreconnectedSpace αᵒᵈ := by assumption
   have some_result := general_iic_not_open (α := αᵒᵈ) a ha
-  have in_regular: ¬ IsOpen (Set.Ici a) := by apply some_result
-  apply some_result
+  -- TODO: Figure out how this works
+  have in_regular: ¬ IsOpen (Set.Ici a) := some_result
+  apply in_regular
 
 
 -- Missing 'open Set' implies undefined univ, weird error here
@@ -107,11 +109,16 @@ lemma dual_general_ico_not_open {α: Type*}
   [CovariantClass α α (Function.swap fun x1 x2 ↦ x1 + x2) fun x1 x2 ↦ x1 < x2]
   (a b: α) (hab: a < b): ¬ IsOpen (Set.Ico a b) := by
 
-    have dual_a_lt_b: (OrderDual.toDual (-a)) < (OrderDual.toDual (-b)) := by
+    have dual_a_lt_b: (OrderDual.toDual b) < (OrderDual.toDual a) := by
       simp only [OrderDual.toDual_lt_toDual]
       apply neg_lt_neg_iff.mp
-      simp only [neg_neg]
+      simp
       assumption
 
-
-    have something := general_ioc_not_open (α := αᵒᵈ) (-a) (-b) dual_a_lt_b
+    have something := general_ioc_not_open (α := αᵒᵈ) b a dual_a_lt_b
+    rw [Set.Ioc] at something
+    rw [Set.Ico]
+    simp only [← OrderDual.ofDual_lt_ofDual] at something
+    simp at something
+    simp only [and_comm] at something
+    apply something
