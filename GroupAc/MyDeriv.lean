@@ -1,5 +1,4 @@
-
-import Paperproof
+--import Paperproof
 import Mathlib
 import Mathlib.Data.Set.Defs
 import Mathlib.Data.Set.Basic
