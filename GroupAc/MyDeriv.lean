@@ -1772,17 +1772,13 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
               | inl y_le_a_q =>
                 have y_in_set: y ∈ Set.Ioo p q := by
                   rw [Set.mem_Ioo]
-                  refine ⟨?_, ?_⟩
-                  linarith
-                  linarith
+                  refine ⟨?_, ?_⟩ <;> linarith
                 specialize h_full_poly y y_in_set
                 exact h_full_poly
               | inr y_gt_a_q =>
                 have y_in_set: y ∈ Set.Ioo a_q b_q := by
                   rw [Set.mem_Ioo]
-                  refine ⟨?_, ?_⟩
-                  linarith
-                  linarith
+                  refine ⟨?_, ?_⟩ <;> linarith
                 specialize hq_poly y y_in_set
                 rw [polys_eq] at hq_poly
                 exact hq_poly
@@ -1794,21 +1790,11 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
               rw [Set.Ioo_subset_Ioo_iff] at pq_subset_cd
               linarith
               linarith
-              simp
-              simp
-              refine ⟨?_, ?_⟩
-              linarith
-              linarith
-              simp [new_set]
-              refine ⟨?_, ?_, ?_⟩
-              linarith
-              linarith
-              linarith
-
-
-
-
-
+              simp only [min_le_iff, le_refl, or_true]
+              simp only [lt_min_iff]
+              refine ⟨?_, ?_⟩ <;> linarith
+              simp only [Set.mem_Ioo, lt_min_iff, new_set]
+              refine ⟨?_, ?_, ?_⟩ <;> linarith
 
 
             rw [maximal_set_eq] at q_in_maximal
