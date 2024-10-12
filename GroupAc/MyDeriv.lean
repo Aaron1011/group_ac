@@ -1,10 +1,18 @@
+import Mathlib.Algebra.Lie.OfAssociative
+import Mathlib.Analysis.Calculus.ContDiff.RCLike
+import Mathlib.Analysis.Calculus.Deriv.Polynomial
+import Mathlib.Analysis.Calculus.IteratedDeriv.Lemmas
+import Mathlib.Analysis.InnerProductSpace.Basic
+import Mathlib.Analysis.Normed.Order.Lattice
+import Mathlib.Data.Int.Star
+import Mathlib.Data.Real.StarOrdered
+import Mathlib.Topology.Algebra.Polynomial
+import Mathlib.Topology.Baire.CompleteMetrizable
+import Mathlib.Topology.Baire.Lemmas
+import Mathlib.Topology.CompletelyRegular
+import Mathlib.Topology.MetricSpace.Polish
 
-import Paperproof
-import Mathlib
-import Mathlib.Data.Set.Defs
-import Mathlib.Data.Set.Basic
-import Mathlib.Topology.Defs.Filter
-import Mathlib.Order.Filter.Basic
+import GroupAc.NotOpen
 
 open Topology
 open Filter
@@ -66,26 +74,6 @@ lemma ici_not_open: ∀ a: ℝ, ¬ IsOpen (Set.Ici a) := by
     refine ⟨a - 1, ici_missing⟩
 
   have not_clopen: ¬IsClopen (Set.Ici a) := by
-    apply (not_imp_not.mpr isClopen_iff.mp)
-    simp
-    refine ⟨Set.Nonempty.ne_empty nonempty, ici_not_univ⟩
-
-  simp [IsClopen] at not_clopen
-  apply not_clopen is_closed
-
--- TODO - deduplicate with ici
-lemma iic_not_open: ∀ a: ℝ, ¬ IsOpen (Set.Iic a) := by
-  intro a
-  have is_closed: IsClosed (Set.Iic a) := isClosed_Iic
-  have nonempty: (Set.Iic a).Nonempty := by simp
-  have iic_missing: (a + 1) ∉ Set.Iic a := by
-    simp
-
-  have ici_not_univ: Set.Iic a ≠ Set.univ := by
-    rw [Set.ne_univ_iff_exists_not_mem]
-    refine ⟨a + 1, iic_missing⟩
-
-  have not_clopen: ¬IsClopen (Set.Iic a) := by
     apply (not_imp_not.mpr isClopen_iff.mp)
     simp
     refine ⟨Set.Nonempty.ne_empty nonempty, ici_not_univ⟩
@@ -1444,8 +1432,8 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           apply Real.sInf_le_sSup maximal_set maximal_bounded_below maximal_bounded_above
 
 
-        have inf_glb: IsGLB maximal_set (sInf maximal_set) := Real.is_glb_sInf maximal_set maximal_nonempty maximal_bounded_below
-        have sup_lub: IsLUB maximal_set (sSup maximal_set) := Real.isLUB_sSup maximal_set maximal_nonempty maximal_bounded_above
+        have inf_glb: IsGLB maximal_set (sInf maximal_set) := Real.isGLB_sInf maximal_nonempty maximal_bounded_below
+        have sup_lub: IsLUB maximal_set (sSup maximal_set) := Real.isLUB_sSup maximal_nonempty maximal_bounded_above
 
         have glb_subset: (sInf maximal_set) ≤ a := by
           apply IsGLB.mono glb_ab inf_glb ab_subset
@@ -1463,7 +1451,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
         have maximal_is_interval: ∃ p q, maximal_set = Set.Ioo p q := by
           have neq_icc := maximal_neq_not_open (Set.Icc (sInf maximal_set) (sSup maximal_set)) (icc_not_open _ _ inf_le_sup)
           have neq_ici := maximal_neq_not_open (Set.Ici (sInf maximal_set)) (ici_not_open _)
-          have neq_iic := maximal_neq_not_open (Set.Iic (sSup maximal_set)) (iic_not_open _)
+          have neq_iic := maximal_neq_not_open (Set.Iic (sSup maximal_set)) (Iic_not_open (not_isMax (sSup maximal_set)))
           have neq_ico := maximal_neq_not_open (Set.Ico (sInf maximal_set) (sSup maximal_set)) (ico_not_open _ _ inf_lt_sup)
           have neq_ioc := maximal_neq_not_open (Set.Ioc (sInf maximal_set) (sSup maximal_set)) (ioc_not_open _ _ inf_lt_sup)
           have neq_ioi := maximal_neq_unbounded_above (Set.Ioi (sInf maximal_set)) (not_bddAbove_Ioi _)
