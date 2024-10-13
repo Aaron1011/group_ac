@@ -95,7 +95,7 @@ lemma lt_iff_neg (a b: ℝ): a < b ↔ -b < -a := by
   simp only [neg_lt_neg_iff]
 
 lemma dual_general_ico_not_open {α: Type*}
-  [TopologicalSpace α] [LinearOrder α] [DenselyOrdered α] [NoMinOrder α] [OrderTopology α] [PreconnectedSpace α]
+  [TopologicalSpace α] [LinearOrder α] [DenselyOrdered α] [NoMinOrder α] [OrderTopology α]
   (a b: α) (hab: a < b): ¬ IsOpen (Set.Ico a b) := by
     have something := general_ioc_not_open (α := αᵒᵈ) b a hab
     simp only [Set.Ico, and_comm]
