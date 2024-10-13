@@ -105,7 +105,6 @@ lemma dual_general_ico_not_open {α: Type*}
   [TopologicalSpace α] [LinearOrder α] [DenselyOrdered α] [NoMinOrder α] [OrderTopology α] [PreconnectedSpace α]
   (a b: α) (hab: a < b): ¬ IsOpen (Set.Ico a b) := by
     have something := general_ioc_not_open (α := αᵒᵈ) b a hab
-    rw [Set.Ioc] at something
-    rw [Set.Ico]
-    simp only [and_comm] at something
+    simp only [Set.Ico, and_comm]
+    simp only [Set.Ioc, and_comm] at something
     apply something
