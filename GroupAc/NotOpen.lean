@@ -9,14 +9,7 @@ open Topology
 open Filter
 
 lemma general_iic_not_open  {α : Type u} [TopologicalSpace α] [LinearOrder α] [DenselyOrdered α] [OrderTopology α] [NoMaxOrder α]  (a: α) : ¬ IsOpen (Set.Iic a) := by
-  have frontier_eq: frontier (Set.Iic a) = {a} := by apply frontier_Iic
-  have s_inter_frontier: (Set.Iic a) ∩ (frontier (Set.Iic a)) = {a} := by
-    rw [frontier_eq]
-    simp
-
-  apply not_imp_not.mpr IsOpen.inter_frontier_eq
-  simp [s_inter_frontier]
-
+  simp [not_imp_not.mpr IsOpen.inter_frontier_eq, frontier_Iic]
 
 -- (-↔, a]
 -- [a, +↔)
