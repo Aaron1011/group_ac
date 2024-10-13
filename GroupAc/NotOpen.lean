@@ -8,21 +8,14 @@ import Mathlib.Order.Filter.Basic
 open Topology
 open Filter
 
-lemma general_iic_not_open  {α : Type u} [TopologicalSpace α] [LinearOrder α] [OrderClosedTopology α] [PreconnectedSpace α]  (a: α) (ha: ¬ IsMax a) : ¬ IsOpen (Set.Iic a) := by
-  have is_closed: IsClosed (Set.Iic a) := isClosed_Iic
-  have nonempty: (Set.Iic a).Nonempty := by simp only [Set.nonempty_Iic]
+lemma general_iic_not_open  {α : Type u} [TopologicalSpace α] [LinearOrder α] [DenselyOrdered α] [OrderTopology α] [NoMaxOrder α]  (a: α) : ¬ IsOpen (Set.Iic a) := by
+  have frontier_eq: frontier (Set.Iic a) = {a} := by apply frontier_Iic
+  have s_inter_frontier: (Set.Iic a) ∩ (frontier (Set.Iic a)) = {a} := by
+    rw [frontier_eq]
+    simp
 
-  have ici_not_univ: Set.Iic a ≠ Set.univ := by
-    simp only [Set.ne_univ_iff_exists_not_mem, Set.mem_Iic, not_le]
-    apply not_isMax_iff.mp ha
-
-  have not_clopen: ¬IsClopen (Set.Iic a) := by
-    apply (not_imp_not.mpr isClopen_iff.mp)
-    rw [not_or]
-    exact ⟨Set.Nonempty.ne_empty nonempty, ici_not_univ⟩
-
-  rw [IsClopen, not_and] at not_clopen
-  exact not_clopen is_closed
+  apply not_imp_not.mpr IsOpen.inter_frontier_eq
+  simp [s_inter_frontier]
 
 
 -- (-↔, a]
@@ -43,9 +36,9 @@ lemma general_iic_not_open  {α : Type u} [TopologicalSpace α] [LinearOrder α]
 instance instPreconnected (α : Type*) [TopologicalSpace α] [hq: PreconnectedSpace α] : PreconnectedSpace αᵒᵈ := ‹_›
 
 
-lemma general_ici_not_open  {α : Type u} [TopologicalSpace α] [LinearOrder α] [OrderClosedTopology α] [PreconnectedSpace α] (a: α) (ha: ¬ IsMin a) : ¬ IsOpen (Set.Ici a) := by
+lemma general_ici_not_open  {α : Type u} [TopologicalSpace α] [LinearOrder α] [DenselyOrdered α] [OrderTopology α] [NoMinOrder α] (a: α) : ¬ IsOpen (Set.Ici a) := by
   -- have is_dual: PreconnectedSpace αᵒᵈ := by assumption
-  have some_result := general_iic_not_open (α := αᵒᵈ) a ha
+  have some_result := general_iic_not_open (α := αᵒᵈ) a
   -- TODO: Figure out how this works
   have in_regular: ¬ IsOpen (Set.Ici a) := some_result
   apply in_regular
@@ -60,7 +53,7 @@ lemma not_preconnected {α: Type u} [TopologicalSpace α] (ha: ¬(PreconnectedSp
 
 -- (a, b] [a, b)
 
-lemma general_ioc_not_open {α: Type*} [TopologicalSpace α] [LinearOrder α] [DenselyOrdered α] [NoMaxOrder α] [OrderTopology α] [PreconnectedSpace α] (a b: α) (hab: a < b): ¬ IsOpen (Set.Ioc a b) := by
+lemma general_ioc_not_open {α: Type*} [TopologicalSpace α] [LinearOrder α] [DenselyOrdered α] [NoMaxOrder α] [OrderTopology α] (a b: α) (hab: a < b): ¬ IsOpen (Set.Ioc a b) := by
   have frontier_eq: frontier (Set.Ioc a b) = {a, b} := by apply frontier_Ioc hab
   have frontier_imp_not_open: ¬((Set.Ioc a b) ∩ frontier (Set.Ioc a b) = ∅) → ¬ IsOpen (Set.Ioc a b) := not_imp_not.mpr IsOpen.inter_frontier_eq
   have b_in_ioc: b ∈ Set.Ioc a b := by
@@ -79,7 +72,7 @@ lemma general_ioc_not_open {α: Type*} [TopologicalSpace α] [LinearOrder α] [D
 
   apply frontier_imp_not_open not_eq_empty
 
-lemma general_ico_not_open {α: Type*} [TopologicalSpace α] [LinearOrder α] [DenselyOrdered α] [NoMinOrder α] [OrderTopology α] [PreconnectedSpace α] (a b: α) (hab: a < b): ¬ IsOpen (Set.Ico a b) := by
+lemma general_ico_not_open {α: Type*} [TopologicalSpace α] [LinearOrder α] [DenselyOrdered α] [NoMinOrder α] [OrderTopology α] (a b: α) (hab: a < b): ¬ IsOpen (Set.Ico a b) := by
   have frontier_eq: frontier (Set.Ico a b) = {a, b} := by apply frontier_Ico hab
   have frontier_imp_not_open: ¬((Set.Ico a b) ∩ frontier (Set.Ico a b) = ∅) → ¬ IsOpen (Set.Ico a b) := not_imp_not.mpr IsOpen.inter_frontier_eq
   have a_in_ico: a ∈ Set.Ico a b := by
