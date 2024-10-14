@@ -25,8 +25,6 @@ lemma Ico_not_open [DenselyOrdered α] [NoMinOrder α] [OrderTopology α] (hab: 
   simpa only [Set.Ioc, and_comm] using (Ioc_not_open (α := αᵒᵈ) (LT.lt.dual hab))
 
 lemma Icc_not_open [OrderTopology α] [DenselyOrdered α] [OrderClosedTopology α] [NoMinOrder α] [NoMaxOrder α] (hab: a ≤ b): ¬ IsOpen (Set.Icc a b) := by
-  have hb: b ∈ (Set.Icc a b) ∩ frontier (Set.Icc a b) := by
-    rw [frontier_Icc hab, Set.mem_inter_iff, Set.mem_insert_iff, Set.mem_singleton_iff, Set.mem_Icc]
-    simpa only [le_refl, and_true, or_true]
-
-  exact not_imp_not.mpr IsOpen.inter_frontier_eq (Set.nonempty_iff_ne_empty.mp ⟨b, hb⟩)
+  apply not_imp_not.mpr IsOpen.inter_frontier_eq
+  simp_rw [frontier_Icc hab, Set.eq_empty_iff_forall_not_mem, Set.mem_inter_iff, Set.mem_Icc, not_forall, Classical.not_not]
+  refine ⟨b, ⟨hab, le_refl _⟩, by simp_rw [Set.mem_insert_iff, Set.mem_singleton_iff, or_true]⟩
