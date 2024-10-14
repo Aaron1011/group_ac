@@ -159,9 +159,7 @@ lemma iter_deriv_degree_zero (n: ℕ) (p: Polynomial ℝ) (hp: p.degree = n): ((
 lemma iterated_deriv_eq_f_poly (n: ℕ) (p: Polynomial ℝ) (s: Set ℝ) (hs: UniqueDiffOn ℝ s) (ho: IsOpen s) (hp: RestrictsToPolyBundleOn f s p): Set.EqOn (iteratedDeriv n f) (iteratedDeriv n p.eval) s := by
   rw [Set.EqOn]
   intro x hx
-  rw [iteratedDeriv]
-  rw [iteratedDeriv]
-  rw [←iteratedFDerivWithin_of_isOpen n ho]
+  rw [iteratedDeriv, iteratedDeriv, ←iteratedFDerivWithin_of_isOpen n ho]
   rw [←iteratedFDerivWithin_of_isOpen n ho]
   simp only [iteratedDerivWithin_eq_iterate hs hx]
   apply iteratedDerivWithin_congr hs

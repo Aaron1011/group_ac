@@ -9,7 +9,8 @@ open Topology
 open Filter
 
 lemma general_iic_not_open  {α : Type u} [TopologicalSpace α] [LinearOrder α] [DenselyOrdered α] [OrderTopology α] [NoMaxOrder α]  (a: α) : ¬ IsOpen (Set.Iic a) := by
-  simp [not_imp_not.mpr IsOpen.inter_frontier_eq, frontier_Iic]
+  simp only [Set.nonempty_Ioi, frontier_Iic', Set.inter_singleton_eq_empty, Set.mem_Iic, le_refl,
+    not_true_eq_false, not_false_eq_true, not_imp_not.mpr IsOpen.inter_frontier_eq]
 
 -- (-↔, a]
 -- [a, +↔)
@@ -28,13 +29,7 @@ lemma general_iic_not_open  {α : Type u} [TopologicalSpace α] [LinearOrder α]
 
 instance instPreconnected (α : Type*) [TopologicalSpace α] [hq: PreconnectedSpace α] : PreconnectedSpace αᵒᵈ := ‹_›
 
-
-lemma general_ici_not_open  {α : Type u} [TopologicalSpace α] [LinearOrder α] [DenselyOrdered α] [OrderTopology α] [NoMinOrder α] (a: α) : ¬ IsOpen (Set.Ici a) := by
-  -- have is_dual: PreconnectedSpace αᵒᵈ := by assumption
-  have some_result := general_iic_not_open (α := αᵒᵈ) a
-  -- TODO: Figure out how this works
-  have in_regular: ¬ IsOpen (Set.Ici a) := some_result
-  apply in_regular
+lemma general_ici_not_open  {α : Type u} [TopologicalSpace α] [LinearOrder α] [DenselyOrdered α] [OrderTopology α] [NoMinOrder α] (a: α) : ¬ IsOpen (Set.Ici a) := general_iic_not_open (α := αᵒᵈ) a
 
 
 -- Missing 'open Set' implies undefined univ, weird error here
