@@ -1451,7 +1451,7 @@ theorem infinite_zero_is_poly (hf: ∀ (x : ℝ), ∃ (n: ℕ), (iteratedDeriv n
           have neq_ici := maximal_neq_not_open (Set.Ici (sInf maximal_set)) (ici_not_open _)
           have neq_iic := maximal_neq_not_open (Set.Iic (sSup maximal_set)) (Iic_not_open)
           have neq_ico := maximal_neq_not_open (Set.Ico (sInf maximal_set) (sSup maximal_set)) (ico_not_open _ _ inf_lt_sup)
-          have neq_ioc := maximal_neq_not_open (Set.Ioc (sInf maximal_set) (sSup maximal_set)) (ioc_not_open _ _ inf_lt_sup)
+          have neq_ioc := maximal_neq_not_open (Set.Ioc (sInf maximal_set) (sSup maximal_set)) (ioc_nfrontier_Icc habot_open _ _ inf_lt_sup)
           have neq_ioi := maximal_neq_unbounded_above (Set.Ioi (sInf maximal_set)) (not_bddAbove_Ioi _)
           have neq_iio := maximal_neq_unbounded_below (Set.Iio (sSup maximal_set)) (not_bddBelow_Iio _)
           have neq_univ := maximal_neq_unbounded_above Set.univ (not_bddAbove_univ)
