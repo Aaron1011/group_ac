@@ -18,13 +18,11 @@ lemma Iic_not_open [OrderTopology α] [DenselyOrdered α] [NoMaxOrder α]: ¬ Is
 lemma Ici_not_open [OrderTopology α] [DenselyOrdered α] [NoMinOrder α] : ¬ IsOpen (Set.Ici a) := Iic_not_open (α := αᵒᵈ)
 
 lemma general_ioc_not_open [OrderTopology α] [DenselyOrdered α] [NoMaxOrder α] (hab: a < b): ¬ IsOpen (Set.Ioc a b) := by
-  have intersect_frontier: b ∈ (Set.Ioc a b) ∩ frontier (Set.Ioc a b) := by
-    rw [frontier_Ioc hab]
-    rw [Set.mem_inter_iff, Set.mem_insert_iff, Set.mem_singleton_iff, Set.mem_Ioc]
-    simp only [le_refl, and_true, or_true]
-    exact hab
+  have hb: b ∈ (Set.Ioc a b) ∩ frontier (Set.Ioc a b) := by
+    rw [frontier_Ioc hab, Set.mem_inter_iff, Set.mem_insert_iff, Set.mem_singleton_iff, Set.mem_Ioc]
+    simpa only [le_refl, and_true, or_true]
 
-  exact not_imp_not.mpr IsOpen.inter_frontier_eq (Set.nonempty_iff_ne_empty.mp ⟨b, intersect_frontier⟩)
+  exact not_imp_not.mpr IsOpen.inter_frontier_eq (Set.nonempty_iff_ne_empty.mp ⟨b, hb⟩)
 
 lemma dual_general_ico_not_open [DenselyOrdered α] [NoMinOrder α] [OrderTopology α] (hab: a < b): ¬ IsOpen (Set.Ico a b) := by
-  simpa [Set.Ioc, and_comm] using (general_ioc_not_open (α := αᵒᵈ) (LT.lt.dual hab))
+  simpa only [Set.Ioc, and_comm] using (general_ioc_not_open (α := αᵒᵈ) (LT.lt.dual hab))
