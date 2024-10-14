@@ -16,26 +16,12 @@ lemma Set.Iic.ne_univ_of_not_isMax (ha: ¬ IsMax a) : Set.Iic a ≠ Set.univ :=
 variable [TopologicalSpace α] [OrderTopology α]
 
 lemma Iic_not_open [DenselyOrdered α] [NoMaxOrder α]: ¬ IsOpen (Set.Iic a) := by
-  simp? [not_imp_not.mpr IsOpen.inter_frontier_eq, frontier_Iic]
+  simp only [Set.nonempty_Ioi, frontier_Iic', Set.inter_singleton_eq_empty, Set.mem_Iic, le_refl,
+    not_true_eq_false, not_false_eq_true, not_imp_not.mpr IsOpen.inter_frontier_eq]
 
 
    --simp [not_imp_not.mpr IsOpen.inter_frontier_eq, frontier_Iic]
 
-
--- (-↔, a]
--- [a, +↔)
-
---lemma new_general_ici_not_open  {α : Type u} (a: ℝ) (ha: ¬ IsMin a) : ¬ IsOpen (Set.Ici a) := by
-
--- Bug - when duplicate 'ha' hypothsis names, 'exact' doesn't work
--- lemma exact_question_bug_general_ici_not_open  {α : Type u} [TopologicalSpace α] [LinearOrder α] [OrderClosedTopology α] (ha: PreconnectedSpace α) (a: α) (ha: ¬ IsMin a) : ¬ IsOpen (Set.Ici a) := by
---   have is_dual: PreconnectedSpace αᵒᵈ := by exact? -- Suggests 'exact ha', doesn't work
---   apply general_iic_not_open (α := αᵒᵈ) a ha
-
---variable {β} [TopologicalSpace β] [LinearOrder β] [OrderClosedTopology β] [hq: PreconnectedSpace β]
---#synth PreconnectedSpace βᵒᵈ
-
---set_option trace.Meta.synthInstance true
 
 instance instPreconnected (α : Type*) [TopologicalSpace α] [hq: PreconnectedSpace α] : PreconnectedSpace αᵒᵈ := ‹_›
 
