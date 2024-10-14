@@ -1,16 +1,26 @@
-
-import Mathlib
 import Mathlib.Data.Set.Defs
 import Mathlib.Data.Set.Basic
 import Mathlib.Topology.Defs.Filter
+import Mathlib.Topology.Order.Basic
 import Mathlib.Order.Filter.Basic
+import Mathlib.Topology.Order.DenselyOrdered
 
 open Topology
 open Filter
 
-lemma general_iic_not_open  {α : Type u} [TopologicalSpace α] [LinearOrder α] [DenselyOrdered α] [OrderTopology α] [NoMaxOrder α]  (a: α) : ¬ IsOpen (Set.Iic a) := by
-  simp only [Set.nonempty_Ioi, frontier_Iic', Set.inter_singleton_eq_empty, Set.mem_Iic, le_refl,
-    not_true_eq_false, not_false_eq_true, not_imp_not.mpr IsOpen.inter_frontier_eq]
+variable {α : Type u} {a: α} [LinearOrder α]
+
+lemma Set.Iic.ne_univ_of_not_isMax (ha: ¬ IsMax a) : Set.Iic a ≠ Set.univ :=
+  (Set.ne_univ_iff_exists_not_mem _).mpr <| by simpa using not_isMax_iff.mp ha
+
+variable [TopologicalSpace α] [OrderTopology α]
+
+lemma Iic_not_open [DenselyOrdered α] [NoMaxOrder α]: ¬ IsOpen (Set.Iic a) := by
+  simp? [not_imp_not.mpr IsOpen.inter_frontier_eq, frontier_Iic]
+
+
+   --simp [not_imp_not.mpr IsOpen.inter_frontier_eq, frontier_Iic]
+
 
 -- (-↔, a]
 -- [a, +↔)
@@ -29,8 +39,7 @@ lemma general_iic_not_open  {α : Type u} [TopologicalSpace α] [LinearOrder α]
 
 instance instPreconnected (α : Type*) [TopologicalSpace α] [hq: PreconnectedSpace α] : PreconnectedSpace αᵒᵈ := ‹_›
 
-lemma general_ici_not_open  {α : Type u} [TopologicalSpace α] [LinearOrder α] [DenselyOrdered α] [OrderTopology α] [NoMinOrder α] (a: α) : ¬ IsOpen (Set.Ici a) := general_iic_not_open (α := αᵒᵈ) a
-
+lemma Ici_not_open [DenselyOrdered α] [NoMinOrder α] : ¬ IsOpen (Set.Ici a) := Iic_not_open (α := αᵒᵈ)
 
 -- Missing 'open Set' implies undefined univ, weird error here
 lemma not_preconnected {α: Type u} [TopologicalSpace α] (ha: ¬(PreconnectedSpace α)) : (¬ IsPreconnected (Set.univ : Set α)) := by
@@ -78,9 +87,6 @@ lemma general_ico_not_open {α: Type*} [TopologicalSpace α] [LinearOrder α] [D
     exact Set.nonempty_iff_ne_empty.mp frontier_intersect_nonempty
 
   apply frontier_imp_not_open not_eq_empty
-
-lemma lt_iff_neg (a b: ℝ): a < b ↔ -b < -a := by
-  simp only [neg_lt_neg_iff]
 
 lemma dual_general_ico_not_open {α: Type*}
   [TopologicalSpace α] [LinearOrder α] [DenselyOrdered α] [NoMinOrder α] [OrderTopology α]
